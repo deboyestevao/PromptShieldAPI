@@ -19,6 +19,3 @@ public class ApiError {
         this.timestamp = LocalDateTime.now();
     }
 }
-
-
-//teste
