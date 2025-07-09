@@ -1,61 +1,151 @@
 package com.example.SafeMindAPI.util;
 
+import com.example.SafeMindAPI.service.MaskingResult;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.collections4.set.MapBackedSet;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DataMasker {
-    public static String maskSensitiveData(String input) {
+    public static MaskingResult maskSensitiveData(String input) {
         if (input == null) return null;
 
+        Map<String, Integer> totalCounts = new HashMap<>();
         String masked = input;
 
-        masked = maskEmails(masked);
-        masked = maskCVC(masked);
-        masked = maskIBAN(masked);
-        masked = maskVAT(masked);
-        masked = maskPhoneNumbers(masked);
-        masked = maskNineDigitNumber(masked);
-        masked = maskPostalCode(masked);
-        masked = maskDates(masked);
-        masked = maskCardExpiry(masked);
-        masked = maskBalance(masked);
-        masked = maskName(masked);
-        masked = maskCreditCard(masked);
-        masked = maskAddress(masked);
+        MaskingResult result;
 
-        return masked;
+        result = maskEmails(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskCVC(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskIBAN(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskVAT(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskPhoneNumbers(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskNineDigitNumber(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskPostalCode(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskDates(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskCardExpiry(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskBalance(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskName(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskCreditCard(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        result = maskAddress(masked);
+        masked = result.getMaskedText();
+        mergeCounts(totalCounts, result.getCounts());
+
+        return new MaskingResult(masked, totalCounts);
     }
 
-    private static String maskNineDigitNumber(String input) {
-
-        // ID Card, NIF/TIN/VAT
-        return input.replaceAll("\\b\\d{9}\\b", "*********");
+    private static void mergeCounts(Map<String, Integer> total, Map<String, Integer> part) {
+        for (var entry : part.entrySet()) {
+            total.merge(entry.getKey(), entry.getValue(), Integer::sum);
+        }
     }
 
-    public static String maskPhoneNumbers(String input) {
+    private static MaskingResult maskNineDigitNumber(String input) {
+        String regex = "\\b\\d{9}\\b";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        StringBuffer result = new StringBuffer();
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+
+        while (matcher.find()) {
+            count++;
+            matcher.appendReplacement(result, "*********");
+        }
+
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("nineDigitNumber", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
+    }
+
+    private static MaskingResult maskPhoneNumbers(String input)  {
 
         Pattern pattern = Pattern.compile("(\\b\\+351|351)?\\s*9\\d{2}[\\s.-]?\\d{3}[\\s.-]?\\d{3}\\b");
+        Matcher matcher = pattern.matcher(input);
 
-        return pattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group();
+        Map<String, Integer> counts = new HashMap<>();
+        StringBuffer result = new StringBuffer();
+        int count =  0;
+
+        while (matcher.find()) {
+            String raw = matcher.group();
             String cleaned = raw.replaceAll("[^\\d]", "");
 
+            String masked;
             if (cleaned.length() == 9 && cleaned.startsWith("9")) {
-                return "9** *** *" + cleaned.charAt(8);
+                masked = "9** *** *" + cleaned.charAt(8);
+                count++;
+            } else if (cleaned.length() == 12 && cleaned.startsWith("351")) {
+                masked = "351 9** *** *" + cleaned.charAt(11);
+                count++;
+            } else {
+                masked = raw;
             }
 
-            if (cleaned.length() == 12 && cleaned.startsWith("351")) {
-                return "351 9** *** *" + cleaned.charAt(11);
-            }
+            matcher.appendReplacement(result, masked);
+        }
 
-            return raw;
-        });
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("phoneNumber", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    private static String maskEmails(String input) {
+    private static MaskingResult maskEmails(String input)  {
         Pattern pattern = Pattern.compile("\\b([\\w._%+-]+)@([\\w.-]+)\\.([a-zA-Z]{2,})\\b");
         Matcher matcher = pattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+
+        Map<String, Integer> counts = new HashMap<>();
+        StringBuffer result = new StringBuffer();
+        int count = 0;
 
         while (matcher.find()) {
             String username = matcher.group(1);
@@ -75,121 +165,297 @@ public class DataMasker {
                     : tld.charAt(0) + "*";
 
             String maskedEmail = maskedUsername + "@" + maskedDomain + "." + maskedTld;
-            matcher.appendReplacement(sb, maskedEmail);
+            count++;
+            matcher.appendReplacement(result, maskedEmail);
         }
-        matcher.appendTail(sb);
-        return sb.toString();
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("email", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    public static String maskIBAN(String input) {
+    private static MaskingResult maskIBAN(String input) {
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
 
-        // Portugal – 25 characters
+        // Portugal – 25 characters (PT50 + 21 digits)
         Pattern ptPattern = Pattern.compile("\\bPT50([\\.\\s-]?\\d){21}\\b", Pattern.CASE_INSENSITIVE);
-        input = ptPattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group().replaceAll("[^\\d]", "");
-            if (raw.length() != 23) return matchResult.group();
-            return "PT50" + ".****.****.***********.**";
-        });
+        Matcher ptMatcher = ptPattern.matcher(input);
+        StringBuffer ptBuffer = new StringBuffer();
+
+        while (ptMatcher.find()) {
+            String raw = ptMatcher.group().replaceAll("[^\\d]", "");
+            if (raw.length() == 23) {
+                ptMatcher.appendReplacement(ptBuffer, "PT50.****.****.***********.**");
+                count++;
+            } else {
+                ptMatcher.appendReplacement(ptBuffer, ptMatcher.group());
+            }
+        }
+        ptMatcher.appendTail(ptBuffer);
+        input = ptBuffer.toString();
 
         // Angola – 25 characters
         Pattern aoPattern = Pattern.compile("\\bAO(?:[\\.\\s-]?\\d){23}\\b", Pattern.CASE_INSENSITIVE);
-        input = aoPattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group().replaceAll("[^\\d]", "");
-            if (raw.length() != 23) return matchResult.group();
-            return "AO" + raw.substring(0, 2) + ".****.****.***********.**";
-        });
+        Matcher aoMatcher = aoPattern.matcher(input);
+        StringBuffer aoBuffer = new StringBuffer();
+
+        while (aoMatcher.find()) {
+            String raw = aoMatcher.group().replaceAll("[^\\d]", "");
+            if (raw.length() == 23) {
+                String masked = "AO" + raw.substring(0, 2) + ".****.****.***********.**";
+                aoMatcher.appendReplacement(aoBuffer, masked);
+                count++;
+            } else {
+                aoMatcher.appendReplacement(aoBuffer, aoMatcher.group());
+            }
+        }
+        aoMatcher.appendTail(aoBuffer);
+        input = aoBuffer.toString();
 
         // Cabo Verde – 23 characters
         Pattern cvPattern = Pattern.compile("\\bCV(?:[\\.\\s-]?\\d){21}\\b", Pattern.CASE_INSENSITIVE);
-        input = cvPattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group().replaceAll("[^\\d]", "");
-            if (raw.length() != 21) return matchResult.group();
-            return "CV" + raw.substring(0, 2) + ".****.****.***********";
-        });
+        Matcher cvMatcher = cvPattern.matcher(input);
+        StringBuffer cvBuffer = new StringBuffer();
 
-        // São Tome e Principe – 23 characters
+        while (cvMatcher.find()) {
+            String raw = cvMatcher.group().replaceAll("[^\\d]", "");
+            if (raw.length() == 21) {
+                String masked = "CV" + raw.substring(0, 2) + ".****.****.***********";
+                cvMatcher.appendReplacement(cvBuffer, masked);
+                count++;
+            } else {
+                cvMatcher.appendReplacement(cvBuffer, cvMatcher.group());
+            }
+        }
+        cvMatcher.appendTail(cvBuffer);
+        input = cvBuffer.toString();
+
+        // São Tomé e Príncipe – 23 characters
         Pattern stPattern = Pattern.compile("\\bST(?:[\\.\\s-]?\\d){21}\\b", Pattern.CASE_INSENSITIVE);
-        input = stPattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group().replaceAll("[^\\d]", "");
-            if (raw.length() != 21) return matchResult.group();
-            return "ST" + raw.substring(0, 2) + ".****.****.***********";
-        });
+        Matcher stMatcher = stPattern.matcher(input);
+        StringBuffer stBuffer = new StringBuffer();
 
-        return input;
+        while (stMatcher.find()) {
+            String raw = stMatcher.group().replaceAll("[^\\d]", "");
+            if (raw.length() == 21) {
+                String masked = "ST" + raw.substring(0, 2) + ".****.****.***********";
+                stMatcher.appendReplacement(stBuffer, masked);
+                count++;
+            } else {
+                stMatcher.appendReplacement(stBuffer, stMatcher.group());
+            }
+        }
+        stMatcher.appendTail(stBuffer);
+        input = stBuffer.toString();
+
+        if (count > 0) {
+            counts.put("iban", count);
+        }
+
+        return new MaskingResult(input, counts);
     }
 
-    public static String maskVAT(String input) {
+    private static MaskingResult maskVAT(String input)  {
 
-        // Portugal (9 digits)
-        // Sao Tome e Principe (9 digits)
-        // Cabo Verde (10 digits)
-        // Angola (14 digits)
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
 
         Pattern pattern = Pattern.compile("\\b\\d{9,14}\\b");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer result = new StringBuffer();
 
-        return pattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group();
+        while (matcher.find()) {
+            String raw = matcher.group();
             String cleaned = raw.replaceAll("[^\\d]", "");
+            String masked = raw;
 
             switch (cleaned.length()) {
-                case 9 -> { // Portugal, Sao Tome e Principe
-                    if (cleaned.matches("[125]\\d{8}")) return "*** *** " + cleaned.substring(6);
+                case 9 -> {
+                    if (cleaned.matches("[125]\\d{8}")) {
+                        masked = "*** *** " + cleaned.substring(6);
+                        count++;
+                    }
                 }
-                case 10 -> { // Cabo Verde
-                    return "** *** ** " + cleaned.substring(7);
+                case 10 -> {
+                    masked = "** *** ** " + cleaned.substring(7);
+                    count++;
                 }
-                case 14 -> { // Angola
-                    return "*** **** *** " + cleaned.substring(10);
+                case 14 -> {
+                    masked = "*** **** *** " + cleaned.substring(10);
+                    count++;
                 }
             }
 
+            matcher.appendReplacement(result, masked);
+        }
 
-            return raw;
-        });
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put(result.toString(), count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    public static String maskCreditCard(String input) {
-        Pattern pattern = Pattern.compile("\\b(?:\\d{4}[-.\\s]?){3}\\d{4}\\b");
+    private static MaskingResult maskCreditCard(String input)  {
 
-        return pattern.matcher(input).replaceAll(matchResult -> {
-            String raw = matchResult.group();
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+
+        Pattern pattern = Pattern.compile("\\b(?:\\d{4}[-.\\s]?){3}\\d{4}\\b");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            String raw = matcher.group();
             String cleaned = raw.replaceAll("[^\\d]", "");
 
-            if (cleaned.length() != 16) return raw;
+            if (cleaned.length() != 16) {
+                matcher.appendReplacement(result, raw);
+                continue;
+            }
 
-            return "**** **** **** " + cleaned.substring(12);
-        });
+            String masked = "**** **** **** " + cleaned.substring(12);
+            matcher.appendReplacement(result, masked);
+            count++;
+        }
+
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("creditCard", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
 
-    private static String maskCardExpiry(String input) {
-        return input.replaceAll("\\b(0[1-9]|1[0-2])[\\/\\-](\\d{2}|\\d{4})\\b", "**/**");
+    private static MaskingResult maskCardExpiry(String input)  {
+
+        Pattern pattern = Pattern.compile("\\b(0[1-9]|1[0-2])[\\/\\-](\\d{2}|\\d{4})\\b");
+        Matcher matcher = pattern.matcher(input);
+
+        Map<String, Integer> counts = new HashMap<>();
+        StringBuffer result = new StringBuffer();
+        int count = 0;
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "**/**");
+            count++;
+        }
+
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("cardExpiry", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    private static String maskDates(String input) {
-        input = input.replaceAll("\\b\\d{4}[/-]?\\d{2}[/-]?\\d{2}\\b", "****-**-**");
+    private static MaskingResult maskDates(String input) {
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+        StringBuffer result = new StringBuffer();
 
-        input = input.replaceAll("\\b\\d{2}[/-]?\\d{4}[/-]?\\d{2}\\b", "**-****-**");
+        // ISO: yyyy-MM-dd
+        Pattern pattern1 = Pattern.compile("\\b\\d{4}[/-]?\\d{2}[/-]?\\d{2}\\b");
+        Matcher matcher1 = pattern1.matcher(input);
+        while (matcher1.find()) {
+            matcher1.appendReplacement(result, "****-**-**");
+            count++;
+        }
+        matcher1.appendTail(result);
 
-        input = input.replaceAll("\\b\\d{2}[/-]?\\d{2}[/-]?\\d{4}\\b", "**-**-****");
+        String temp = result.toString();
+        result.setLength(0);
 
-        return input;
+        // dd-yyyy-MM
+        Pattern pattern2 = Pattern.compile("\\b\\d{2}[/-]?\\d{4}[/-]?\\d{2}\\b");
+        Matcher matcher2 = pattern2.matcher(temp);
+        while (matcher2.find()) {
+            matcher2.appendReplacement(result, "**-****-**");
+            count++;
+        }
+        matcher2.appendTail(result);
+
+        temp = result.toString();
+        result.setLength(0);
+
+        // dd-MM-yyyy
+        Pattern pattern3 = Pattern.compile("\\b\\d{2}[/-]?\\d{2}[/-]?\\d{4}\\b");
+        Matcher matcher3 = pattern3.matcher(temp);
+        while (matcher3.find()) {
+            matcher3.appendReplacement(result, "**-**-****");
+            count++;
+        }
+        matcher3.appendTail(result);
+
+        if (count > 0) {
+            counts.put("date", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    public static String maskCVC(String input) {
-        return input.replaceAll("\\b(?i)(cvv|cvc)[\\s:]*(\\d{3,4}\\b)", "$1: ***");
+    private static MaskingResult maskCVC(String input)  {
+
+        Pattern pattern = Pattern.compile("\\b(?i)(cvv|cvc)[\\s:]*(\\d{3,4})\\b");
+        Matcher matcher = pattern.matcher(input);
+
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            count++;
+            matcher.appendReplacement(result, matcher.group() + ": ***");
+        }
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("cvc", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    public static String maskPostalCode(String input) {
-        return input.replaceAll("\\b(\\d{4})[\\s/-]?(\\d{3})\\b", "****-$2");
+    private static MaskingResult maskPostalCode(String input)  {
+
+        Pattern pattern = Pattern.compile("\\b(\\d{4})[\\s/-]?(\\d{3})\\b");
+        Matcher matcher = pattern.matcher(input);
+
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            count++;
+            matcher.appendReplacement(result, "****-**");
+        }
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("postalCode", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    private static String maskAddress(String input) {
+    private static MaskingResult maskAddress(String input)  {
 
         // Mask street names
         Pattern pattern = Pattern.compile("\\b(?i)(rua|avenida|praça|praca|travessa)\\s+([\\p{L}\\s]+)\\b");
         Matcher matcher = pattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+        StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
             String type = matcher.group(1);
@@ -207,48 +473,58 @@ public class DataMasker {
                 }
             }
 
-            matcher.appendReplacement(sb, type + " " + maskedName.toString());
+            count++;
+            matcher.appendReplacement(result, type + " " + maskedName.toString());
         }
-        matcher.appendTail(sb);
-        input = sb.toString();
+        matcher.appendTail(result);
 
-        return input;
+        if (count > 0) {
+            counts.put("address", count);
+        }
+
+        return new MaskingResult(result.toString(), counts);
     }
 
-    public static String maskBalance(String input) {
-        Pattern pattern = Pattern.compile(
-                "(?i)(<saldo>|<balance>|\"saldo\"\\s*[:>]\\s*|\"balance\"\\s*[:>]\\s*)(\\d+)(\\.(\\d+))?(</saldo>|</balance>)?",
-                Pattern.CASE_INSENSITIVE
-        );
-
+    private static MaskingResult maskBalance(String input)  {
+        Pattern pattern = Pattern.compile("(?i)(<saldo>|<balance>|\"saldo\"\\s*[:>]\\s*|\"balance\"\\s*[:>]\\s*)(\\d+)(\\.(\\d+))?(</saldo>|</balance>)?");
         Matcher matcher = pattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+        StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            String prefix = matcher.group(1);         // ex: <Balance> or "saldo" :>
+            String prefix = matcher.group(1);         // ex: <Balance> ou "saldo" :>
             String integerPart = matcher.group(2);    // ex: 5200
             String decimalPart = matcher.group(4);    // ex: 75
             String suffix = matcher.group(5) != null ? matcher.group(5) : "";  // ex: </balance>
 
-            String maskedInt = "*".repeat(Math.max(1, integerPart.length()));
+            String maskedInt = integerPart != null ? "*".repeat(integerPart.length()) : "";
             String maskedDec = decimalPart != null ? "." + "*".repeat(decimalPart.length()) : "";
 
             String maskedValue = prefix + maskedInt + maskedDec + suffix;
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(maskedValue));
+            count++;
+            matcher.appendReplacement(result, Matcher.quoteReplacement(maskedValue));
+        }
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("balance", count);
         }
 
-        matcher.appendTail(sb);
-        return sb.toString();
+        return new MaskingResult(result.toString(), counts);
     }
 
-    private static String maskName(String input) {
+    private static MaskingResult maskName(String input)  {
         Pattern pattern = Pattern.compile(
                 "(?i)(?:<(?<xmlTag>nome|name|banco|bank|cidade|city|distrito|district|estado|state)>(?<xmlValue>[^<]+)</\\k<xmlTag>>" +     // XML
                         "|\"(?<jsonKey>nome|name|banco|bank|cidade|city|distrito|district|estado|state)\"\\s*[:>]\\s*\"(?<jsonValue>[^\"]+)\")"      // JSON
         );
-
         Matcher matcher = pattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+
+        Map<String, Integer> counts = new HashMap<>();
+        int count = 0;
+        StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
             String value = matcher.group("xmlValue") != null ? matcher.group("xmlValue") : matcher.group("jsonValue");
@@ -257,7 +533,7 @@ public class DataMasker {
             for (String word : value.split(" ")) {
                 if (!word.isEmpty()) {
                     masked.append(word.charAt(0));
-                    masked.append("*".repeat(Math.max(0, word.length() - 1)));
+                    masked.append("*".repeat(word.length() - 1));
                     masked.append(" ");
                 }
             }
@@ -265,14 +541,20 @@ public class DataMasker {
 
             if (matcher.group("xmlTag") != null) {
                 String tag = matcher.group("xmlTag");
-                matcher.appendReplacement(sb, "<" + tag + ">" + maskedValue + "</" + tag + ">");
+                matcher.appendReplacement(result, "<" + tag + ">" + maskedValue + "</" + tag + ">");
             } else {
                 String key = matcher.group("jsonKey");
-                matcher.appendReplacement(sb, "\"" + key + "\": \"" + maskedValue + "\"");
+                matcher.appendReplacement(result, "\"" + key + "\": \"" + maskedValue + "\"");
             }
+
+            count++;
+        }
+        matcher.appendTail(result);
+
+        if (count > 0) {
+            counts.put("name", count);
         }
 
-        matcher.appendTail(sb);
-        return sb.toString();
+        return new MaskingResult(result.toString(), counts);
     }
 }

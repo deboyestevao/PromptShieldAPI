@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ClientesBanco>
+    <Cliente>
+        <ID>001</ID>
+        <Nome>Maria da Silva</Nome>
+        <CPF>123.456.789-00</CPF>
+        <Conta>
+            <Numero>12345-6</Numero>
+            <Agencia>0001</Agencia>
+            <Tipo>Poupança</Tipo>
+            <Saldo>5200.75</Saldo>
+        </Conta>
+    </Cliente>
+    <Cliente>
+        <ID>002</ID>
+        <Nome>João Pereira</Nome>
+        <CPF>987.654.321-00</CPF>
+        <Conta>
+            <Numero>65432-1</Numero>
+            <Agencia>0002</Agencia>
+            <Tipo>Corrente</Tipo>
+            <Saldo>15800.50</Saldo>
+        </Conta>
+    </Cliente>
+    <Cliente>
+        <ID>003</ID>
+        <Nome>Ana Costa</Nome>
+        <CPF>456.789.123-99</CPF>
+        <Conta>
+            <Numero>78901-2</Numero>
+            <Agencia>0003</Agencia>
+            <Tipo>Salário</Tipo>
+            <Saldo>3200.00</Saldo>
+        </Conta>
+    </Cliente>
+</ClientesBanco>

@@ -155,7 +155,7 @@ public class FileService {
                     fileText = new String(Files.readAllBytes(file.toPath()));
                 }
 
-                String masked = DataMasker.maskSensitiveData(fileText);
+                String masked = DataMasker.maskSensitiveData(fileText).getMaskedText();
                 int tokens = estimateTokens(masked);
 
                 if ((totalTokens + tokens) > MAX_INPUT_TOKENS) {

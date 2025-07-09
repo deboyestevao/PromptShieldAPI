@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,6 @@ public class AiService {
     private final UserRepository userRepo;
     private final SystemConfigService systemConfigService;
     private final QuestionService questionService;
-    private final FileService fileService;
 
     private static final String INPUT_FOLDER = "InputFiles";
 
@@ -42,14 +42,22 @@ public class AiService {
             return "OpenAi está desativado para este utilizador.";
         }
 
-        String maskedQuestion = DataMasker.maskSensitiveData(question);
+        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
+        String maskedQuestion = maskingResult.getMaskedText();
+        Map<String, Integer> counts = maskingResult.getCounts();
+
         String answer = chatModel.call(maskedQuestion) + "\n";
 
         questionService.saveQuestion(maskedQuestion, answer, "openai");
 
+        if (!counts.isEmpty()) {
+            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : "") + (total > 1 ? "sensíveis" : "sensível") +
+                    " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+        }
+
         return answer;
     }
-
 
     public String askOllama(String question) {
         if (!systemConfigService.isOllamaEnabled()) {
@@ -61,13 +69,23 @@ public class AiService {
             return "Ollama está desativado para este utilizador.";
         }
 
-        String maskedQuestion = DataMasker.maskSensitiveData(question);
+        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
+        String maskedQuestion = maskingResult.getMaskedText();
+        Map<String, Integer> counts = maskingResult.getCounts();
+
         String answer = ollamaChatModel.call(maskedQuestion) + "\n";
 
         questionService.saveQuestion(maskedQuestion, answer, "ollama");
 
+        if (!counts.isEmpty()) {
+            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s" : "") + (total > 1 ? "sensível" : "sensíveis") +
+                    " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+        }
+
         return answer;
     }
+
 
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
