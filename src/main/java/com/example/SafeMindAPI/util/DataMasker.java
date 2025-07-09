@@ -96,9 +96,8 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("nineDigitNumber", count);
-        }
+
+        counts.put("nineDigitNumber", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -132,9 +131,8 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("phoneNumber", count);
-        }
+
+        counts.put("phoneNumber", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -170,9 +168,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("email", count);
-        }
+
+        counts.put("email", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -252,9 +249,8 @@ public class DataMasker {
         stMatcher.appendTail(stBuffer);
         input = stBuffer.toString();
 
-        if (count > 0) {
-            counts.put("iban", count);
-        }
+
+        counts.put("iban", count);
 
         return new MaskingResult(input, counts);
     }
@@ -295,9 +291,8 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put(result.toString(), count);
-        }
+
+        counts.put(result.toString(), count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -327,9 +322,8 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("creditCard", count);
-        }
+
+        counts.put("creditCard", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -351,9 +345,8 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("cardExpiry", count);
-        }
+
+        counts.put("cardExpiry", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -396,9 +389,8 @@ public class DataMasker {
         }
         matcher3.appendTail(result);
 
-        if (count > 0) {
-            counts.put("date", count);
-        }
+
+        counts.put("date", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -418,9 +410,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("cvc", count);
-        }
+
+        counts.put("cvc", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -440,9 +431,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("postalCode", count);
-        }
+
+        counts.put("postalCode", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -478,9 +468,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("address", count);
-        }
+
+        counts.put("address", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -508,9 +497,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("balance", count);
-        }
+
+        counts.put("balance", count);
 
         return new MaskingResult(result.toString(), counts);
     }
@@ -551,9 +539,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
-        if (count > 0) {
-            counts.put("name", count);
-        }
+
+        counts.put("name", count);
 
         return new MaskingResult(result.toString(), counts);
     }

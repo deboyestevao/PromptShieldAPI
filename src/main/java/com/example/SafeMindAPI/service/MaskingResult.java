@@ -18,5 +18,4 @@ public class MaskingResult {
         this.maskedText = maskedText;
         this.counts = counts;
     }
-
 }

@@ -50,8 +50,8 @@ public class AiService {
 
         questionService.saveQuestion(maskedQuestion, answer, "openai");
 
-        if (!counts.isEmpty()) {
-            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+        int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+        if (total > 0) {
             answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : "") + (total > 1 ? "sensíveis" : "sensível") +
                     " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
         }
@@ -77,9 +77,9 @@ public class AiService {
 
         questionService.saveQuestion(maskedQuestion, answer, "ollama");
 
-        if (!counts.isEmpty()) {
-            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
-            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s" : "") + (total > 1 ? "sensível" : "sensíveis") +
+        int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+        if (total > 0) {
+            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : "") + (total > 1 ? "sensíveis" : "sensível") +
                     " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
         }
 
