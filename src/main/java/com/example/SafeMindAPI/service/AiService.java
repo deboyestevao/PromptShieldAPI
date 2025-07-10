@@ -44,15 +44,13 @@ public class AiService {
 
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
-        Map<String, Integer> counts = maskingResult.getCounts();
+        long total = maskingResult.getTotal();
 
         String answer = chatModel.call(maskedQuestion) + "\n";
-
         questionService.saveQuestion(maskedQuestion, answer, "openai");
 
-        int total = counts.values().stream().mapToInt(Integer::intValue).sum();
         if (total > 0) {
-            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : "") + (total > 1 ? "sensíveis" : "sensível") +
+            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : " ") + (total > 1 ? "sensíveis" : "sensível") +
                     " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
         }
 
@@ -71,15 +69,14 @@ public class AiService {
 
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
-        Map<String, Integer> counts = maskingResult.getCounts();
+        long total = maskingResult.getTotal();
 
         String answer = ollamaChatModel.call(maskedQuestion) + "\n";
 
         questionService.saveQuestion(maskedQuestion, answer, "ollama");
 
-        int total = counts.values().stream().mapToInt(Integer::intValue).sum();
         if (total > 0) {
-            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : "") + (total > 1 ? "sensíveis" : "sensível") +
+            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : " ") + (total > 1 ? "sensíveis" : "sensível") +
                     " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
         }
 

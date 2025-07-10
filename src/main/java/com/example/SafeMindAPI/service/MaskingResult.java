@@ -12,10 +12,10 @@ import java.util.Map;
 public class MaskingResult {
 
     private String maskedText;
-    private Map<String, Integer> counts;
+    private Long total;
 
-    public MaskingResult(String maskedText, Map<String, Integer> counts) {
+    public MaskingResult(String maskedText, Long total) {
         this.maskedText = maskedText;
-        this.counts = counts;
+        this.total = total;
     }
 }

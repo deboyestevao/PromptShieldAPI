@@ -12,72 +12,63 @@ import java.util.regex.Pattern;
 
 public class DataMasker {
     public static MaskingResult maskSensitiveData(String input) {
-        if (input == null) return null;
-
-        Map<String, Integer> totalCounts = new HashMap<>();
         String masked = input;
-
+        long totalCount = 0;
         MaskingResult result;
 
         result = maskEmails(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskCVC(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskIBAN(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskVAT(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskPhoneNumbers(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskNineDigitNumber(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskPostalCode(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskDates(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskCardExpiry(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskBalance(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskName(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskCreditCard(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
         result = maskAddress(masked);
         masked = result.getMaskedText();
-        mergeCounts(totalCounts, result.getCounts());
+        totalCount += result.getTotal();
 
-        return new MaskingResult(masked, totalCounts);
-    }
-
-    private static void mergeCounts(Map<String, Integer> total, Map<String, Integer> part) {
-        for (var entry : part.entrySet()) {
-            total.merge(entry.getKey(), entry.getValue(), Integer::sum);
-        }
+        return new MaskingResult(masked, totalCount);
     }
 
     private static MaskingResult maskNineDigitNumber(String input) {
@@ -85,9 +76,9 @@ public class DataMasker {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
 
+        MaskingResult maskingResult = new MaskingResult();
         StringBuffer result = new StringBuffer();
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        Long count = 0L;
 
         while (matcher.find()) {
             count++;
@@ -96,10 +87,9 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("nineDigitNumber", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskPhoneNumbers(String input)  {
@@ -107,9 +97,9 @@ public class DataMasker {
         Pattern pattern = Pattern.compile("(\\b\\+351|351)?\\s*9\\d{2}[\\s.-]?\\d{3}[\\s.-]?\\d{3}\\b");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
+        MaskingResult maskingResult = new MaskingResult();
         StringBuffer result = new StringBuffer();
-        int count =  0;
+        Long count = 0L;
 
         while (matcher.find()) {
             String raw = matcher.group();
@@ -131,19 +121,18 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("phoneNumber", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskEmails(String input)  {
         Pattern pattern = Pattern.compile("\\b([\\w._%+-]+)@([\\w.-]+)\\.([a-zA-Z]{2,})\\b");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
+        MaskingResult maskingResult = new MaskingResult();
         StringBuffer result = new StringBuffer();
-        int count = 0;
+        Long count = 0L;
 
         while (matcher.find()) {
             String username = matcher.group(1);
@@ -168,15 +157,14 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("email", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskIBAN(String input) {
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
 
         // Portugal – 25 characters (PT50 + 21 digits)
         Pattern ptPattern = Pattern.compile("\\bPT50([\\.\\s-]?\\d){21}\\b", Pattern.CASE_INSENSITIVE);
@@ -249,16 +237,15 @@ public class DataMasker {
         stMatcher.appendTail(stBuffer);
         input = stBuffer.toString();
 
+        maskingResult.setTotal(count);
 
-        counts.put("iban", count);
-
-        return new MaskingResult(input, counts);
+        return new MaskingResult(input, maskingResult.getTotal());
     }
 
     private static MaskingResult maskVAT(String input)  {
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
 
         Pattern pattern = Pattern.compile("\\b\\d{9,14}\\b");
         Matcher matcher = pattern.matcher(input);
@@ -291,16 +278,15 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put(result.toString(), count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskCreditCard(String input)  {
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
 
         Pattern pattern = Pattern.compile("\\b(?:\\d{4}[-.\\s]?){3}\\d{4}\\b");
         Matcher matcher = pattern.matcher(input);
@@ -322,10 +308,10 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("creditCard", count);
-
-        return new MaskingResult(result.toString(), counts);
+        System.out.println("Cartões encontrados: " + count);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
 
@@ -334,9 +320,9 @@ public class DataMasker {
         Pattern pattern = Pattern.compile("\\b(0[1-9]|1[0-2])[\\/\\-](\\d{2}|\\d{4})\\b");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
+        MaskingResult maskingResult = new MaskingResult();
         StringBuffer result = new StringBuffer();
-        int count = 0;
+        Long count = 0L;
 
         while (matcher.find()) {
             matcher.appendReplacement(result, "**/**");
@@ -345,15 +331,14 @@ public class DataMasker {
 
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("cardExpiry", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskDates(String input) {
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
         StringBuffer result = new StringBuffer();
 
         // ISO: yyyy-MM-dd
@@ -389,10 +374,9 @@ public class DataMasker {
         }
         matcher3.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("date", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskCVC(String input)  {
@@ -400,8 +384,8 @@ public class DataMasker {
         Pattern pattern = Pattern.compile("\\b(?i)(cvv|cvc)[\\s:]*(\\d{3,4})\\b");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
@@ -410,10 +394,9 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("cvc", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskPostalCode(String input)  {
@@ -421,8 +404,8 @@ public class DataMasker {
         Pattern pattern = Pattern.compile("\\b(\\d{4})[\\s/-]?(\\d{3})\\b");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
@@ -431,20 +414,19 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("postalCode", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
-    private static MaskingResult maskAddress(String input)  {
+    private static MaskingResult maskAddress(String input) {
 
         // Mask street names
         Pattern pattern = Pattern.compile("\\b(?i)(rua|avenida|praça|praca|travessa)\\s+([\\p{L}\\s]+)\\b");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
@@ -468,18 +450,17 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("address", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskBalance(String input)  {
         Pattern pattern = Pattern.compile("(?i)(<saldo>|<balance>|\"saldo\"\\s*[:>]\\s*|\"balance\"\\s*[:>]\\s*)(\\d+)(\\.(\\d+))?(</saldo>|</balance>)?");
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
@@ -497,10 +478,9 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("balance", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
     private static MaskingResult maskName(String input)  {
@@ -510,8 +490,8 @@ public class DataMasker {
         );
         Matcher matcher = pattern.matcher(input);
 
-        Map<String, Integer> counts = new HashMap<>();
-        int count = 0;
+        MaskingResult maskingResult = new MaskingResult();
+        Long count = 0L;
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
@@ -539,9 +519,8 @@ public class DataMasker {
         }
         matcher.appendTail(result);
 
+        maskingResult.setTotal(count);
 
-        counts.put("name", count);
-
-        return new MaskingResult(result.toString(), counts);
+        return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 }
