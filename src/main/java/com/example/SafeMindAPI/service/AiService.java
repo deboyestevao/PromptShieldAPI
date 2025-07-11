@@ -50,8 +50,10 @@ public class AiService {
         questionService.saveQuestion(maskedQuestion, answer, "openai");
 
         if (total > 0) {
-            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : " ") + (total > 1 ? "sensíveis" : "sensível") +
-                    " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+            answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
+                    + total + " dado" + (total > 1 ? "s " : " ")
+                    + (total > 1 ? "sensíveis" : "sensível")
+                    + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
         }
 
         return answer;
@@ -76,8 +78,10 @@ public class AiService {
         questionService.saveQuestion(maskedQuestion, answer, "ollama");
 
         if (total > 0) {
-            answer += "Foram encontrados " + total + " dado" + (total > 1 ? "s " : " ") + (total > 1 ? "sensíveis" : "sensível") +
-                    " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+            answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
+                    + total + " dado" + (total > 1 ? "s " : " ")
+                    + (total > 1 ? "sensíveis" : "sensível")
+                    + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
         }
 
         return answer;

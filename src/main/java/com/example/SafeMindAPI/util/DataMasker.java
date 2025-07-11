@@ -310,7 +310,6 @@ public class DataMasker {
 
         maskingResult.setTotal(count);
 
-        System.out.println("Cartões encontrados: " + count);
         return new MaskingResult(result.toString(), maskingResult.getTotal());
     }
 
