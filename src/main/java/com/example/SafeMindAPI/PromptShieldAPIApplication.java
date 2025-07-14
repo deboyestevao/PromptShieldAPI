@@ -4,10 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SafeMindApiApplication {
+@EnableConfigService
+public class PromptShieldAPIApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SafeMindApiApplication.class, args);
+		SpringApplication.run(PromptShieldAPIApplication.class, args);
 	}
 
 }
