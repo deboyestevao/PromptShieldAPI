@@ -83,7 +83,7 @@ public class FileService {
         File userFolder = uploadDir.resolve(userId).toFile();
         if (!userFolder.exists() || !userFolder.isDirectory()) {
             System.out.println("Pasta do utilizador não existe: " + userFolder.getAbsolutePath());
-            return "";
+            return "Pasta do utilizador " + userId + " não encontrada.";
         }
 
         for (String id : fileIds) {

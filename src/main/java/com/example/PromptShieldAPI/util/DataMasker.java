@@ -102,10 +102,10 @@ public class DataMasker {
 
             String masked;
             if (cleaned.length() == 9 && cleaned.startsWith("9")) {
-                masked = "9** *** *" + cleaned.charAt(8);
+                masked = "9** *** **" + cleaned.charAt(8);
                 count++;
             } else if (cleaned.length() == 12 && cleaned.startsWith("351")) {
-                masked = "351 9** *** *" + cleaned.charAt(11);
+                masked = "351 9** *** **" + cleaned.charAt(11);
                 count++;
             } else {
                 masked = raw;
@@ -404,7 +404,7 @@ public class DataMasker {
 
         while (matcher.find()) {
             count++;
-            matcher.appendReplacement(result, "****-**");
+            matcher.appendReplacement(result, "****-***");
         }
         matcher.appendTail(result);
 

@@ -1,6 +1,6 @@
 @echo off
 set VAULT_ADDR=http://127.0.0.1:8200
-set VAULT_TOKEN=hvs.GdNCnNYLb9xn7hXjgZObAGUm
+set VAULT_TOKEN=hvs.IEoPTTJWjqVwHKWNXBmu6itR
 
 timeout /t 5
 
