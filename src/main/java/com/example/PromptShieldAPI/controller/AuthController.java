@@ -25,12 +25,12 @@ public class AuthController {
     private final AuthService authService;
 
 
-    @PostMapping("/login")
-    @Operation(summary = "User login", security = @SecurityRequirement(name = ""))
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
-        authService.login(request, session);
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/login")
+//    @Operation(summary = "User login", security = @SecurityRequirement(name = ""))
+//    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+//        authService.login(request, session);
+//        return ResponseEntity.ok().build();
+//    }
 
     @PostMapping("/register")
     @Operation(summary = "User register", security = @SecurityRequirement(name = ""))

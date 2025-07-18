@@ -24,27 +24,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**").permitAll()
+                .requestMatchers("/auth/register", "/login", "/swagger-ui/**", "/v3/**", "/files/**").permitAll()
                 .requestMatchers("/admin/**", "/auth/delete/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic()
-                .and()
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .usernameParameter("email")
-                        .passwordParameter("senha")
-                        .defaultSuccessUrl("/ai/welcome", true)
-                        .permitAll()
-                )
                 .httpBasic();
         return http.build();
     }
 
-
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class).userDetailsService(userDetailsService).passwordEncoder(passwordEncoder()).and().build();
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder())
+                .and()
+                .build();
     }
 
     @Bean
