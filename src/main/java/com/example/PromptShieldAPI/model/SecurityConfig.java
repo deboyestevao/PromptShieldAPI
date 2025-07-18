@@ -30,7 +30,14 @@ public class SecurityConfig {
                 .and()
                 .httpBasic()
                 .and()
-                .formLogin(form -> form.defaultSuccessUrl("/ai/welcome", true));
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("senha")
+                        .defaultSuccessUrl("/ai/welcome", true)
+                        .permitAll()
+                )
+                .httpBasic();
         return http.build();
     }
 
