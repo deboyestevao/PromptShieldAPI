@@ -25,12 +25,18 @@ public class AuthController {
     private final AuthService authService;
 
 
-//    @PostMapping("/login")
-//    @Operation(summary = "User login", security = @SecurityRequirement(name = ""))
-//    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
-//        authService.login(request, session);
-//        return ResponseEntity.ok().build();
-//    }
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "User login", security = @SecurityRequirement(name = ""))
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+        authService.login(request, session);
+        return ResponseEntity.ok().build();
+    }
+
 
     @PostMapping("/register")
     @Operation(summary = "User register", security = @SecurityRequirement(name = ""))
@@ -42,6 +48,12 @@ public class AuthController {
     @DeleteMapping("/delete/{id}")
     public void delete(@PathVariable Long id) {
         authService.delete(id);
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/auth/login";
     }
 
 }
