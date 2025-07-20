@@ -24,20 +24,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**").permitAll()
+                .requestMatchers("/", "/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**", "/css/**").permitAll()
                 .requestMatchers("/admin/**", "/auth/delete/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic()
-                .and()
                 .formLogin(form -> form
-                        .loginPage("/login")
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
                         .usernameParameter("email")
-                        .passwordParameter("senha")
+                        .passwordParameter("password")
                         .defaultSuccessUrl("/ai/welcome", true)
+                        .failureUrl("/auth/login?error=true")
                         .permitAll()
                 )
-                .httpBasic();
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login")
+                        .permitAll()
+                );
         return http.build();
     }
 
