@@ -1,23 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="login.css" rel="stylesheet" type="text/css">
+    <link href="/css/login.css" rel="stylesheet" type="text/css">
     <title>PromptShield - Login</title>
 </head>
 <body>
 <div class="container">
-    <form class="form-signin" method="post" action="/login">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <p>
+    <form class="form-signin" method="post" action="/auth/login">
+        <div class="logo">
+            <h1>🛡️ PromptShield</h1>
+        </div>
+        <h2 class="form-signin-heading">Iniciar Sessão</h2>
+        <div class="form-group">
             <label for="email" class="sr-only">E-mail</label>
-            <input type="text" id="email" name="email" class="form-control" placeholder="Digite o seu e-mail" required autofocus>
-        </p>
-        <p>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Digite o seu e-mail" required autofocus>
+        </div>
+        <div class="form-group">
             <label for="password" class="sr-only">Password</label>
             <input type="password" id="password" name="password" class="form-control" placeholder="Digite a sua senha" required>
-        </p>
+        </div>
+        <div th:if="${param.error}" class="error-message">
+            <span>⚠️ Email ou senha inválidos. Tente novamente.</span>
+        </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
     </form>
 </div>
