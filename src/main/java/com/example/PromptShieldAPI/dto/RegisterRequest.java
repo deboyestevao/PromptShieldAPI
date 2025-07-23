@@ -17,4 +17,5 @@ public class RegisterRequest {
 
     @Schema(description = "Role", example = "USER")
     private String role;
+
 }

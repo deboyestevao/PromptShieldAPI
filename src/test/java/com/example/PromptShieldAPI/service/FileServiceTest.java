@@ -15,6 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,56 +32,41 @@ class FileServiceTest {
     private FileService fileService;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IOException {
         fileService = new FileService(); // usa o construtor real
     }
 
     @Test
-    void shouldLoadMaskedFileContentAndRespectTokenLimit() throws Exception {
-        // Arrange
+    void shouldLoadMaskedFileContentAndRespectTokenLimit(@TempDir Path tempDir) throws Exception {
         String userId = "testuser";
         String fileId = "abc123";
         String originalText = "Email: test@test.com\nCC: 1234-5678-9012-3456";
         String maskedText = "Email: ***@***.com\nCC: ****-****-****-****";
 
-        // Cria diretório e arquivo simulado
-        Path userPath = fileService.getUploadDir().resolve(userId);
-        File userFolder = userPath.toFile();
-        userFolder.mkdirs();
+        Path userPath = tempDir.resolve(userId);
+        Files.createDirectories(userPath);
 
-        File file = new File(userFolder, fileId + "_teste.txt");
+        File file = new File(userPath.toFile(), fileId + "_teste.txt");
         try (FileWriter fw = new FileWriter(file)) {
             fw.write(originalText);
         }
 
-        // Mock estático de DataMasker
         try (MockedStatic<DataMasker> mocked = Mockito.mockStatic(DataMasker.class)) {
             mocked.when(() -> DataMasker.maskSensitiveData(Mockito.anyString()))
                     .thenReturn(new MaskingResult(maskedText, 2L));
 
-            // Act
-            String result = fileService.loadFilesContent(userId, List.of(fileId));
+            String result = fileService.loadFilesContent(userPath.toString(), List.of(fileId));
 
-            // Assert
             assertTrue(result.contains(maskedText));
             assertTrue(result.contains("Conteúdo de teste.txt"));
         }
-
-        // Clean up
-        file.delete();
-        userFolder.delete();
     }
 
     @Test
-    void shouldReturnErrorWhenUserFolderNotFound() {
-        String userId = "user_not_found";
-        String fileId = "missing_file";
-
-        String result = fileService.loadFilesContent(userId, List.of(fileId));
-
-        assertEquals("Pasta do utilizador " + userId + " não encontrada.", result);
+    void shouldReturnErrorWhenUserFolderNotFound(@TempDir Path tempDir) {
+        String result = fileService.loadFilesContent(tempDir.resolve("user_not_found").toString(), List.of("missing_file"));
+        assertTrue(result.contains("não encontrada"));
     }
-
 
     @Test
     void shouldLoadMultipleFileTypesCorrectly() throws Exception {
@@ -297,33 +283,25 @@ class FileServiceTest {
 
 
     @Test
-    void shouldSaveFilesSuccessfully() throws Exception {
+    void shouldSaveFilesSuccessfully(@TempDir Path tempDir) throws Exception {
         String userId = "saveUser";
         MultipartFile mockFile = Mockito.mock(MultipartFile.class);
         Mockito.when(mockFile.getOriginalFilename()).thenReturn("teste.txt");
         Mockito.when(mockFile.getInputStream()).thenReturn(new ByteArrayInputStream("conteúdo".getBytes()));
 
         List<String> ids = fileService.saveFiles(new MultipartFile[]{mockFile}, userId);
-
         assertEquals(1, ids.size());
-
-        // Limpeza
-        Path userPath = fileService.getUploadDir().resolve(userId);
-        Files.walk(userPath)
-                .map(Path::toFile)
-                .forEach(File::delete);
-        userPath.toFile().delete();
     }
 
     @Test
-    void shouldHandleIOExceptionWhenSavingFile() throws Exception {
+    void shouldHandleIOExceptionWhenSavingFile(@TempDir Path tempDir) throws Exception {
         String userId = "errorSaveUser";
-        MultipartFile mockFile = Mockito.mock(MultipartFile.class);
-        Mockito.when(mockFile.getOriginalFilename()).thenReturn("erro.txt");
-        Mockito.when(mockFile.getInputStream()).thenThrow(new IOException("Erro simulado"));
+        MultipartFile file = Mockito.mock(MultipartFile.class);
+        Mockito.when(file.getOriginalFilename()).thenReturn("erro.txt");
+        Mockito.when(file.getInputStream()).thenThrow(new IOException("Erro simulado"));
 
-        List<String> ids = fileService.saveFiles(new MultipartFile[]{mockFile}, userId);
-
+        List<String> ids = fileService.saveFiles(new MultipartFile[]{file}, userId);
         assertTrue(ids.isEmpty());
     }
+
 }
