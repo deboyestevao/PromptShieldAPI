@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #183c7c 20%, #000000 120%);
     margin: 0;
     padding: 0;
     height: 100vh;
@@ -30,7 +30,7 @@ body {
 }
 
 .logo h1 {
-    color: #667eea;
+    color: #183c7c;
     font-size: 28px;
     font-weight: 700;
     margin: 0;
@@ -62,7 +62,7 @@ body {
 
 .form-control:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #183c7c;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     background-color: white;
     transform: translateY(-1px);
@@ -71,7 +71,7 @@ body {
 .btn {
     width: 100%;
     padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #183c7c 0%, #183c7c 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -86,7 +86,7 @@ body {
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px #183c7c;
 }
 
 .btn:active {
