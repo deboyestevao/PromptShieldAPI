@@ -15,45 +15,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
-    private final SystemConfigService systemConfigService;
     private final AuthService authService;
 
-
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
-    }
-
     @PostMapping("/login")
-    @Operation(summary = "User login", security = @SecurityRequirement(name = ""))
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         authService.login(request, session);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Login efetuado com sucesso");
     }
 
-
     @PostMapping("/register")
-    @Operation(summary = "User register", security = @SecurityRequirement(name = ""))
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         authService.register(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Registo concluído");
     }
 
     @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         authService.delete(id);
+        return ResponseEntity.ok("Utilizador removido");
     }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/auth/login";
-    }
-
 }

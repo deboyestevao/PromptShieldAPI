@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/auth/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/ai/welcome", true)
+                        .defaultSuccessUrl("/chat", true)
                         .failureUrl("/auth/login?error=true")
                         .permitAll()
                 )
