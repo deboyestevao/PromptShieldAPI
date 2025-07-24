@@ -1,0 +1,40 @@
+<cliente>
+    <nome>Ricardo Manuel Antunes</nome>
+    <nif>198765432</nif>
+    <data_nascimento>1985-11-10</data_nascimento>
+
+    <endereco>
+        <rua>Avenida dos Aliados</rua>
+        <numero>14</numero>
+        <andar>2º Dt</andar>
+        <codigo_postal>4000-067</codigo_postal>
+        <cidade>Porto</cidade>
+        <distrito>Porto</distrito>
+    </endereco>
+
+    <contato>
+        <telemovel>935 678 901</telemovel>
+        <email>ricardo.antunes@exemplo.pt</email>
+    </contato>
+
+    <conta_bancaria>
+        <iban>PT50 0023 0000 9876 5432 1098 7</iban>
+        <banco>Caixa Nacional de Crédito</banco>
+        <tipo>Conta Poupança</tipo>
+        <saldo>3145.75</saldo>
+        <moeda>EUR</moeda>
+    </conta_bancaria>
+
+    <cartoes>
+        <cartao>
+            <numero>4716 9876 5432 1098</numero>
+            <validade>05/28</validade>
+            <bandeira>Visa</bandeira>
+        </cartao>
+        <cartao>
+            <numero>6011 2233 4455 6677</numero>
+            <validade>09/26</validade>
+            <bandeira>Discover</bandeira>
+        </cartao>
+    </cartoes>
+</cliente>

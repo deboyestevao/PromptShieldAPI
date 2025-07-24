@@ -10,6 +10,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.example.PromptShieldAPI.util.DataMasker;
+import com.example.PromptShieldAPI.service.MaskingResult;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/ai")
@@ -27,7 +33,7 @@ public class AiController {
     }
 
     @PostMapping("/ask")
-    public String ask(@RequestBody QuestionWithFilesRequest request) {
+    public ResponseEntity<?> ask(@RequestBody QuestionWithFilesRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // ⛑️ Verifica disponibilidade real e atualiza o estado no banco
@@ -39,7 +45,10 @@ public class AiController {
         boolean useOllama = configService.isModelEnabled(ModelType.OLLAMA);
 
         if (!useOpenAi && !useOllama) {
-            return "Nenhum LLM está ativado na configuração do sistema.";
+            return ResponseEntity.ok().body(Map.of(
+                "maskedQuestion", "",
+                "llmAnswers", List.of("Nenhum LLM está ativado na configuração do sistema.")
+            ));
         }
 
         // 📁 Carrega contexto de ficheiros
@@ -53,27 +62,47 @@ public class AiController {
 
         int tokenEstimate = fileService.estimateTokens(finalPrompt);
         if (tokenEstimate > 4096) {
-            return "O conteúdo total ultrapassa o limite de tokens permitido (4096). Reduza os ficheiros ou a pergunta e tente novamente.";
+            return ResponseEntity.ok().body(Map.of(
+                "maskedQuestion", "",
+                "llmAnswers", List.of("O conteúdo total ultrapassa o limite de tokens permitido (4096). Reduza os ficheiros ou a pergunta e tente novamente.")
+            ));
         }
 
+        // Aplica DataMasker à pergunta do utilizador
+        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
+        String maskedQuestion = maskingResult.getMaskedText();
+
         // 🤖 Faz pergunta ao(s) modelo(s) ativo(s)
-        StringBuilder answer = new StringBuilder();
+        List<String> llmAnswers = new ArrayList<>();
 
         if (useOpenAi) {
             String a = aiService.askOpenAi(finalPrompt);
-            answer.append("OpenAI: ").append(a).append("\n");
+            llmAnswers.add("OpenAI: " + a);
         }
 
         if (useOllama) {
             String a = aiService.askOllama(finalPrompt);
-            answer.append("Ollama: ").append(a).append("\n");
+            llmAnswers.add("Ollama: " + a);
         }
 
-        return answer.toString();
+        Map<String, Object> response = Map.of(
+            "maskedQuestion", maskedQuestion,
+            "llmAnswers", llmAnswers
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/find-year-month")
     public ResponseEntity<QuestionYearMonthRequest> findByDate(@RequestParam Integer year, Integer month) {
         return aiService.findByYearAndMonth(year, month);
+    }
+
+    @GetMapping("/role")
+    public String getRole() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities() == null) return "";
+        return auth.getAuthorities().stream()
+            .map(a -> a.getAuthority().replace("ROLE_", "").toLowerCase())
+            .findFirst().orElse("");
     }
 }

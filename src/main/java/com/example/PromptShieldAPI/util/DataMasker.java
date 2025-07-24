@@ -67,7 +67,7 @@ public class DataMasker {
     }
 
     private static MaskingResult maskNineDigitNumber(String input) {
-        String regex = "\\b\\d{9}\\b";
+        String regex = "\\b(\\d)\\d{2}\\s?\\d{3}\\s?\\d{3}\\b";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
 
@@ -77,7 +77,10 @@ public class DataMasker {
 
         while (matcher.find()) {
             count++;
-            matcher.appendReplacement(result, "*********");
+            String original = matcher.group();
+            // Substitui todos os dígitos por * exceto o primeiro e o último
+            String masked = original.replaceAll("(\\d)(\\d{2})(\\s?)(\\d{3})(\\s?)(\\d{2})(\\d)", "$1**$3***$5**$7");
+            matcher.appendReplacement(result, masked);
         }
 
         matcher.appendTail(result);

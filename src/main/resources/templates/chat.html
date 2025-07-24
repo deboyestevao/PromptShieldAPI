@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/chat.css" rel="stylesheet" type="text/css">
+    <title>PromptShield - Chat</title>
+</head>
+<body>
+<div class="chat-layout">
+    <div class="container-chat">
+        <header class="chat-header">
+            <div class="header-left">
+                <div class="logo"><h1>PromptShield</h1></div>
+                <div id="dashboard-btn" style="display:none; margin-right:18px;"></div>
+            </div>
+            <div class="user-info">Olá, <span id="username">Utilizador</span>! <a href="/auth/logout" class="logout-link">Sair</a></div>
+        </header>
+        <main class="chat-main">
+            <div id="chat-messages" class="chat-messages">
+                <!-- Mensagens do chat aparecem aqui -->
+            </div>
+            <form id="chat-form" class="chat-form" autocomplete="off">
+                <div id="file-chip" class="file-chip" style="display:none;"></div>
+                <div class="input-group">
+                    <label for="file-upload" class="upload-label" title="Enviar ficheiro">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#183c7c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <input type="file" id="file-upload" name="files" multiple class="file-input" style="display:none;">
+                    </label>
+                    <input type="text" id="question" name="question" class="form-control" placeholder="Escreva a sua mensagem..." required autofocus>
+                    <button type="submit" class="btn btn-primary" title="Enviar">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+    <aside class="chat-sidebar">
+        <h2>Preferências de LLM</h2>
+        <form id="llm-preferences-form">
+            <div id="llm-checkbox-list"></div>
+            <button type="submit" id="save-prefs-btn" class="btn btn-secondary" disabled>Guardar preferências</button>
+        </form>
+        <div id="llm-status-info" class="llm-status-info"></div>
+        <div id="llm-prefs-feedback" class="llm-prefs-feedback"></div>
+    </aside>
+</div>
+<script>
+// Busca nome do utilizador autenticado
+fetch('/ai/welcome').then(r => r.text()).then(txt => {
+    const match = txt.match(/Bem vindo\/a (.+)/);
+    if (match) document.getElementById('username').textContent = match[1];
+});
+
+// Função para mostrar o botão Dashboard se for admin
+fetch('/ai/role').then(r => r.text()).then(role => {
+    if (role.trim().toLowerCase() === 'admin') {
+        document.getElementById('dashboard-btn').innerHTML = '<a href="/admin/dashboard" class="dashboard-link">Dashboard</a>';
+        document.getElementById('dashboard-btn').style.display = 'block';
+    }
+});
+
+// Carrega status dos LLMs e preferências do user e gera checkboxes
+let lastPrefs = {};
+async function loadLLMStatusAndPrefs() {
+    const status = await fetch('/admin/llm-status').then(r => r.json()).catch(() => ({}));
+    const prefs = await fetch('/admin/llm-user-prefs').then(r => r.json()).catch(() => ({}));
+    lastPrefs = { ...prefs };
+    // Gera checkboxes
+    const list = document.getElementById('llm-checkbox-list');
+    list.innerHTML = '';
+    Object.keys(status).forEach(llm => {
+        const checked = !!prefs[llm];
+        const disabled = !status[llm];
+        const label = document.createElement('label');
+        label.className = 'llm-checkbox-label' + (disabled ? ' llm-disabled' : '');
+        label.innerHTML = `<input type="checkbox" name="llm-${llm}" value="${llm}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}> ${llm.charAt(0).toUpperCase() + llm.slice(1)}`;
+        list.appendChild(label);
+    });
+    // Mostra info
+    document.getElementById('llm-status-info').innerHTML =
+        Object.entries(status).map(([llm, v]) => `<span class=\"llm-status ${v ? 'active' : 'inactive'}\">${llm.charAt(0).toUpperCase() + llm.slice(1)}: ${v ? 'Ativo' : 'Em baixo'}</span>`).join('<br>');
+    document.getElementById('save-prefs-btn').disabled = true;
+}
+loadLLMStatusAndPrefs();
+
+// Ativa botão se houver alterações
+const llmForm = document.getElementById('llm-preferences-form');
+llmForm.addEventListener('change', function() {
+    const checkboxes = llmForm.querySelectorAll('input[type=checkbox]');
+    let changed = false;
+    checkboxes.forEach(cb => {
+        if (lastPrefs[cb.value] !== cb.checked) changed = true;
+    });
+    document.getElementById('save-prefs-btn').disabled = !changed;
+});
+
+// Guardar preferências
+llmForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const checkboxes = llmForm.querySelectorAll('input[type=checkbox]');
+    const prefs = {};
+    checkboxes.forEach(cb => {
+        prefs[cb.value] = cb.checked;
+    });
+    const btn = document.getElementById('save-prefs-btn');
+    btn.disabled = true;
+    const feedback = document.getElementById('llm-prefs-feedback');
+    feedback.textContent = 'A guardar...';
+    try {
+        await fetch('/admin/llm-user-prefs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
+        });
+        feedback.textContent = 'Preferências guardadas com sucesso!';
+        lastPrefs = { ...prefs };
+        setTimeout(() => feedback.textContent = '', 2000);
+    } catch {
+        feedback.textContent = 'Erro ao guardar preferências.';
+    }
+});
+
+// Mostrar aba do ficheiro carregado junto ao input
+const fileInput = document.getElementById('file-upload');
+const fileChip = document.getElementById('file-chip');
+fileInput.addEventListener('change', function() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileChip.innerHTML = `<span class='file-chip-icon'>📎</span> <span class='file-chip-name'>${file.name}</span> <span class='file-chip-remove' title='Remover'>&times;</span>`;
+        fileChip.style.display = 'flex';
+    } else {
+        fileChip.style.display = 'none';
+    }
+});
+fileChip.addEventListener('click', function(e) {
+    if (e.target.classList.contains('file-chip-remove')) {
+        fileInput.value = '';
+        fileChip.style.display = 'none';
+    }
+});
+
+// Lógica de envio de mensagem e upload de ficheiros
+const chatForm = document.getElementById('chat-form');
+const chatMessages = document.getElementById('chat-messages');
+
+chatForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const question = document.getElementById('question').value;
+    let fileIds = [];
+    if (fileInput.files.length > 0) {
+        const formData = new FormData();
+        for (const file of fileInput.files) {
+            formData.append('files', file);
+        }
+        const uploadResp = await fetch('/files/upload', { method: 'POST', body: formData });
+        if (uploadResp.ok) {
+            fileIds = await uploadResp.json();
+        } else {
+            alert('Erro ao fazer upload dos ficheiros.');
+            return;
+        }
+    }
+    // Esconde a aba do ficheiro após envio
+    fileInput.value = '';
+    fileChip.style.display = 'none';
+    document.getElementById('question').value = '';
+    // Envia pergunta para o backend
+    const resp = await fetch('/ai/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, fileIds })
+    });
+    if (resp.ok) {
+        const data = await resp.json();
+        // Mostra pergunta mascarada do utilizador
+        if (data.maskedQuestion) {
+            addMessage('Você', data.maskedQuestion, 'user');
+        }
+        // Mostra respostas dos LLMs
+        if (data.llmAnswers && Array.isArray(data.llmAnswers)) {
+            data.llmAnswers.forEach(ans => addLLMAnswers(ans));
+        }
+    } else {
+        addMessage('Erro', 'Falha ao obter resposta do chatbot.', 'error');
+    }
+});
+
+function addLLMAnswers(answerText) {
+    // Agrupa todas as linhas do mesmo modelo numa só mensagem
+    const lines = answerText.split(/\n+/).filter(Boolean);
+    const llmMap = {};
+    for (const line of lines) {
+        const match = line.match(/^(OpenAI|Ollama):\s*(.*)$/i);
+        if (match) {
+            const llm = match[1];
+            const msg = match[2];
+            if (!llmMap[llm]) llmMap[llm] = [];
+            llmMap[llm].push(msg);
+        } else {
+            // Não mostrar mensagens "LLM:" soltas
+        }
+    }
+    for (const llm in llmMap) {
+        addMessage(llm, llmMap[llm].join('<br>'), 'llm-' + llm.toLowerCase(), true);
+    }
+}
+
+function addMessage(author, text, type, typingEffect = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-message ' + type;
+    msgDiv.innerHTML = `<strong>${author}:</strong> <span></span>`;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    const span = msgDiv.querySelector('span');
+    if (typingEffect) {
+        let i = 0;
+        function typeChar() {
+            if (i <= text.length) {
+                span.innerHTML = text.slice(0, i).replace(/\n/g, '<br>');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                i++;
+                setTimeout(typeChar, 8); // velocidade do efeito
+            } else {
+                span.innerHTML = text.replace(/\n/g, '<br>');
+            }
+        }
+        typeChar();
+    } else {
+        span.innerHTML = text.replace(/\n/g, '<br>');
+    }
+}
+</script>
+</body>
+</html> 

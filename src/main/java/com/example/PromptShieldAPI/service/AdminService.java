@@ -50,4 +50,20 @@ public class AdminService {
         userPreferencesRepository.save(userPreferences);
         return userPreferences;
     }
+
+    @Transactional
+    public void updateUserLLMPreferences(String username, java.util.Map<String, Boolean> prefs) {
+        User user = userRepository.findByUsername(username).orElseThrow();
+        boolean openai = prefs.getOrDefault("openai", false);
+        boolean ollama = prefs.getOrDefault("ollama", false);
+        updateUserPreferences(ollama, openai, user.getId());
+    }
+
+    public java.util.Map<String, Boolean> getUserLLMPreferences(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Optional<UserPreferences> prefsOpt = userPreferencesRepository.findByUser(user);
+        boolean openai = prefsOpt.map(UserPreferences::isOpenaiPreferred).orElse(false);
+        boolean ollama = prefsOpt.map(UserPreferences::isOllamaPreferred).orElse(false);
+        return java.util.Map.of("openai", openai, "ollama", ollama);
+    }
 }
