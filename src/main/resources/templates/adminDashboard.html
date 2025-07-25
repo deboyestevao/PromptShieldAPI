@@ -8,28 +8,32 @@
 </head>
 <body>
     <header class="admin-header">
-        <div class="admin-logo"><a href="/chat">PromptShield</a></div>
+        <div class="admin-logo">
+            <a href="/chat">PromptShield</a>
+            <span class="admin-badge">Admin</span>
+        </div>
         <div class="admin-user-info">
-            <a href="/chat" class="admin-back">Voltar ao Chat</a>
+            <span class="admin-avatar">A</span>
         </div>
     </header>
     <main class="admin-main">
         <h1>Dashboard de Administração</h1>
-        <div class="admin-cards">
+        <div class="admin-cards-grid">
             <div class="admin-card">
+                <div class="admin-card-icon admin-card-icon-sys">
+                    <svg width="38" height="38" fill="none" stroke="#183c7c" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h.01M7 11h10M7 15h6"/></svg>
+                </div>
                 <h2>Configurações do Sistema</h2>
                 <p>Altere preferências globais, ative/desative LLMs e ajuste parâmetros do sistema.</p>
-                <a href="/admin/system-preferences" class="admin-btn">Configurar Sistema</a>
+                <a href="/admin/system-preferences" class="admin-btn-link">Configurar Sistema <span class="admin-btn-arrow">→</span></a>
             </div>
             <div class="admin-card">
+                <div class="admin-card-icon admin-card-icon-users">
+                    <svg width="38" height="38" fill="none" stroke="#183c7c" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M17 11a4 4 0 1 0-8 0v1a4 4 0 0 0 8 0v-1z"/><path d="M17 21v-2a4 4 0 0 0-8 0v2"/></svg>
+                </div>
                 <h2>Gestão de Utilizadores</h2>
                 <p>Veja, edite ou remova utilizadores registados na plataforma.</p>
-                <a href="/admin/users" class="admin-btn">Gerir Utilizadores</a>
-            </div>
-            <div class="admin-card">
-                <h2>Modelos LLM Ativos</h2>
-                <p>Consulte e altere quais LLMs estão disponíveis para os utilizadores.</p>
-                <a href="/admin/llm-status" class="admin-btn">Gerir LLMs</a>
+                <a href="/admin/users" class="admin-btn-link">Gerir Utilizadores <span class="admin-btn-arrow">→</span></a>
             </div>
         </div>
     </main>

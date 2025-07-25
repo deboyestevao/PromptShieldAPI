@@ -63,8 +63,27 @@ fetch('/ai/role').then(r => r.text()).then(role => {
 // Carrega status dos LLMs e preferências do user e gera checkboxes
 let lastPrefs = {};
 async function loadLLMStatusAndPrefs() {
-    const status = await fetch('/admin/llm-status').then(r => r.json()).catch(() => ({}));
-    const prefs = await fetch('/admin/llm-user-prefs').then(r => r.json()).catch(() => ({}));
+    let status = {};
+    let prefs = {};
+    try {
+        const statusResp = await fetch('/admin/llm-status');
+        if (!statusResp.ok) {
+            document.getElementById('llm-checkbox-list').innerHTML = '<span style="color:red">Erro ao carregar preferências de LLM.</span>';
+            document.getElementById('llm-status-info').innerHTML = '';
+            document.getElementById('save-prefs-btn').disabled = true;
+            return;
+        }
+        status = await statusResp.json();
+        const prefsResp = await fetch('/admin/llm-user-prefs');
+        if (prefsResp.ok) {
+            prefs = await prefsResp.json();
+        }
+    } catch {
+        document.getElementById('llm-checkbox-list').innerHTML = '<span style="color:red">Erro ao carregar preferências de LLM.</span>';
+        document.getElementById('llm-status-info').innerHTML = '';
+        document.getElementById('save-prefs-btn').disabled = true;
+        return;
+    }
     lastPrefs = { ...prefs };
     // Gera checkboxes
     const list = document.getElementById('llm-checkbox-list');

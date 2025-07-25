@@ -6,16 +6,19 @@ import lombok.Data;
 @Data
 public class RegisterRequest {
 
-    @Schema(description = "Username", example = "test")
-    private String username;
-
     @Schema(description = "Email", example = "test@gmail.com")
     private String email;
+
+    @Schema(description = "Primeiro Nome", example = "João")
+    private String firstName;
+
+    @Schema(description = "Último Nome", example = "Morais")
+    private String lastName;
 
     @Schema(description = "Password", example = "test")
     private String password;
 
-    @Schema(description = "Role", example = "USER")
-    private String role;
+    @Schema(description = "Confirmar Password", example = "test")
+    private String confirmPassword;
 
 }
