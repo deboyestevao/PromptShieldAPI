@@ -9,6 +9,7 @@ import com.example.PromptShieldAPI.repository.QuestionRepository;
 import com.example.PromptShieldAPI.repository.UserRepository;
 import com.example.PromptShieldAPI.util.DataMasker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.azure.openai.AzureOpenAiChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AiService {
 
     private final AzureOpenAiChatModel chatModel;
@@ -32,6 +34,8 @@ public class AiService {
     private static final String INPUT_FOLDER = "InputFiles";
 
     public String askOpenAi(String question, Long chatId) {
+        // log.info("Iniciando askOpenAi - chatId: {}, question: {}", chatId, question.substring(0, Math.min(50, question.length())));
+        
         if (!systemConfigService.isOpenAiEnabled()) {
             return "OpenAi está em manutenção.";
         }
@@ -42,34 +46,37 @@ public class AiService {
         }
 
         // Carregar histórico do chat para contexto
-        StringBuilder context = new StringBuilder();
-        if (chatId != null) {
-            List<Question> history = questionService.getQuestionsByChat(chatId);
-            for (Question q : history) {
-                context.append("Usuário: ").append(q.getQuestion()).append("\n");
-                context.append("LLM: ").append(q.getAnswer()).append("\n");
-            }
-        }
-        context.append("Usuário: ").append(question).append("\nLLM: ");
+        String context = buildChatContext(chatId);
+        String finalPrompt = context + "Usuário: " + question + "\nLLM: ";
+        
+        // log.info("Prompt final para OpenAI: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         long total = maskingResult.getTotal();
 
-        String answer = chatModel.call(context.toString()) + "\n";
-        questionService.saveQuestion(maskedQuestion, answer, "openai", chatId);
+        try {
+            String answer = chatModel.call(finalPrompt) + "\n";
+            questionService.saveQuestion(maskedQuestion, answer, "openai", chatId);
 
-        if (total > 0) {
-            answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
-                    + total + " dado" + (total > 1 ? "s " : " ")
-                    + (total > 1 ? "sensíveis" : "sensível")
-                    + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+            if (total > 0) {
+                answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
+                        + total + " dado" + (total > 1 ? "s " : " ")
+                        + (total > 1 ? "sensíveis" : "sensível")
+                        + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+            }
+
+            // log.info("Resposta OpenAI gerada com sucesso");
+            return answer;
+        } catch (Exception e) {
+            log.error("Erro ao chamar OpenAI: {}", e.getMessage(), e);
+            return "Erro ao processar a pergunta: " + e.getMessage();
         }
-
-        return answer;
     }
 
     public String askOllama(String question, Long chatId) {
+        // log.info("Iniciando askOllama - chatId: {}, question: {}", chatId, question.substring(0, Math.min(50, question.length())));
+        
         if (!systemConfigService.isOllamaEnabled()) {
             return "Ollama está em manutenção.";
         }
@@ -80,33 +87,61 @@ public class AiService {
         }
 
         // Carregar histórico do chat para contexto
-        StringBuilder context = new StringBuilder();
-        if (chatId != null) {
-            List<Question> history = questionService.getQuestionsByChat(chatId);
-            for (Question q : history) {
-                context.append("Usuário: ").append(q.getQuestion()).append("\n");
-                context.append("LLM: ").append(q.getAnswer()).append("\n");
-            }
-        }
-        context.append("Usuário: ").append(question).append("\nLLM: ");
+        String context = buildChatContext(chatId);
+        String finalPrompt = context + "Usuário: " + question + "\nLLM: ";
+        
+        // log.info("Prompt final para Ollama: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         long total = maskingResult.getTotal();
 
-        String answer = ollamaChatModel.call(context.toString()) + "\n";
-        questionService.saveQuestion(maskedQuestion, answer, "ollama", chatId);
+        try {
+            String answer = ollamaChatModel.call(finalPrompt) + "\n";
+            questionService.saveQuestion(maskedQuestion, answer, "ollama", chatId);
 
-        if (total > 0) {
-            answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
-                    + total + " dado" + (total > 1 ? "s " : " ")
-                    + (total > 1 ? "sensíveis" : "sensível")
-                    + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+            if (total > 0) {
+                answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
+                        + total + " dado" + (total > 1 ? "s " : " ")
+                        + (total > 1 ? "sensíveis" : "sensível")
+                        + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
+            }
+
+            // log.info("Resposta Ollama gerada com sucesso");
+            return answer;
+        } catch (Exception e) {
+            log.error("Erro ao chamar Ollama: {}", e.getMessage(), e);
+            return "Erro ao processar a pergunta: " + e.getMessage();
         }
-
-        return answer;
     }
 
+    private String buildChatContext(Long chatId) {
+        if (chatId == null) {
+            // log.info("ChatId é null, retornando contexto vazio");
+            return "";
+        }
+
+        try {
+            List<Question> history = questionService.getQuestionsByChat(chatId);
+            // log.info("Carregando histórico do chat {} - {} mensagens encontradas", chatId, history.size());
+            
+            if (history.isEmpty()) {
+                return "";
+            }
+
+            StringBuilder context = new StringBuilder();
+            for (Question q : history) {
+                context.append("Usuário: ").append(q.getQuestion()).append("\n");
+                context.append("LLM: ").append(q.getAnswer()).append("\n");
+            }
+            
+            log.info("Contexto construído com {} caracteres", context.length());
+            return context.toString();
+        } catch (Exception e) {
+            log.error("Erro ao carregar histórico do chat {}: {}", chatId, e.getMessage(), e);
+            return "";
+        }
+    }
 
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

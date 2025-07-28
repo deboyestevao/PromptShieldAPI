@@ -37,8 +37,18 @@ public class AuthService {
             Authentication authentication = authenticationManager.authenticate(authToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            // Atualizar last_login_at
+            String email = request.getEmail();
+            userRepository.findByEmail(email).ifPresent(user -> {
+                user.setLastLoginAt(java.time.LocalDateTime.now());
+                userRepository.save(user);
+            });
 
-            String username = request.getUsername();
+            // Buscar o username do utilizador
+            String username = userRepository.findByEmail(email)
+                    .map(User::getUsername)
+                    .orElse("User");
+            
             return ResponseEntity.ok("Welcome, " + username + "! Login successful.");
 
         } catch (AuthenticationException e) {
@@ -71,6 +81,9 @@ public class AuthService {
         user.setUsername(username);
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setActive(true);
         user.setRole("USER");
         userRepository.save(user);
 
@@ -90,5 +103,13 @@ public class AuthService {
         } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found.");
         }
+    }
+
+    @Transactional
+    public void updateLastLogin(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            user.setLastLoginAt(java.time.LocalDateTime.now());
+            userRepository.save(user);
+        });
     }
 }

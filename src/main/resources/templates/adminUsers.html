@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/adminDashboard.css" rel="stylesheet" type="text/css">
+    <link href="/css/adminUsers.css" rel="stylesheet" type="text/css">
+    <title>Gestão de Utilizadores - PromptShield</title>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="admin-logo">
+            <a href="/chat">PromptShield</a>
+            <span class="admin-badge">Admin</span>
+        </div>
+        <div class="admin-user-info">
+            <span class="admin-avatar">A</span>
+        </div>
+    </header>
+    
+    <main class="admin-main">
+        <a href="/admin/dashboard" class="admin-back">← Voltar ao Dashboard</a>
+        <h1>Gestão de Utilizadores</h1>
+        
+        <!-- Estatísticas -->
+        <div class="users-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="total-users">0</span>
+                    <span class="stat-label">Total de Utilizadores</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="active-users">0</span>
+                    <span class="stat-label">Utilizadores Ativos</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4"></path>
+                        <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>
+                        <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"></path>
+                        <path d="M12 3c0 1-1 2-2 2s-2-1-2-2 1-2 2-2 2 1 2 2z"></path>
+                        <path d="M12 21c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z"></path>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="new-users">0</span>
+                    <span class="stat-label">Novos (30 dias)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de pesquisa e filtros -->
+        <div class="users-controls">
+            <div class="search-box">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="search-users" placeholder="Pesquisar utilizadores...">
+            </div>
+            <div class="filter-controls">
+                <select id="status-filter">
+                    <option value="">Todos os estados</option>
+                    <option value="active">Ativos</option>
+                    <option value="inactive">Inativos</option>
+                </select>
+                <select id="sort-filter">
+                    <option value="date-desc">Mais recentes</option>
+                    <option value="date-asc">Mais antigos</option>
+                    <option value="name-asc">Nome A-Z</option>
+                    <option value="name-desc">Nome Z-A</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabela de utilizadores -->
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Utilizador</th>
+                        <th>Email</th>
+                        <th>Data de Registo</th>
+                        <th>Estado</th>
+                        <th>Chats</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Os utilizadores serão carregados aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação -->
+        <div class="pagination" id="pagination">
+            <!-- Paginação será gerada via JavaScript -->
+        </div>
+
+        <!-- Modal de detalhes do utilizador -->
+        <div id="user-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Detalhes do Utilizador</h2>
+                    <button class="modal-close" onclick="closeUserModal()">×</button>
+                </div>
+                <div class="modal-body" id="user-modal-body">
+                    <!-- Conteúdo do modal será carregado via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmação -->
+        <div id="confirm-modal" class="modal">
+            <div class="modal-content confirm-modal">
+                <div class="modal-header">
+                    <h2>Confirmar Ação</h2>
+                    <button class="modal-close" onclick="closeConfirmModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-message"></p>
+                    <div class="confirm-actions">
+                        <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+                        <button class="btn btn-danger" id="confirm-action-btn">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentPage = 1;
+        let usersPerPage = 10;
+        let allUsers = [];
+        let filteredUsers = [];
+
+        // Carregar utilizadores quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Pesquisa
+            document.getElementById('search-users').addEventListener('input', filterUsers);
+            
+            // Filtros
+            document.getElementById('status-filter').addEventListener('change', filterUsers);
+            document.getElementById('sort-filter').addEventListener('change', filterUsers);
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/admin/users');
+                if (response.ok) {
+                    const data = await response.json();
+                    allUsers = data;
+                    filteredUsers = [...allUsers];
+                    updateStats();
+                    renderUsers();
+                    renderPagination();
+                } else {
+                    showNotification('Erro ao carregar utilizadores', 'error');
+                }
+            } catch (error) {
+                showNotification('Erro de conexão', 'error');
+            }
+        }
+
+        function updateStats() {
+            const total = allUsers.length;
+            const active = allUsers.filter(u => u.active).length;
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const newUsers = allUsers.filter(u => new Date(u.createdAt) > thirtyDaysAgo).length;
+
+            document.getElementById('total-users').textContent = total;
+            document.getElementById('active-users').textContent = active;
+            document.getElementById('new-users').textContent = newUsers;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('search-users').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+
+            filteredUsers = allUsers.filter(user => {
+                const matchesSearch = user.firstName.toLowerCase().includes(searchTerm) ||
+                                    user.lastName.toLowerCase().includes(searchTerm) ||
+                                    user.email.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || 
+                                    (statusFilter === 'active' && user.active) ||
+                                    (statusFilter === 'inactive' && !user.active);
+
+                return matchesSearch && matchesStatus;
+            });
+
+            // Ordenar
+            filteredUsers.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'date-desc':
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    case 'date-asc':
+                        return new Date(a.createdAt) - new Date(b.createdAt);
+                    case 'name-asc':
+                        return (a.firstName + ' ' + a.lastName).localeCompare(b.firstName + ' ' + b.lastName);
+                    case 'name-desc':
+                        return (b.firstName + ' ' + b.lastName).localeCompare(a.firstName + ' ' + a.lastName);
+                    default:
+                        return 0;
+                }
+            });
+
+            currentPage = 1;
+            renderUsers();
+            renderPagination();
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('users-table-body');
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            const pageUsers = filteredUsers.slice(startIndex, endIndex);
+
+            tbody.innerHTML = '';
+
+            if (pageUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-users">
+                            <div class="no-users-content">
+                                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                <p>Nenhum utilizador encontrado</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            pageUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">${user.firstName.charAt(0)}${user.lastName.charAt(0)}</div>
+                            <div class="user-details">
+                                <span class="user-name">${user.firstName} ${user.lastName}</span>
+                                <span class="user-username">@${user.username}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>${formatDate(user.createdAt)}</td>
+                    <td>
+                        <span class="status-badge ${user.active ? 'active' : 'inactive'}">
+                            ${user.active ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>${user.chatCount || 0}</td>
+                    <td>
+                        <div class="user-actions">
+                            <button class="action-btn view-btn" onclick="viewUser(${user.id})" title="Ver detalhes">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                            <button class="action-btn ${user.active ? 'deactivate-btn' : 'activate-btn'}" 
+                                    onclick="${user.active ? 'deactivateUser' : 'activateUser'}(${user.id})" 
+                                    title="${user.active ? 'Desativar' : 'Ativar'}">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    ${user.active ? 
+                                        '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>' :
+                                        '<path d="M9 12l2 2 4-4"></path><path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>'
+                                    }
+                                </svg>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteUser(${user.id})" title="Eliminar">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <polyline points="3,6 5,6 21,6"></polyline>
+                                    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            // Botão anterior
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                        onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+            `;
+
+            // Páginas
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHTML += `
+                        <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                                onclick="changePage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHTML += '<span class="pagination-ellipsis">...</span>';
+                }
+            }
+
+            // Botão seguinte
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                        onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Seguinte →
+                </button>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderUsers();
+            renderPagination();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-PT', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Funções de ação dos utilizadores
+        async function viewUser(userId) {
+            try {
+                const response = await fetch(`/admin/users/${userId}`);
+                if (response.ok) {
+                    const user = await response.json();
+                    showUserModal(user);
+                } else {
+                    showNotification('Erro ao carregar detalhes do utilizador', 'error');
+                }
+            } catch (error) {
+                showNotification('Erro de conexão', 'error');
+            }
+        }
+
+        async function activateUser(userId) {
+            showConfirmModal(
+                'Tem a certeza que deseja ativar este utilizador?',
+                async () => {
+                    try {
+                        const response = await fetch(`/admin/users/${userId}/activate`, { method: 'POST' });
+                        if (response.ok) {
+                            showNotification('Utilizador ativado com sucesso', 'success');
+                            loadUsers();
+                        } else {
+                            showNotification('Erro ao ativar utilizador', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Erro de conexão', 'error');
+                    }
+                }
+            );
+        }
+
+        async function deactivateUser(userId) {
+            showConfirmModal(
+                'Tem a certeza que deseja desativar este utilizador?',
+                async () => {
+                    try {
+                        const response = await fetch(`/admin/users/${userId}/deactivate`, { method: 'POST' });
+                        if (response.ok) {
+                            showNotification('Utilizador desativado com sucesso', 'success');
+                            loadUsers();
+                        } else {
+                            showNotification('Erro ao desativar utilizador', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Erro de conexão', 'error');
+                    }
+                }
+            );
+        }
+
+        async function deleteUser(userId) {
+            showConfirmModal(
+                'Tem a certeza que deseja eliminar este utilizador? Esta ação não pode ser desfeita.',
+                async () => {
+                    try {
+                        const response = await fetch(`/admin/users/${userId}`, { method: 'DELETE' });
+                        if (response.ok) {
+                            showNotification('Utilizador eliminado com sucesso', 'success');
+                            loadUsers();
+                        } else {
+                            showNotification('Erro ao eliminar utilizador', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Erro de conexão', 'error');
+                    }
+                }
+            );
+        }
+
+        // Funções dos modais
+        function showUserModal(user) {
+            const modal = document.getElementById('user-modal');
+            const modalBody = document.getElementById('user-modal-body');
+            
+            modalBody.innerHTML = `
+                <div class="user-modal-content">
+                    <div class="user-modal-avatar">${user.firstName.charAt(0)}${user.lastName.charAt(0)}</div>
+                    <h3>${user.firstName} ${user.lastName}</h3>
+                    <p class="user-modal-email">${user.email}</p>
+                    <p class="user-modal-username">@${user.username}</p>
+                    
+                    <div class="user-modal-stats">
+                        <div class="user-stat">
+                            <span class="stat-label">Data de Registo</span>
+                            <span class="stat-value">${formatDate(user.createdAt)}</span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="stat-label">Estado</span>
+                            <span class="stat-value">
+                                <span class="status-badge ${user.active ? 'active' : 'inactive'}">
+                                    ${user.active ? 'Ativo' : 'Inativo'}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="stat-label">Total de Chats</span>
+                            <span class="stat-value">${user.chatCount || 0}</span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="stat-label">Última Atividade</span>
+                            <span class="stat-value">${user.lastActivity ? formatDate(user.lastActivity) : 'Nunca'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').style.display = 'none';
+        }
+
+        function showConfirmModal(message, onConfirm) {
+            const modal = document.getElementById('confirm-modal');
+            const messageEl = document.getElementById('confirm-message');
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            
+            messageEl.textContent = message;
+            confirmBtn.onclick = () => {
+                onConfirm();
+                closeConfirmModal();
+            };
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+        }
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const userModal = document.getElementById('user-modal');
+            const confirmModal = document.getElementById('confirm-modal');
+            
+            if (event.target === userModal) {
+                closeUserModal();
+            }
+            if (event.target === confirmModal) {
+                closeConfirmModal();
+            }
+        }
+
+        // Notificações
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 
