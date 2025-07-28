@@ -12,4 +12,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findByUser(User user);
 
     List<Question> findByDateBetween(LocalDateTime fromDate, LocalDateTime toDate);
+
+    List<Question> findByChatIdOrderByDateAsc(Long chatId);
 }
