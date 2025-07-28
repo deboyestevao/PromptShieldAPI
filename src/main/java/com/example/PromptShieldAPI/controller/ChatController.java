@@ -36,6 +36,11 @@ public class ChatController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByUsername(username).orElseThrow();
         chat.setUser(user);
+        
+        // Definir o próximo número de chat para este usuário
+        Integer maxUserChatNumber = chatRepo.findMaxUserChatNumberByUser(user);
+        chat.setUserChatNumber(maxUserChatNumber + 1);
+        
         return chatRepo.save(chat);
     }
 

@@ -326,7 +326,7 @@ async function loadChats() {
         div.className = 'chat-list-item' + (currentChatId===chat.id?' selected':'');
         // Alternar cor de fundo
         div.style.background = idx%2===0 ? '#fff' : '#f3f6fa';
-        div.textContent = chat.name || 'Chat ' + chat.id;
+        div.textContent = chat.name || 'Chat ' + chat.userChatNumber;
         div.onclick = () => selectChat(chat.id);
         // Botão deletar (SVG minimalista)
         const del = document.createElement('button');

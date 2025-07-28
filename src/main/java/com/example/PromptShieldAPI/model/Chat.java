@@ -18,4 +18,7 @@ public class Chat {
     private User user;
 
     private String name;
+    
+    @Column(name = "user_chat_number")
+    private Integer userChatNumber;
 } 
