@@ -1,7 +1,9 @@
 package com.example.PromptShieldAPI.service;
 
+import com.example.PromptShieldAPI.model.ConfigHistory;
 import com.example.PromptShieldAPI.model.SystemConfig;
 import com.example.PromptShieldAPI.model.SystemConfig.ModelType;
+import com.example.PromptShieldAPI.repository.ConfigHistoryRepository;
 import com.example.PromptShieldAPI.repository.SystemConfigRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class SystemConfigService {
 
     private final SystemConfigRepository repository;
+    private final ConfigHistoryRepository configHistoryRepository;
     private final AzureService azureService;
 
     public boolean isOllamaEnabled() {
@@ -36,10 +39,33 @@ public class SystemConfigService {
         };
 
         repository.findByModel(model).ifPresent(cfg -> {
-            if (cfg.isEnabled() != reachable) {
+            boolean previousStatus = cfg.isEnabled();
+
+            if (previousStatus != reachable) {
                 cfg.setEnabled(reachable);
                 repository.save(cfg);
+
+                // ✅ Registrar no histórico
+                ConfigHistory history = new ConfigHistory();
+                history.setModel(model);
+                history.setEnabled(reachable);
+                history.setChangedBy("sistema");
+                configHistoryRepository.save(history);
             }
+        });
+    }
+
+    // (opcional) usar em alterações manuais também
+    public void updateModelStatusManually(ModelType model, boolean enabled, String changedBy) {
+        repository.findByModel(model).ifPresent(cfg -> {
+            cfg.setEnabled(enabled);
+            repository.save(cfg);
+
+            ConfigHistory history = new ConfigHistory();
+            history.setModel(model);
+            history.setEnabled(enabled);
+            history.setChangedBy(changedBy);
+            configHistoryRepository.save(history);
         });
     }
 }
