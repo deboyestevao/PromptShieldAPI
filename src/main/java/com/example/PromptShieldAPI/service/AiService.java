@@ -31,7 +31,7 @@ public class AiService {
 
     private static final String INPUT_FOLDER = "InputFiles";
 
-    public String askOpenAi(String question) {
+    public String askOpenAi(String question, Long chatId) {
         if (!systemConfigService.isOpenAiEnabled()) {
             return "OpenAi está em manutenção.";
         }
@@ -41,12 +41,23 @@ public class AiService {
             return "OpenAi está desativado para este utilizador.";
         }
 
+        // Carregar histórico do chat para contexto
+        StringBuilder context = new StringBuilder();
+        if (chatId != null) {
+            List<Question> history = questionService.getQuestionsByChat(chatId);
+            for (Question q : history) {
+                context.append("Usuário: ").append(q.getQuestion()).append("\n");
+                context.append("LLM: ").append(q.getAnswer()).append("\n");
+            }
+        }
+        context.append("Usuário: ").append(question).append("\nLLM: ");
+
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         long total = maskingResult.getTotal();
 
-        String answer = chatModel.call(maskedQuestion) + "\n";
-        questionService.saveQuestion(maskedQuestion, answer, "openai");
+        String answer = chatModel.call(context.toString()) + "\n";
+        questionService.saveQuestion(maskedQuestion, answer, "openai", chatId);
 
         if (total > 0) {
             answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
@@ -58,7 +69,7 @@ public class AiService {
         return answer;
     }
 
-    public String askOllama(String question) {
+    public String askOllama(String question, Long chatId) {
         if (!systemConfigService.isOllamaEnabled()) {
             return "Ollama está em manutenção.";
         }
@@ -68,13 +79,23 @@ public class AiService {
             return "Ollama está desativado para este utilizador.";
         }
 
+        // Carregar histórico do chat para contexto
+        StringBuilder context = new StringBuilder();
+        if (chatId != null) {
+            List<Question> history = questionService.getQuestionsByChat(chatId);
+            for (Question q : history) {
+                context.append("Usuário: ").append(q.getQuestion()).append("\n");
+                context.append("LLM: ").append(q.getAnswer()).append("\n");
+            }
+        }
+        context.append("Usuário: ").append(question).append("\nLLM: ");
+
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         long total = maskingResult.getTotal();
 
-        String answer = ollamaChatModel.call(maskedQuestion) + "\n";
-
-        questionService.saveQuestion(maskedQuestion, answer, "ollama");
+        String answer = ollamaChatModel.call(context.toString()) + "\n";
+        questionService.saveQuestion(maskedQuestion, answer, "ollama", chatId);
 
         if (total > 0) {
             answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")

@@ -69,6 +69,12 @@ public class AdminController {
         return ResponseEntity.ok(java.util.Map.of("openai", openai, "ollama", ollama));
     }
 
+    @GetMapping("/system-preferences")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String systemPreferencesPage() {
+        return "adminSystemPreferences";
+    }
+
     @GetMapping("/dashboard")
     public String dashboardPage() {
         return "adminDashboard";

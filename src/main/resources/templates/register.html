@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/register.css" rel="stylesheet" type="text/css">
+    <title>PromptShield - Registo</title>
+</head>
+<body>
+<div class="container">
+    <form class="form-signin" method="post" action="/api/auth/register" id="registerForm">
+        <div class="logo">
+            <h1>PromptShield</h1>
+        </div>
+        <h2 class="form-signin-heading">Criar Conta</h2>
+        <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Digite o seu e-mail" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="firstName">Primeiro Nome</label>
+            <input type="text" id="firstName" name="firstName" class="form-control" placeholder="Digite o seu primeiro nome" required>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Último Nome</label>
+            <input type="text" id="lastName" name="lastName" class="form-control" placeholder="Digite o seu último nome" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Digite a sua senha" required>
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirmar Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirme a sua senha" required>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Registar</button>
+        <div class="login-link">
+            <span>Já tem conta? <a href="/auth/login">Inicie sessão aqui</a></span>
+        </div>
+        <div id="feedback-message" class="feedback-message" style="display:none;"></div>
+    </form>
+</div>
+<script>
+    document.getElementById('registerForm').onsubmit = function(e) {
+        e.preventDefault();
+        var form = e.target;
+        var data = {
+            email: form.email.value,
+            firstName: form.firstName.value,
+            lastName: form.lastName.value,
+            password: form.password.value,
+            confirmPassword: form.confirmPassword.value
+        };
+        fetch(form.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(async resp => {
+            const msg = (await resp.text()).trim();
+            const feedback = document.getElementById('feedback-message');
+            feedback.style.display = 'block';
+            if (resp.status >= 200 && resp.status < 300 && msg.toLowerCase().includes('sucesso')) {
+                feedback.className = 'success-message';
+                feedback.innerText = 'Utilizador criado com sucesso! Vai ser redirecionado para o login...';
+                setTimeout(() => window.location.href = '/auth/login', 2000);
+            } else {
+                feedback.className = 'error-message';
+                feedback.innerText = msg || 'Erro ao processar o registo.';
+            }
+        }).catch((err) => {
+            const feedback = document.getElementById('feedback-message');
+            feedback.style.display = 'block';
+            feedback.className = 'error-message';
+            feedback.innerText = 'Erro ao processar o registo: ' + err;
+        });
+    };
+</script>
+</body>
+</html> 

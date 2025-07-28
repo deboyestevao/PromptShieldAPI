@@ -28,6 +28,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    // Removido: private final JavaMailSender mailSender;
 
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         try {
@@ -47,19 +48,40 @@ public class AuthService {
 
     @Transactional
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists.");
+        // Validar se as passwords coincidem
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("As senhas não coincidem.");
         }
 
+        // Gerar username: inicial do primeiro nome + último nome, tudo minúsculo
+        String baseUsername = (request.getFirstName().substring(0, 1) + request.getLastName()).toLowerCase().replaceAll("\\s+", "");
+        String username = baseUsername;
+        int count = 1;
+        while (userRepository.findByUsername(username).isPresent()) {
+            username = baseUsername + count;
+            count++;
+        }
+        // Verificar se já existe utilizador com o mesmo email
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe um utilizador com este email.");
+        }
+
+        // Criar utilizador imediatamente
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(username);
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole() != null ? request.getRole() : "USER");
-
+        user.setRole("USER");
         userRepository.save(user);
-        return ResponseEntity.ok("User registered successfuly.");
+
+        String mensagem = "Registo efetuado com sucesso. O seu username é: " + username;
+        if (!username.equals(baseUsername)) {
+            mensagem += " (O username base já existia, por isso foi atribuído um username alternativo.)";
+        }
+        return ResponseEntity.ok(mensagem);
     }
+
+    // Remover métodos sendVerificationCode e finalizeRegister
 
     @Transactional
     public void delete(@PathVariable Long id) {

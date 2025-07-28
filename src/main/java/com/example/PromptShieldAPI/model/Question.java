@@ -26,6 +26,9 @@ public class Question {
     @ManyToOne
     private User user;
 
+    @ManyToOne
+    private Chat chat;
+
     private String question;
 
     private String answer;

@@ -35,6 +35,7 @@ public class AiController {
     @PostMapping("/ask")
     public ResponseEntity<?> ask(@RequestBody QuestionWithFilesRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long chatId = request.getChatId();
 
         // ⛑️ Verifica disponibilidade real e atualiza o estado no banco
         configService.checkAndUpdateModelStatus(ModelType.OPENAI);
@@ -76,12 +77,12 @@ public class AiController {
         List<String> llmAnswers = new ArrayList<>();
 
         if (useOpenAi) {
-            String a = aiService.askOpenAi(finalPrompt);
+            String a = aiService.askOpenAi(finalPrompt, chatId);
             llmAnswers.add("OpenAI: " + a);
         }
 
         if (useOllama) {
-            String a = aiService.askOllama(finalPrompt);
+            String a = aiService.askOllama(finalPrompt, chatId);
             llmAnswers.add("Ollama: " + a);
         }
 

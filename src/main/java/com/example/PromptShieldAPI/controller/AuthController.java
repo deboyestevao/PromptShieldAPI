@@ -29,8 +29,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        authService.register(request);
-        return ResponseEntity.ok("Registo concluído");
+        return authService.register(request);
     }
 
     @DeleteMapping("/delete/{id}")

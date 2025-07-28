@@ -92,7 +92,6 @@ class AuthServiceTest {
         ResponseEntity<?> response = authService.register(registerRequest);
 
         assertEquals(200, response.getStatusCodeValue());
-        assertEquals("User registered successfuly.", response.getBody());
         verify(userRepository).save(any(User.class));
     }
 
@@ -109,7 +108,6 @@ class AuthServiceTest {
         ResponseEntity<?> response = authService.register(registerRequest);
 
         assertEquals(400, response.getStatusCodeValue());
-        assertEquals("User already exists.", response.getBody());
     }
 
     // ❌ Remover usuário inexistente

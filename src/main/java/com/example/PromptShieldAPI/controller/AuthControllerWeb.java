@@ -14,6 +14,11 @@ public class AuthControllerWeb {
         return "login";
     }
 
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register";
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

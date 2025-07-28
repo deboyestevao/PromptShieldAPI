@@ -1,4 +1,4 @@
-/* ===== LAYOUT FULLPAGE E MINIMALISTA ===== */
+/* ===== CORREÇÃO DE LAYOUT E ROLAGEM ===== */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #183c7c 20%, #000000 120%);
@@ -7,7 +7,8 @@ body {
     min-height: 100vh;
     height: 100vh;
     width: 100vw;
-    overflow: hidden;
+    /* Remover overflow: hidden para permitir rolagem se necessário */
+    overflow: auto;
     color: #222;
 }
 
@@ -21,6 +22,8 @@ body {
     min-height: 100vh;
     background: none;
     gap: 0;
+    /* Garante que o layout ocupe toda a tela e permita rolagem interna */
+    overflow: hidden;
 }
 
 .container-chat {
@@ -174,15 +177,15 @@ body {
     align-items: center;
 }
 
-/* ===== MENSAGENS FULLPAGE ===== */
 .chat-main {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    padding: 0 0 32px 0;
     justify-content: flex-end;
     height: 100%;
     background: none;
+    min-height: 0;
+    /* Garante que o main ocupe o espaço restante */
 }
 
 .chat-messages {
@@ -200,6 +203,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 18px;
+    /* Garante que as mensagens ocupem o espaço e tenham rolagem */
 }
 
 .chat-message {
@@ -294,7 +298,6 @@ body {
     box-shadow: 0 2px 8px #e74c3c22;
 }
 
-/* ===== FORMULÁRIO ===== */
 .chat-form {
     display: flex;
     flex-direction: column;
@@ -305,6 +308,12 @@ body {
     align-items: center;
     justify-content: center;
     background: none;
+    /* Fixar o formulário no rodapé do chat */
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding-bottom: 8px;
+    background: linear-gradient(0deg, rgba(255,255,255,0.95) 80%, rgba(255,255,255,0.5) 100%);
 }
 .input-group {
     display: flex;
@@ -547,6 +556,15 @@ input:focus, button:focus, select:focus, textarea:focus {
     .chat-layout {
         flex-direction: column-reverse;
         justify-content: flex-end;
+        /* Garante que o layout continue ocupando toda a tela */
+        height: 100vh;
+        min-height: 100vh;
+    }
+    .container-chat {
+        height: 100vh;
+    }
+    .chat-messages, .input-group {
+        max-width: 98vw;
     }
 }
 @media (max-width: 900px) {
@@ -555,6 +573,7 @@ input:focus, button:focus, select:focus, textarea:focus {
     }
     .container-chat {
         max-width: 100vw;
+        height: 100vh;
     }
     .chat-messages, .input-group {
         max-width: 98vw;
