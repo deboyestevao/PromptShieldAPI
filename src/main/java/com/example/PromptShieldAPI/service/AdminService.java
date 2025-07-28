@@ -8,6 +8,7 @@ import com.example.PromptShieldAPI.repository.UserPreferencesRepository;
 import com.example.PromptShieldAPI.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,20 +20,27 @@ public class AdminService {
     private final SystemConfigRepository systemConfigRepository;
     private final UserPreferencesRepository userPreferencesRepository;
     private final UserRepository userRepository;
+    private final SystemConfigService systemConfigService;
 
     @Transactional
     public SystemConfig updateSystemPreferences(boolean openaiEnabled, boolean ollamaEnabled) {
+        String adminName = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Optional<SystemConfig> openaiConfigOpt = systemConfigRepository.findByModel(SystemConfig.ModelType.OPENAI);
         SystemConfig openaiConfig = openaiConfigOpt.orElse(new SystemConfig());
         openaiConfig.setModel(SystemConfig.ModelType.OPENAI);
         openaiConfig.setEnabled(openaiEnabled);
         systemConfigRepository.save(openaiConfig);
+        // Registrar histórico
+        systemConfigService.updateModelStatusManually(SystemConfig.ModelType.OPENAI, openaiEnabled, adminName);
 
         Optional<SystemConfig> ollamaConfigOpt = systemConfigRepository.findByModel(SystemConfig.ModelType.OLLAMA);
         SystemConfig ollamaConfig = ollamaConfigOpt.orElse(new SystemConfig());
         ollamaConfig.setModel(SystemConfig.ModelType.OLLAMA);
         ollamaConfig.setEnabled(ollamaEnabled);
         systemConfigRepository.save(ollamaConfig);
+        // Registrar histórico
+        systemConfigService.updateModelStatusManually(SystemConfig.ModelType.OLLAMA, ollamaEnabled, adminName);
 
         return openaiConfig;
     }

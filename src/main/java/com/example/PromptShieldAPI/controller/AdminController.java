@@ -35,7 +35,6 @@ public class AdminController {
         } catch (OptimisticLockingFailureException e) {
             return ResponseEntity.status(409).body("Error: System preferences were updated by another user. Please, try again.");
         }
-
     }
 
     @PostMapping("/user-preferences")

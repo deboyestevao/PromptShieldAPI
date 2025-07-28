@@ -47,6 +47,7 @@ public class SystemConfigService {
 
                 // ✅ Registrar no histórico
                 ConfigHistory history = new ConfigHistory();
+                history.setSystemConfig(cfg);
                 history.setModel(model);
                 history.setEnabled(reachable);
                 history.setChangedBy("sistema");
@@ -62,6 +63,7 @@ public class SystemConfigService {
             repository.save(cfg);
 
             ConfigHistory history = new ConfigHistory();
+            history.setSystemConfig(cfg);
             history.setModel(model);
             history.setEnabled(enabled);
             history.setChangedBy(changedBy);
