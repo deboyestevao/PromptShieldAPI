@@ -13,12 +13,26 @@
             <span class="admin-badge">Admin</span>
         </div>
         <div class="admin-user-info">
-            <div class="notification-bell">
+            <div class="notification-bell" id="notification-bell">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                 </svg>
                 <span class="notification-badge" id="notification-count">0</span>
+            </div>
+            
+            <!-- Dropdown de notificações -->
+            <div class="notification-dropdown" id="notification-dropdown">
+                <div class="notification-header">
+                    <h3>Notificações</h3>
+                    <button id="mark-all-read" class="mark-all-read-btn">Marcar todas como lidas</button>
+                </div>
+                <div class="notification-list" id="notification-list">
+                    <!-- Notificações serão carregadas aqui -->
+                </div>
+                <div class="notification-empty" id="notification-empty" style="display:none;">
+                    <p>Nenhuma notificação</p>
+                </div>
             </div>
             <span class="admin-avatar">A</span>
         </div>
@@ -99,6 +113,14 @@
                 <p>Analisar e responder a solicitações de reativação de contas desativadas.</p>
                 <a href="/admin/reports" class="admin-btn-link">Gerir Reports <span class="admin-btn-arrow">→</span></a>
             </div>
+            <div class="admin-card">
+                <div class="admin-card-icon admin-card-icon-history">
+                    <svg width="38" height="38" fill="none" stroke="#183c7c" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2>Histórico de Configurações</h2>
+                <p>Visualizar histórico completo de alterações nos modelos LLM e configurações do sistema.</p>
+                <a href="/admin/config-history" class="admin-btn-link">Ver Histórico <span class="admin-btn-arrow">→</span></a>
+            </div>
         </div>
 
         <div class="quick-actions">
@@ -131,6 +153,14 @@
                         </svg>
                     </div>
                     <span>Configurações</span>
+                </a>
+                <a href="/admin/config-history" class="action-card">
+                    <div class="action-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <span>Histórico</span>
                 </a>
                 <a href="/chat" class="action-card">
                     <div class="action-icon">
@@ -208,15 +238,171 @@
                 .then(reports => {
                     const pendentes = reports.filter(r => r.status === 'PENDING').length;
                     document.getElementById('pending-reports').textContent = pendentes;
-                    document.getElementById('notification-count').textContent = pendentes;
                 })
                 .catch(error => {
                     document.getElementById('pending-reports').textContent = '0';
-                    document.getElementById('notification-count').textContent = '0';
                 });
 
             // Simular sessões ativas (valor fixo por simplicidade)
             document.getElementById('active-sessions').textContent = '2';
+            
+            // Carregar notificações
+            loadNotifications();
+        }
+        
+        // Event listeners para notificações
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listener para o sino de notificações
+            const notificationBell = document.getElementById('notification-bell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function() {
+                    const dropdown = document.getElementById('notification-dropdown');
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                });
+            }
+            
+            // Event listener para marcar todas como lidas
+            const markAllReadBtn = document.getElementById('mark-all-read');
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function() {
+                    markAllNotificationsAsRead();
+                });
+            }
+            
+            // Fechar dropdown quando clicar fora
+            document.addEventListener('click', function(event) {
+                const bell = document.getElementById('notification-bell');
+                const dropdown = document.getElementById('notification-dropdown');
+                if (bell && dropdown && !bell.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
+
+        // Função para carregar notificações
+        function loadNotifications() {
+            // Carregar contador
+            fetch('/admin/api/notifications/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('notification-count').textContent = data.unreadCount;
+                })
+                .catch(error => {
+                    document.getElementById('notification-count').textContent = '0';
+                });
+            
+            // Carregar lista de notificações
+            fetch('/admin/api/notifications')
+                .then(response => response.json())
+                .then(notifications => {
+                    const list = document.getElementById('notification-list');
+                    const empty = document.getElementById('notification-empty');
+                    
+                    if (notifications.length === 0) {
+                        list.style.display = 'none';
+                        empty.style.display = 'block';
+                        return;
+                    }
+                    
+                    list.style.display = 'block';
+                    empty.style.display = 'none';
+                    
+                    list.innerHTML = notifications.map(notification => `
+                        <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
+                            <div class="notification-icon">
+                                ${getNotificationIcon(notification.type)}
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">${notification.title}</div>
+                                <div class="notification-message">${notification.message}</div>
+                                <div class="notification-time">${formatTime(notification.createdAt)}</div>
+                            </div>
+                            ${!notification.read ? '<div class="notification-dot"></div>' : ''}
+                        </div>
+                    `).join('');
+                    
+                    // Adicionar event listeners para cada notificação
+                    document.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const notificationId = this.dataset.id;
+                            markNotificationAsRead(notificationId);
+                            this.classList.remove('unread');
+                            this.classList.add('read');
+                            this.querySelector('.notification-dot')?.remove();
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar notificações:', error);
+                });
+        }
+        
+        // Função para marcar notificação como lida
+        function markNotificationAsRead(notificationId) {
+            fetch(`/admin/api/notifications/${notificationId}/read`, {
+                method: 'POST'
+            }).then(() => {
+                loadNotifications();
+            }).catch(error => {
+                console.error('Erro ao marcar notificação como lida:', error);
+            });
+        }
+        
+        // Função para marcar todas como lidas
+        function markAllNotificationsAsRead() {
+            fetch('/admin/api/notifications/read-all', {
+                method: 'POST'
+            }).then(() => {
+                loadNotifications();
+            }).catch(error => {
+                console.error('Erro ao marcar todas como lidas:', error);
+            });
+        }
+        
+        // Função para obter ícone SVG baseado no tipo de notificação
+        function getNotificationIcon(type) {
+            const icons = {
+                'REPORT': `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>`,
+                'SYSTEM': `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>`,
+                'USER': `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>`,
+                'ALERT': `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>`,
+                'STATS': `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 20V10"></path>
+                    <path d="M12 20V4"></path>
+                    <path d="M6 20v-6"></path>
+                </svg>`
+            };
+            return icons[type] || icons['SYSTEM'];
+        }
+        
+        // Função para formatar tempo
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Agora';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m atrás`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h atrás`;
+            return date.toLocaleDateString('pt-PT');
         }
     </script>
 </body>

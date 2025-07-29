@@ -8,6 +8,10 @@ import com.example.PromptShieldAPI.model.AccountReport;
 import com.example.PromptShieldAPI.service.AdminService;
 import com.example.PromptShieldAPI.service.SystemConfigService;
 import com.example.PromptShieldAPI.repository.AccountReportRepository;
+import com.example.PromptShieldAPI.repository.ConfigHistoryRepository;
+import com.example.PromptShieldAPI.model.ConfigHistory;
+import com.example.PromptShieldAPI.model.Notification;
+import com.example.PromptShieldAPI.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +39,8 @@ public class AdminController {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final AccountReportRepository accountReportRepository;
+    private final ConfigHistoryRepository configHistoryRepository;
+    private final NotificationService notificationService;
 
     @PatchMapping("/system-preferences")
     @PreAuthorize("hasRole('ADMIN')")
@@ -78,6 +84,92 @@ public class AdminController {
         return ResponseEntity.ok(java.util.Map.of("openai", openai, "ollama", ollama));
     }
 
+    @GetMapping("/api/config-history")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getConfigHistory() {
+        try {
+            List<ConfigHistory> history = configHistoryRepository.findAllByOrderByChangedAtDesc();
+            List<Map<String, Object>> historyData = history.stream().map(entry -> {
+                Map<String, Object> entryMap = new HashMap<>();
+                entryMap.put("id", entry.getId());
+                entryMap.put("model", entry.getModel().name());
+                entryMap.put("modelDisplay", entry.getModel() == SystemConfig.ModelType.OPENAI ? "OpenAI" : "Ollama");
+                entryMap.put("enabled", entry.isEnabled());
+                entryMap.put("changedBy", entry.getChangedBy());
+                entryMap.put("changedAt", entry.getChangedAt());
+                entryMap.put("action", entry.isEnabled() ? "Ativado" : "Desativado");
+                return entryMap;
+            }).collect(Collectors.toList());
+            
+            return ResponseEntity.ok(historyData);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    // Endpoints para notificações
+    @GetMapping("/api/notifications")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getNotifications() {
+        try {
+            List<Notification> notifications = notificationService.getRecentNotifications();
+            List<Map<String, Object>> notificationData = notifications.stream().map(notification -> {
+                Map<String, Object> notificationMap = new HashMap<>();
+                notificationMap.put("id", notification.getId());
+                notificationMap.put("type", notification.getType().name());
+                notificationMap.put("icon", notification.getType().getIcon());
+                notificationMap.put("title", notification.getTitle());
+                notificationMap.put("message", notification.getMessage());
+                notificationMap.put("read", notification.isRead());
+                notificationMap.put("actionUrl", notification.getActionUrl());
+                notificationMap.put("createdAt", notification.getCreatedAt());
+                return notificationMap;
+            }).collect(Collectors.toList());
+            
+            return ResponseEntity.ok(notificationData);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @GetMapping("/api/notifications/count")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getNotificationCount() {
+        try {
+            long unreadCount = notificationService.getUnreadCount();
+            return ResponseEntity.ok(Map.of("unreadCount", unreadCount));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("unreadCount", 0));
+        }
+    }
+
+    @PostMapping("/api/notifications/{id}/read")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<?> markNotificationAsRead(@PathVariable Long id) {
+        try {
+            notificationService.markAsRead(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao marcar notificação como lida"));
+        }
+    }
+
+    @PostMapping("/api/notifications/read-all")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<?> markAllNotificationsAsRead() {
+        try {
+            notificationService.markAllAsRead();
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao marcar notificações como lidas"));
+        }
+    }
+
     @GetMapping("/system-preferences")
     @PreAuthorize("hasRole('ADMIN')")
     public String systemPreferencesPage() {
@@ -93,6 +185,12 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public String usersPage() {
         return "adminUsers";
+    }
+
+    @GetMapping(value = "/config-history", produces = "text/html")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String configHistoryPage() {
+        return "adminConfigHistory";
     }
 
     @GetMapping("/reports")
@@ -173,6 +271,14 @@ public class AdminController {
             user.setActive(true);
             userRepository.save(user);
             
+            // Criar notificação de utilizador ativado
+            notificationService.createNotification(
+                Notification.NotificationType.USER,
+                "Utilizador Ativado",
+                "Utilizador '" + user.getUsername() + "' foi ativado",
+                "/admin/users"
+            );
+            
             Map<String, String> response = new HashMap<>();
             response.put("message", "Utilizador ativado com sucesso");
             return ResponseEntity.ok(response);
@@ -195,6 +301,14 @@ public class AdminController {
             
             user.setActive(false);
             userRepository.save(user);
+            
+            // Criar notificação de utilizador desativado
+            notificationService.createNotification(
+                Notification.NotificationType.USER,
+                "Utilizador Desativado",
+                "Utilizador '" + user.getUsername() + "' foi desativado",
+                "/admin/users"
+            );
             
             Map<String, String> response = new HashMap<>();
             response.put("message", "Utilizador desativado com sucesso");
@@ -224,7 +338,16 @@ public class AdminController {
             return ResponseEntity.badRequest().body(errorResponse);
             }
             
+            String username = user.getUsername();
             userRepository.delete(user);
+            
+            // Criar notificação de utilizador eliminado
+            notificationService.createNotification(
+                Notification.NotificationType.USER,
+                "Utilizador Eliminado",
+                "Utilizador '" + username + "' foi eliminado",
+                "/admin/users"
+            );
             
             return ResponseEntity.ok(Map.of("message", "Utilizador eliminado com sucesso"));
         } catch (Exception e) {
@@ -252,6 +375,14 @@ public class AdminController {
             
             user.setRole("ADMIN");
             userRepository.save(user);
+            
+            // Criar notificação de utilizador tornado admin
+            notificationService.createNotification(
+                Notification.NotificationType.USER,
+                "Novo Admin",
+                "Utilizador '" + user.getUsername() + "' foi tornado administrador",
+                "/admin/users"
+            );
             
             Map<String, String> response = new HashMap<>();
             response.put("message", "Utilizador tornado admin com sucesso");
@@ -283,6 +414,14 @@ public class AdminController {
             
             user.setRole("USER");
             userRepository.save(user);
+            
+            // Criar notificação de admin removido
+            notificationService.createNotification(
+                Notification.NotificationType.USER,
+                "Admin Removido",
+                "Privilégios de admin removidos de '" + user.getUsername() + "'",
+                "/admin/users"
+            );
             
             Map<String, String> response = new HashMap<>();
             response.put("message", "Privilégios de admin removidos com sucesso");
@@ -347,6 +486,14 @@ public class AdminController {
             report.setResolvedBy(admin);
             accountReportRepository.save(report);
             
+            // Criar notificação de report aprovado
+            notificationService.createNotification(
+                Notification.NotificationType.REPORT,
+                "Report Aprovado",
+                "Report do utilizador '" + report.getUser().getUsername() + "' foi aprovado",
+                "/admin/reports"
+            );
+            
             Map<String, String> response = new HashMap<>();
             response.put("message", "Report aprovado e utilizador ativado com sucesso");
             return ResponseEntity.ok(response);
@@ -375,6 +522,14 @@ public class AdminController {
             report.setResolvedAt(java.time.LocalDateTime.now());
             report.setResolvedBy(admin);
             accountReportRepository.save(report);
+            
+            // Criar notificação de report rejeitado
+            notificationService.createNotification(
+                Notification.NotificationType.REPORT,
+                "Report Rejeitado",
+                "Report do utilizador '" + report.getUser().getUsername() + "' foi rejeitado",
+                "/admin/reports"
+            );
             
             Map<String, String> response = new HashMap<>();
             response.put("message", "Report rejeitado com sucesso");

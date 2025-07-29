@@ -49,18 +49,33 @@
         </div>
         <button type="submit" class="admin-system-save-btn"><span id="save-btn-icon" style="margin-right:6px;"></span>Guardar Alterações</button>
         <div id="system-prefs-feedback" class="admin-system-feedback"></div>
-        <hr style="margin:32px 0 18px 0; border:none; border-top:1px solid #eee;">
-        <div style="opacity:0.5; pointer-events:none;">
-            <h2 style="color:#183c7c; font-size:1.08em; font-weight:700; margin-bottom:10px;">Mais opções em breve</h2>
-            <ul style="margin:0 0 0 18px; padding:0; color:#888; font-size:0.98em;">
-                <li>Limites de uploads e tokens</li>
-                <li>Configurações de email</li>
-                <li>Políticas de segurança</li>
-                <li>Logs e auditoria</li>
-            </ul>
-        </div>
-        <!-- Futuras secções podem ser adicionadas aqui -->
     </form>
+
+        <!-- Seção de Histórico de Configurações -->
+    <section id="config-history-section" class="admin-config-history-section">
+        <div class="config-history-header">
+            <h2 style="color:#183c7c; font-size:1.15em; font-weight:800; margin-bottom:0;">Histórico de Alterações</h2>
+            <a href="/admin/config-history" class="config-history-link">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 18l6-6-6-6" stroke-width="2"/>
+                </svg>
+                Ver Histórico Completo
+            </a>
+        </div>
+        <div class="config-history-preview">
+            <div id="config-history-loading" class="config-history-loading">
+                <div class="loading-spinner"></div>
+                <span>A carregar histórico...</span>
+            </div>
+            <div id="config-history-content" class="config-history-content" style="display:none;">
+                <div id="config-history-list" class="config-history-list"></div>
+            </div>
+            <div id="config-history-empty" class="config-history-empty" style="display:none;">
+                <p>Nenhuma alteração registada ainda.</p>
+            </div>
+        </div>
+    </section>
+</main>
 </main>
 <script>
 // Carrega status atual dos modelos
@@ -139,7 +154,84 @@ form.addEventListener('submit', async function(e) {
     setTimeout(() => { feedback.textContent = ''; saveBtnIcon.innerHTML = ''; }, 2500);
     // Atualiza painel de estado após guardar
     loadSystemPrefs();
+    // Recarrega o histórico após alterações
+    loadConfigHistory();
 });
+
+// Carrega histórico de configurações
+async function loadConfigHistory() {
+    const loadingDiv = document.getElementById('config-history-loading');
+    const contentDiv = document.getElementById('config-history-content');
+    const emptyDiv = document.getElementById('config-history-empty');
+    const listDiv = document.getElementById('config-history-list');
+    
+    loadingDiv.style.display = 'flex';
+    contentDiv.style.display = 'none';
+    emptyDiv.style.display = 'none';
+    
+    try {
+        const resp = await fetch('/admin/api/config-history');
+        if (resp.ok) {
+            const history = await resp.json();
+            
+            if (history.length === 0) {
+                loadingDiv.style.display = 'none';
+                emptyDiv.style.display = 'block';
+                return;
+            }
+            
+            // Mostrar apenas os últimos 5 registos na preview
+            const recentHistory = history.slice(0, 5);
+            listDiv.innerHTML = recentHistory.map(entry => `
+                <div class="config-history-item">
+                    <div class="config-history-header">
+                        <span class="config-history-model">${entry.modelDisplay}</span>
+                        <span class="config-history-action ${entry.enabled ? 'action-enabled' : 'action-disabled'}">
+                            ${entry.action}
+                        </span>
+                    </div>
+                    <div class="config-history-details">
+                        <span class="config-history-user">Por: ${entry.changedBy}</span>
+                        <span class="config-history-date">${formatDateTime(entry.changedAt)}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Adicionar indicador se há mais registos
+            if (history.length > 5) {
+                listDiv.innerHTML += `
+                    <div class="config-history-more">
+                        <span>+${history.length - 5} mais registos</span>
+                    </div>
+                `;
+            }
+            
+            loadingDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+        } else {
+            throw new Error('Erro ao carregar histórico');
+        }
+    } catch (error) {
+        loadingDiv.style.display = 'none';
+        emptyDiv.innerHTML = '<p>Erro ao carregar histórico de configurações.</p>';
+        emptyDiv.style.display = 'block';
+    }
+}
+
+// Formata data e hora para exibição
+function formatDateTime(dateTimeString) {
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('pt-PT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Carrega o histórico quando a página carrega
+loadConfigHistory();
 </script>
 </body>
 </html> 

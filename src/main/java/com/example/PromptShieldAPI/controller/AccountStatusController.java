@@ -4,6 +4,7 @@ import com.example.PromptShieldAPI.model.User;
 import com.example.PromptShieldAPI.model.AccountReport;
 import com.example.PromptShieldAPI.repository.UserRepository;
 import com.example.PromptShieldAPI.repository.AccountReportRepository;
+import com.example.PromptShieldAPI.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,9 @@ public class AccountStatusController {
     
     @Autowired
     private AccountReportRepository accountReportRepository;
+    
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/check-account-status")
     public String checkAccountStatus() {
@@ -54,6 +58,9 @@ public class AccountStatusController {
             report.setUser(user);
             report.setReason(reason);
             accountReportRepository.save(report);
+            
+            // Criar notificação para o admin
+            notificationService.createReportNotification(user.getUsername());
         }
         
         return "redirect:/account-disabled?reported=true";

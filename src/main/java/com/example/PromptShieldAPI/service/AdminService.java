@@ -6,6 +6,7 @@ import com.example.PromptShieldAPI.model.UserPreferences;
 import com.example.PromptShieldAPI.repository.SystemConfigRepository;
 import com.example.PromptShieldAPI.repository.UserPreferencesRepository;
 import com.example.PromptShieldAPI.repository.UserRepository;
+import com.example.PromptShieldAPI.service.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,7 @@ public class AdminService {
     private final UserPreferencesRepository userPreferencesRepository;
     private final UserRepository userRepository;
     private final SystemConfigService systemConfigService;
+    private final NotificationService notificationService;
 
     @Transactional
     public SystemConfig updateSystemPreferences(boolean openaiEnabled, boolean ollamaEnabled) {
@@ -33,6 +35,8 @@ public class AdminService {
         systemConfigRepository.save(openaiConfig);
         // Registrar histórico
         systemConfigService.updateModelStatusManually(SystemConfig.ModelType.OPENAI, openaiEnabled, adminName);
+        // Criar notificação
+        notificationService.createSystemChangeNotification("OpenAI", openaiEnabled ? "ativado" : "desativado", adminName);
 
         Optional<SystemConfig> ollamaConfigOpt = systemConfigRepository.findByModel(SystemConfig.ModelType.OLLAMA);
         SystemConfig ollamaConfig = ollamaConfigOpt.orElse(new SystemConfig());
@@ -41,6 +45,8 @@ public class AdminService {
         systemConfigRepository.save(ollamaConfig);
         // Registrar histórico
         systemConfigService.updateModelStatusManually(SystemConfig.ModelType.OLLAMA, ollamaEnabled, adminName);
+        // Criar notificação
+        notificationService.createSystemChangeNotification("Ollama", ollamaEnabled ? "ativado" : "desativado", adminName);
 
         return openaiConfig;
     }
