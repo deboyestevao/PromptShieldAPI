@@ -47,7 +47,7 @@ public class AiService {
 
         // Carregar histórico do chat para contexto
         String context = buildChatContext(chatId);
-        String finalPrompt = context + "Usuário: " + question + "\nLLM: ";
+        String finalPrompt = context + "Usuário: " + question + "\nOpenAI: ";
         
         // log.info("Prompt final para OpenAI: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
@@ -88,7 +88,7 @@ public class AiService {
 
         // Carregar histórico do chat para contexto
         String context = buildChatContext(chatId);
-        String finalPrompt = context + "Usuário: " + question + "\nLLM: ";
+        String finalPrompt = context + "Usuário: " + question + "\nOllama: ";
         
         // log.info("Prompt final para Ollama: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
@@ -132,7 +132,7 @@ public class AiService {
             StringBuilder context = new StringBuilder();
             for (Question q : history) {
                 context.append("Usuário: ").append(q.getQuestion()).append("\n");
-                context.append("LLM: ").append(q.getAnswer()).append("\n");
+                context.append(q.getModel()).append(": ").append(q.getAnswer()).append("\n");
             }
             
             log.info("Contexto construído com {} caracteres", context.length());

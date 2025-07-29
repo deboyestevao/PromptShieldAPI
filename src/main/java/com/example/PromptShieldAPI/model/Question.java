@@ -30,10 +30,13 @@ public class Question {
     @ManyToOne
     private Chat chat;
 
+    @Column(columnDefinition = "text")
     private String question;
 
+    @Column(columnDefinition = "text")
     private String answer;
 
+    @Column(columnDefinition = "text")
     private String model;
 
     @CreationTimestamp
@@ -41,8 +44,8 @@ public class Question {
     
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-    
-    @Column(name = "deleted_by")
+
+    @Column(name = "deleted_by", columnDefinition = "text")
     private String deletedBy;
     
     // Método para soft delete

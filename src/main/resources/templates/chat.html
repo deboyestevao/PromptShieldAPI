@@ -211,8 +211,11 @@ async function selectChat(chatId) {
     const hist = await fetch(`/api/chat/${chatId}/questions`).then(r=>r.json());
     hist.forEach(q => {
         addMessage('Você', q.question, 'user');
-        addMessage('LLM', q.answer, 'llm-openai'); // ou llm-ollama se quiser diferenciar
-    });
+    addMessage(
+        q.model ? (q.model.charAt(0).toUpperCase() + q.model.slice(1)) : 'LLM',
+        q.answer, 'llm-' + (q.model ? q.model.toLowerCase() : 'llm')
+    );
+});
     // Scroll para baixo após carregar histórico
     setTimeout(scrollToBottom, 100);
 }
