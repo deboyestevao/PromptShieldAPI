@@ -60,145 +60,7 @@
         </div>
     </aside>
 </div>
-<style>
-.chat-sidebar {
-    position: relative;
-    width: 260px;
-    min-width: 180px;
-    max-width: 260px;
-    background: #f8f9fa;
-    border-radius: 0 0 0 24px;
-    box-shadow: -8px 0 32px rgba(24,60,124,0.10);
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    border: none;
-    height: 100vh;
-    min-height: 0;
-    z-index: 10;
-    overflow-x: hidden;
-}
-.sidebar-header {
-    padding: 18px 0 10px 0;
-    background: #fff;
-    border-bottom: 1.5px solid #e1e5e9;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-#new-chat-btn {
-    background: #183c7c;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    font-size: 1.5em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px #183c7c22;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#new-chat-btn:hover, #new-chat-btn:focus {
-    background: #1450b8;
-    outline: none;
-}
-.sidebar-chats {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-.chat-list-item {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 1em;
-    border: none;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    transition: background 0.18s, color 0.18s;
-    cursor: pointer;
-    position: relative;
-    min-height: 40px;
-    user-select: none;
-    box-sizing: border-box;
-    overflow-x: hidden;
-}
-.chat-list-item.selected {
-    background: #e3eafc !important;
-    color: #183c7c;
-    font-weight: bold;
-}
-.chat-list-item:hover {
-    background: #e8f0fe;
-}
-.delete-chat-btn {
-    margin-left: auto;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
-    transition: background 0.15s;
-    display: flex;
-    align-items: center;
-}
-.delete-chat-btn:hover {
-    background: #f2f2f2;
-}
-#settings-btn {
-    position: absolute;
-    bottom: 18px;
-    right: 18px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: none;
-    width: 38px;
-    height: 38px;
-}
-#settings-btn svg {
-    display: block;
-    margin: 0 auto;
-    transform: rotate(0deg);
-}
-.llm-prefs-modal {
-    display: flex;
-}
-@media (max-width: 900px) {
-    .chat-sidebar {
-        min-width: 0;
-        max-width: 100vw;
-        width: 100vw;
-        border-radius: 0 0 24px 24px;
-        height: auto;
-        position: static;
-        right: unset;
-        top: unset;
-        transform: none;
-        margin: 0;
-        padding: 16px 0 12px 0;
-    }
-}
-</style>
+
 <script>
 // Busca nome do utilizador autenticado
 fetch('/ai/welcome').then(r => r.text()).then(txt => {
@@ -324,15 +186,17 @@ async function loadChats() {
     chats.forEach((chat, idx) => {
         const div = document.createElement('div');
         div.className = 'chat-list-item' + (currentChatId===chat.id?' selected':'');
-        // Alternar cor de fundo
-        div.style.background = idx%2===0 ? '#fff' : '#f3f6fa';
-        div.textContent = chat.name || 'Chat ' + chat.id;
+        
+        // Mostrar nome do chat ou "Novo chat" se estiver vazio
+        const chatName = chat.name && chat.name.trim() !== '' ? chat.name : 'Novo chat';
+        div.textContent = chatName;
+        
         div.onclick = () => selectChat(chat.id);
         // Botão deletar (SVG minimalista)
         const del = document.createElement('button');
         del.className = 'delete-chat-btn';
         del.title = 'Apagar chat';
-        del.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0b0b0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+        del.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
         del.onclick = (e) => { e.stopPropagation(); deleteChat(chat.id); };
         div.appendChild(del);
         sidebarChats.appendChild(div);
@@ -349,12 +213,34 @@ async function selectChat(chatId) {
         addMessage('Você', q.question, 'user');
         addMessage('LLM', q.answer, 'llm-openai'); // ou llm-ollama se quiser diferenciar
     });
+    // Scroll para baixo após carregar histórico
+    setTimeout(scrollToBottom, 100);
 }
 async function deleteChat(chatId) {
-    await fetch(`/api/chat/${chatId}`, {method:'DELETE'});
-    if(currentChatId===chatId) currentChatId=null;
-    await loadChats();
-    chatMessages.innerHTML = '';
+    try {
+        const response = await fetch(`/api/chat/${chatId}`, {method:'DELETE'});
+        if (response.ok) {
+            const responseData = await response.json();
+            if(currentChatId===chatId) currentChatId=null;
+            await loadChats();
+            chatMessages.innerHTML = '';
+            // Mostrar mensagem de sucesso
+            if (responseData.message) {
+                // Criar uma notificação temporária
+                const notification = document.createElement('div');
+                notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:8px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+                notification.textContent = responseData.message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            }
+        } else {
+            const errorData = await response.json();
+            alert('Erro ao apagar chat: ' + (errorData.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao apagar chat:', error);
+        alert('Erro ao apagar chat. Tente novamente.');
+    }
 }
 document.getElementById('new-chat-btn').addEventListener('click', async function() {
     // Cria chat vazio (sem nome)
@@ -363,11 +249,25 @@ document.getElementById('new-chat-btn').addEventListener('click', async function
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name: ''})
     }).then(r=>r.json());
+    currentChatId = chat.id;
     await loadChats();
     selectChat(chat.id);
+    // Limpa mensagens e foca no input
+    chatMessages.innerHTML = '';
+    document.getElementById('question').focus();
 });
 // Carrega chats ao iniciar
 loadChats();
+
+// Garantir que o input fica sempre visível quando clicado
+document.getElementById('question').addEventListener('focus', function() {
+    setTimeout(scrollToBottom, 100);
+});
+
+// Scroll para baixo quando a página carrega
+window.addEventListener('load', function() {
+    setTimeout(scrollToBottom, 200);
+});
 
 // Lógica de envio de mensagem e upload de ficheiros
 const chatForm = document.getElementById('chat-form');
@@ -389,17 +289,23 @@ chatForm.addEventListener('submit', async function(e) {
         currentChatId = chat.id;
         await loadChats();
     } else {
-        // Se o chat selecionado não tem nome, atualiza o nome na primeira mensagem
+        // Se o chat selecionado não tem nome (chat vazio), atualiza o nome na primeira mensagem
         const selectedChat = Array.from(document.querySelectorAll('.chat-list-item')).find(div => div.classList.contains('selected'));
-        if (selectedChat && selectedChat.textContent.trim() === '') {
+        if (selectedChat && (selectedChat.textContent.trim() === '' || selectedChat.textContent.trim() === 'Chat ' + currentChatId || selectedChat.textContent.trim() === 'Novo chat')) {
             let firstSentence = question.split(/[.!?]/)[0];
             if (firstSentence.length > 30) firstSentence = firstSentence.slice(0, 30) + '...';
-            await fetch(`/api/chat/${currentChatId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: firstSentence })
-            });
-            await loadChats();
+            try {
+                const updateResponse = await fetch(`/api/chat/${currentChatId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: firstSentence })
+                });
+                if (updateResponse.ok) {
+                    await loadChats();
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar nome do chat:', error);
+            }
         }
     }
 
@@ -463,24 +369,37 @@ function addMessage(author, text, type, typingEffect = false) {
     msgDiv.className = 'chat-message ' + type;
     msgDiv.innerHTML = `<strong>${author}:</strong> <span></span>`;
     chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Scroll para baixo imediatamente
+    scrollToBottom();
+    
     const span = msgDiv.querySelector('span');
     if (typingEffect) {
         let i = 0;
         function typeChar() {
             if (i <= text.length) {
                 span.innerHTML = text.slice(0, i).replace(/\n/g, '<br>');
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                scrollToBottom();
                 i++;
                 setTimeout(typeChar, 8); // velocidade do efeito
             } else {
                 span.innerHTML = text.replace(/\n/g, '<br>');
+                scrollToBottom();
             }
         }
         typeChar();
     } else {
         span.innerHTML = text.replace(/\n/g, '<br>');
+        scrollToBottom();
     }
+}
+
+// Função para scroll suave para baixo
+function scrollToBottom() {
+    chatMessages.scrollTo({
+        top: chatMessages.scrollHeight,
+        behavior: 'smooth'
+    });
 }
 // Preferências de LLM em modal
 const llmPrefsModal = document.getElementById('llm-prefs-modal');

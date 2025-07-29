@@ -1,146 +1,241 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #183c7c 20%, #000000 120%);
+/* Reset e configurações base */
+* {
     margin: 0;
     padding: 0;
-    height: 100vh;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
+/* Container principal */
 .container {
-    background: white;
-    padding: 50px 40px;
-    border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 420px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 450px;
+    margin: 0 auto;
 }
 
+/* Formulário de registo */
 .form-signin {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.1);
     text-align: center;
 }
 
-.logo {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
+/* Logo */
 .logo h1 {
-    color: #183c7c;
-    font-size: 28px;
+    color: #1e40af;
+    font-size: 32px;
     font-weight: 700;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(30, 64, 175, 0.1);
 }
 
+/* Título do formulário */
 .form-signin-heading {
-    color: #333;
-    margin-bottom: 30px;
-    font-size: 20px;
+    color: #374151;
+    font-size: 24px;
     font-weight: 600;
+    margin-bottom: 30px;
     text-align: center;
 }
 
+/* Grupos de formulário */
 .form-group {
     margin-bottom: 20px;
+    text-align: left;
 }
 
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #374151;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Campos de input */
 .form-control {
     width: 100%;
-    padding: 15px 20px;
-    border: 2px solid #e1e5e9;
-    border-radius: 8px;
+    padding: 16px 20px;
+    border: 2px solid rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
     font-size: 16px;
-    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
     transition: all 0.3s ease;
-    background-color: #f8f9fa;
+    outline: none;
 }
 
 .form-control:focus {
-    outline: none;
-    border-color: #183c7c;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background-color: white;
-    transform: translateY(-1px);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: white;
 }
 
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+/* Botão de registo */
 .btn {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #183c7c 0%, #183c7c 100%);
-    color: white;
+    padding: 16px 24px;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 25px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
-.btn:hover {
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px #183c7c;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
-.btn:active {
+.btn-primary:active {
     transform: translateY(0);
 }
 
-.login-link {
-    text-align: center;
-    margin-top: 18px;
-    font-size: 0.98rem;
+.btn-lg {
+    padding: 18px 24px;
+    font-size: 18px;
 }
 
-.login-link a {
-    color: #183c7c;
-    text-decoration: underline;
-    font-weight: 500;
-}
-
-.feedback-message, .error-message, .success-message {
+.btn-block {
     display: block;
-    margin-top: 18px;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
+    width: 100%;
+}
+
+/* Mensagens de feedback */
+.feedback-message {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
     font-size: 14px;
+    font-weight: 500;
+    text-align: center;
 }
 
 .success-message {
-    color: #155724;
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    color: #166534;
 }
 
 .error-message {
-    color: #e74c3c;
-    background-color: #fdf2f2;
-    border: 1px solid #f5c6cb;
-    animation: shake 0.5s ease-in-out;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+    color: #dc2626;
 }
 
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+/* Link de login */
+.login-link {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(59, 130, 246, 0.1);
+    color: #6b7280;
+    font-size: 14px;
 }
 
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+.login-link a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .form-signin {
+        padding: 30px 25px;
+        margin: 10px;
+    }
+    
+    .logo h1 {
+        font-size: 28px;
+    }
+    
+    .form-signin-heading {
+        font-size: 20px;
+    }
+    
+    .form-control {
+        padding: 14px 16px;
+        font-size: 16px;
+    }
+    
+    .btn-lg {
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-signin {
+    animation: fadeInUp 0.6s ease;
+}
+
+/* Efeitos de hover nos inputs */
+.form-control:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Estilo para inputs com erro */
+.form-control.error {
+    border-color: #dc2626;
+    background: rgba(254, 242, 242, 0.5);
+}
+
+.form-control.error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Validação visual */
+.form-control:valid {
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.form-control:valid:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+} 
 } 

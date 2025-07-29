@@ -13,12 +13,68 @@
             <span class="admin-badge">Admin</span>
         </div>
         <div class="admin-user-info">
+            <div class="notification-bell">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span class="notification-badge" id="notification-count">0</span>
+            </div>
             <span class="admin-avatar">A</span>
         </div>
     </header>
     <main class="admin-main">
-        <h1>Dashboard de Administração</h1>
-        <div class="admin-cards-grid">
+        <div class="dashboard-header">
+            <div class="header-content">
+                <h1>Dashboard de Administração</h1>
+                <p class="dashboard-subtitle">Bem-vindo ao painel de controlo do PromptShield</p>
+            </div>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="total-users">-</span>
+                        <span class="stat-label">Utilizadores</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14,2 14,8 20,8"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="pending-reports">-</span>
+                        <span class="stat-label">Reports Pendentes</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="active-sessions">-</span>
+                        <span class="stat-label">Sessões Ativas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="section-header">
+                <h2>Gestão do Sistema</h2>
+                <p>Ferramentas essenciais para administrar a plataforma</p>
+            </div>
+            <div class="admin-cards-grid">
             <div class="admin-card">
                 <div class="admin-card-icon admin-card-icon-sys">
                     <svg width="38" height="38" fill="none" stroke="#183c7c" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h.01M7 11h10M7 15h6"/></svg>
@@ -35,7 +91,133 @@
                 <p>Veja, edite ou remova utilizadores registados na plataforma.</p>
                 <a href="/admin/users" class="admin-btn-link">Gerir Utilizadores <span class="admin-btn-arrow">→</span></a>
             </div>
+            <div class="admin-card">
+                <div class="admin-card-icon admin-card-icon-reports">
+                    <svg width="38" height="38" fill="none" stroke="#183c7c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10,9 9,9 8,9"></polyline></svg>
+                </div>
+                <h2>Gestão de Reports</h2>
+                <p>Analisar e responder a solicitações de reativação de contas desativadas.</p>
+                <a href="/admin/reports" class="admin-btn-link">Gerir Reports <span class="admin-btn-arrow">→</span></a>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <div class="section-header">
+                <h2>Ações Rápidas</h2>
+                <p>Acesso direto às funcionalidades mais utilizadas</p>
+            </div>
+            <div class="actions-grid">
+                <a href="/admin/users" class="action-card">
+                    <div class="action-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </div>
+                    <span>Ver Utilizadores</span>
+                </a>
+                <a href="/admin/reports" class="action-card">
+                    <div class="action-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <span>Verificar Reports</span>
+                </a>
+                <a href="/admin/system-preferences" class="action-card">
+                    <div class="action-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <span>Configurações</span>
+                </a>
+                <a href="/chat" class="action-card">
+                    <div class="action-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <span>Ir para Chat</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-footer">
+            <div class="recent-activity">
+                <h3>Atividade Recente</h3>
+                <div class="activity-list" id="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12,6 12,12 16,14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <span class="activity-text">Sistema iniciado com sucesso</span>
+                            <span class="activity-time">Agora</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="system-status">
+                <h3>Estado do Sistema</h3>
+                <div class="status-grid">
+                    <div class="status-item online">
+                        <div class="status-indicator"></div>
+                        <span>Servidor Online</span>
+                    </div>
+                    <div class="status-item online">
+                        <div class="status-indicator"></div>
+                        <span>Base de Dados</span>
+                    </div>
+                    <div class="status-item online">
+                        <div class="status-indicator"></div>
+                        <span>API Funcional</span>
+                    </div>
+                </div>
+                
+
+            </div>
         </div>
     </main>
+
+    <script>
+        // Carregar estatísticas quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarEstatisticas();
+        });
+
+        // Função simples para carregar estatísticas
+        function carregarEstatisticas() {
+            // Carregar número de utilizadores
+            fetch('/admin/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    document.getElementById('total-users').textContent = users.length;
+                })
+                .catch(error => {
+                    document.getElementById('total-users').textContent = '0';
+                });
+
+            // Carregar número de reports pendentes
+            fetch('/admin/api/reports')
+                .then(response => response.json())
+                .then(reports => {
+                    const pendentes = reports.filter(r => r.status === 'PENDING').length;
+                    document.getElementById('pending-reports').textContent = pendentes;
+                    document.getElementById('notification-count').textContent = pendentes;
+                })
+                .catch(error => {
+                    document.getElementById('pending-reports').textContent = '0';
+                    document.getElementById('notification-count').textContent = '0';
+                });
+
+            // Simular sessões ativas (valor fixo por simplicidade)
+            document.getElementById('active-sessions').textContent = '2';
+        }
+    </script>
 </body>
 </html> 

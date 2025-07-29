@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/adminDashboard.css" rel="stylesheet" type="text/css">
+    <link href="/css/adminReports.css" rel="stylesheet" type="text/css">
+    <title>Gestão de Reports - PromptShield</title>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="admin-logo">
+            <a href="/chat">PromptShield</a>
+            <span class="admin-badge">Admin</span>
+        </div>
+        <div class="admin-user-info">
+            <span class="admin-avatar">A</span>
+        </div>
+    </header>
+    
+    <main class="admin-main">
+        <a href="/admin/dashboard" class="admin-back">← Voltar ao Dashboard</a>
+        <h1>Gestão de Reports</h1>
+        
+        <!-- Estatísticas -->
+        <div class="reports-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="total-reports">0</span>
+                    <span class="stat-label">Total de Reports</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="pending-reports">0</span>
+                    <span class="stat-label">Reports Pendentes</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="resolved-reports">0</span>
+                    <span class="stat-label">Reports Resolvidos</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="reports-controls">
+            <div class="filter-controls">
+                <select id="status-filter">
+                    <option value="">Todos os estados</option>
+                    <option value="PENDING">Pendentes</option>
+                    <option value="APPROVED">Aprovados</option>
+                    <option value="REJECTED">Rejeitados</option>
+                </select>
+                <select id="sort-filter">
+                    <option value="date-desc">Mais recentes</option>
+                    <option value="date-asc">Mais antigos</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lista de reports -->
+        <div class="reports-container" id="reports-container">
+            <!-- Os reports serão carregados aqui via JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        let allReports = [];
+        let filteredReports = [];
+
+        // Carregar reports quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReports();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('status-filter').addEventListener('change', filterReports);
+            document.getElementById('sort-filter').addEventListener('change', filterReports);
+        }
+
+        async function loadReports() {
+            try {
+                const response = await fetch('/admin/api/reports');
+                if (response.ok) {
+                    const data = await response.json();
+                    allReports = data;
+                    filteredReports = [...allReports];
+                    updateStats();
+                    renderReports();
+                } else {
+                    showNotification('Erro ao carregar reports', 'error');
+                }
+            } catch (error) {
+                showNotification('Erro de conexão', 'error');
+            }
+        }
+
+        function updateStats() {
+            const total = allReports.length;
+            const pending = allReports.filter(r => r.status === 'PENDING').length;
+            const resolved = allReports.filter(r => r.status !== 'PENDING').length;
+
+            document.getElementById('total-reports').textContent = total;
+            document.getElementById('pending-reports').textContent = pending;
+            document.getElementById('resolved-reports').textContent = resolved;
+        }
+
+        function filterReports() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+
+            filteredReports = allReports.filter(report => {
+                const matchesStatus = !statusFilter || report.status === statusFilter;
+                return matchesStatus;
+            });
+
+            // Ordenar
+            filteredReports.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'date-desc':
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    case 'date-asc':
+                        return new Date(a.createdAt) - new Date(b.createdAt);
+                    default:
+                        return 0;
+                }
+            });
+
+            renderReports();
+        }
+
+        function renderReports() {
+            const container = document.getElementById('reports-container');
+
+            if (filteredReports.length === 0) {
+                container.innerHTML = `
+                    <div class="no-reports">
+                        <div class="no-reports-content">
+                            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10,9 9,9 8,9"></polyline>
+                            </svg>
+                            <p>Nenhum report encontrado</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredReports.map(report => `
+                <div class="report-card ${report.status.toLowerCase()}">
+                    <div class="report-header">
+                        <div class="report-user">
+                            <div class="user-avatar">${report.userName.charAt(0)}</div>
+                            <div class="user-info">
+                                <span class="user-name">${report.userName}</span>
+                                <span class="user-email">${report.userEmail}</span>
+                            </div>
+                        </div>
+                        <div class="report-status ${report.status.toLowerCase()}">
+                            <span class="status-badge">${report.statusDisplay}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="report-content">
+                        <p class="report-reason">${report.reason}</p>
+                        <div class="report-meta">
+                            <span class="report-date">Solicitado em: ${formatDate(report.createdAt)}</span>
+                            ${report.resolvedAt ? `<span class="report-resolved">Resolvido em: ${formatDate(report.resolvedAt)}</span>` : ''}
+                            ${report.resolvedBy ? `<span class="report-resolved-by">Por: ${report.resolvedBy}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    ${report.status === 'PENDING' ? `
+                        <div class="report-actions">
+                            <button class="btn btn-success" onclick="approveReport(${report.id})">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
+                                Aprovar
+                            </button>
+                            <button class="btn btn-danger" onclick="rejectReport(${report.id})">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Rejeitar
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function approveReport(reportId) {
+            if (confirm('Tem a certeza que deseja aprovar este report e ativar o utilizador?')) {
+                try {
+                    const response = await fetch(`/admin/api/reports/${reportId}/approve`, { method: 'POST' });
+                    if (response.ok) {
+                        showNotification('Report aprovado com sucesso', 'success');
+                        loadReports();
+                    } else {
+                        showNotification('Erro ao aprovar report', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Erro de conexão', 'error');
+                }
+            }
+        }
+
+        async function rejectReport(reportId) {
+            if (confirm('Tem a certeza que deseja rejeitar este report?')) {
+                try {
+                    const response = await fetch(`/admin/api/reports/${reportId}/reject`, { method: 'POST' });
+                    if (response.ok) {
+                        showNotification('Report rejeitado com sucesso', 'success');
+                        loadReports();
+                    } else {
+                        showNotification('Erro ao rejeitar report', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Erro de conexão', 'error');
+                }
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-PT', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 
