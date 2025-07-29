@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/css/chat.css" rel="stylesheet" type="text/css">
+    <link href="/css/chat.css?v=1.1" rel="stylesheet" type="text/css">
     <title>PromptShield - Chat</title>
 </head>
 <body>
@@ -18,6 +18,16 @@
         </header>
         <main class="chat-main">
             <div id="chat-messages" class="chat-messages">
+                <!-- Mensagem de boas-vindas quando não há mensagens -->
+                <div id="welcome-message" class="welcome-message" style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 40px 20px;">
+                    <div class="welcome-content" style="text-align: center; max-width: 500px; background: #fff; border-radius: 20px; padding: 40px 30px; box-shadow: 0 4px 20px rgba(24, 60, 124, 0.1); border: 1px solid rgba(24, 60, 124, 0.1);">
+                        <h2 style="color: #183c7c; margin: 0 0 15px 0; font-size: 1.8rem; font-weight: 600;">Bem-vindo ao PromptShield</h2>
+                        <p style="color: #64748b; margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">Comece uma nova conversa para começar a usar a IA de forma segura.</p>
+                        <div class="welcome-tips" style="background: rgba(24, 60, 124, 0.05); border-radius: 12px; padding: 15px; border-left: 4px solid #183c7c;">
+                            <p style="margin: 0; font-size: 0.95rem; color: #475569;"><strong>Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Mensagens do chat aparecem aqui -->
             </div>
             <form id="chat-form" class="chat-form" autocomplete="off">
@@ -37,25 +47,55 @@
     </div>
     <aside class="chat-sidebar">
         <div class="sidebar-header">
-            <button id="new-chat-btn" title="Basta começar a escrever para criar um novo chat" tabindex="0">+</button>
+            <h3>Conversas</h3>
         </div>
-        <div class="sidebar-chats" id="sidebar-chats"></div>
-        <button id="settings-btn" title="Preferências">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#183c7c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 16 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 8c.14.31.22.65.22 1v.09A1.65 1.65 0 0 0 21 12c0 .35-.08.69-.22 1z"/>
-            </svg>
-        </button>
-        <div id="llm-prefs-modal" class="llm-prefs-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(24,60,124,0.10);z-index:1000;align-items:center;justify-content:center;">
-            <div style="background:#fff;padding:32px 28px 24px 28px;border-radius:18px;box-shadow:0 8px 32px #183c7c22;min-width:320px;max-width:90vw;position:relative;">
-                <button id="close-prefs-btn" style="position:absolute;top:12px;right:12px;background:transparent;border:none;font-size:1.5em;cursor:pointer;">&times;</button>
-                <h2 style="margin-top:0;">Preferências de LLM</h2>
-                <form id="llm-preferences-form">
-                    <div id="llm-checkbox-list"></div>
-                    <button type="submit" id="save-prefs-btn" class="btn btn-secondary" disabled>Guardar preferências</button>
-                </form>
-                <div id="llm-status-info" class="llm-status-info"></div>
-                <div id="llm-prefs-feedback" class="llm-prefs-feedback"></div>
+        <div class="sidebar-chats" id="sidebar-chats">
+            <!-- Os chats serão carregados dinamicamente aqui -->
+        </div>
+        <div class="sidebar-actions">
+            <button id="new-chat-btn" title="Basta começar a escrever para criar um novo chat" tabindex="0">+</button>
+            <button id="settings-btn" title="Preferências">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#183c7c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
+        </div>
+        <div id="llm-prefs-modal" class="llm-prefs-modal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Preferências de LLM</h2>
+                    <button id="close-prefs-btn" class="close-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="llm-preferences-form">
+                        <div class="llm-options">
+                            <h3>Modelos Disponíveis</h3>
+                            <div id="llm-checkbox-list" class="checkbox-grid"></div>
+                        </div>
+                        <div class="llm-status-section">
+                            <h3>Estado dos Serviços</h3>
+                            <div id="llm-status-info" class="status-grid"></div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" id="save-prefs-btn" class="btn btn-primary" disabled>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                    <polyline points="17,21 17,13 7,13 7,21"></polyline>
+                                    <polyline points="7,3 7,8 15,8"></polyline>
+                                </svg>
+                                Guardar Preferências
+                            </button>
+                        </div>
+                    </form>
+                    <div id="llm-prefs-feedback" class="feedback-message"></div>
+                </div>
             </div>
         </div>
     </aside>
@@ -142,6 +182,7 @@ llmForm.addEventListener('submit', async function(e) {
     btn.disabled = true;
     const feedback = document.getElementById('llm-prefs-feedback');
     feedback.textContent = 'A guardar...';
+    feedback.className = 'feedback-message';
     try {
         await fetch('/admin/llm-user-prefs', {
             method: 'POST',
@@ -149,10 +190,15 @@ llmForm.addEventListener('submit', async function(e) {
             body: JSON.stringify(prefs)
         });
         feedback.textContent = 'Preferências guardadas com sucesso!';
+        feedback.className = 'feedback-message success';
         lastPrefs = { ...prefs };
-        setTimeout(() => feedback.textContent = '', 2000);
+        setTimeout(() => {
+            feedback.textContent = '';
+            feedback.className = 'feedback-message';
+        }, 2000);
     } catch {
         feedback.textContent = 'Erro ao guardar preferências.';
+        feedback.className = 'feedback-message error';
     }
 });
 
@@ -175,6 +221,39 @@ fileChip.addEventListener('click', function(e) {
     }
 });
 
+// Função para mostrar mensagem de boas-vindas
+function showWelcomeMessage() {
+    let welcomeMessage = document.getElementById('welcome-message');
+    
+    // Se o elemento não existe, recriá-lo
+    if (!welcomeMessage) {
+        welcomeMessage = document.createElement('div');
+        welcomeMessage.id = 'welcome-message';
+        welcomeMessage.className = 'welcome-message';
+        welcomeMessage.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; padding: 40px 20px;';
+        welcomeMessage.innerHTML = `
+            <div class="welcome-content" style="text-align: center; max-width: 500px; background: #fff; border-radius: 20px; padding: 40px 30px; box-shadow: 0 4px 20px rgba(24, 60, 124, 0.1); border: 1px solid rgba(24, 60, 124, 0.1);">
+                <h2 style="color: #183c7c; margin: 0 0 15px 0; font-size: 1.8rem; font-weight: 600;">Bem-vindo ao PromptShield</h2>
+                <p style="color: #64748b; margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">Comece uma nova conversa para começar a usar a IA de forma segura.</p>
+                <div class="welcome-tips" style="background: rgba(24, 60, 124, 0.05); border-radius: 12px; padding: 15px; border-left: 4px solid #183c7c;">
+                    <p style="margin: 0; font-size: 0.95rem; color: #475569;"><strong>Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(welcomeMessage);
+    }
+    
+    welcomeMessage.style.display = 'flex';
+}
+
+// Função para esconder mensagem de boas-vindas
+function hideWelcomeMessage() {
+    const welcomeMessage = document.getElementById('welcome-message');
+    if (welcomeMessage) {
+        welcomeMessage.style.display = 'none';
+    }
+}
+
 // === MULTICHAT UI MODERNA ===
 let currentChatId = null;
 const sidebarChats = document.getElementById('sidebar-chats');
@@ -183,6 +262,22 @@ const chatMessages = document.getElementById('chat-messages');
 async function loadChats() {
     const chats = await fetch('/api/chat').then(r => r.json());
     sidebarChats.innerHTML = '';
+    
+    // Se não há chats, mostrar mensagem de estado vazio
+    if (chats.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-chats-message';
+        emptyMessage.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 200px; padding: 20px; background: #fff; border-radius: 12px; margin: 10px; border: 1px solid rgba(24, 60, 124, 0.1);';
+        emptyMessage.innerHTML = `
+            <div class="empty-chats-content" style="text-align: center; color: #64748b;">
+                <p style="margin: 0 0 8px 0; font-size: 1rem; font-weight: 500; color: #475569;">Nenhum chat ainda</p>
+                <small style="font-size: 0.85rem; opacity: 0.8; color: #94a3b8;">Clique em + para começar</small>
+            </div>
+        `;
+        sidebarChats.appendChild(emptyMessage);
+        return;
+    }
+    
     chats.forEach((chat, idx) => {
         const div = document.createElement('div');
         div.className = 'chat-list-item' + (currentChatId===chat.id?' selected':'');
@@ -209,13 +304,42 @@ async function selectChat(chatId) {
     chatMessages.innerHTML = '';
     // Carrega histórico
     const hist = await fetch(`/api/chat/${chatId}/questions`).then(r=>r.json());
+    
+    // Se há histórico, esconder mensagem de boas-vindas
+    if (hist.length > 0) {
+        hideWelcomeMessage();
+    } else {
+        // Se não há histórico, mostrar mensagem de boas-vindas
+        showWelcomeMessage();
+    }
+    
     hist.forEach(q => {
-        addMessage('Você', q.question, 'user');
-    addMessage(
-        q.model ? (q.model.charAt(0).toUpperCase() + q.model.slice(1)) : 'LLM',
-        q.answer, 'llm-' + (q.model ? q.model.toLowerCase() : 'llm')
-    );
-});
+        // Para o histórico, não temos informação sobre ficheiros anexados
+        // mas podemos detectar se a pergunta contém conteúdo de ficheiro
+        let attachedFileName = null;
+        let displayQuestion = q.question;
+        
+        if (q.question && q.question.includes('--- Conteúdo de')) {
+            // Extrai o nome do ficheiro da pergunta
+            const match = q.question.match(/--- Conteúdo de (.+?) ---/);
+            if (match) {
+                attachedFileName = match[1];
+                // Remove o conteúdo do ficheiro da pergunta exibida
+                const questionMatch = q.question.match(/Pergunta:\s*(.+)$/);
+                if (questionMatch) {
+                    displayQuestion = questionMatch[1].trim();
+                } else {
+                    displayQuestion = "Pergunta sobre ficheiro anexado";
+                }
+            }
+        }
+        
+        addMessage('Você', displayQuestion, 'user', false, attachedFileName);
+        addMessage(
+            q.model ? (q.model.charAt(0).toUpperCase() + q.model.slice(1)) : 'LLM',
+            q.answer, 'llm-' + (q.model ? q.model.toLowerCase() : 'llm')
+        );
+    });
     // Scroll para baixo após carregar histórico
     setTimeout(scrollToBottom, 100);
 }
@@ -226,7 +350,15 @@ async function deleteChat(chatId) {
             const responseData = await response.json();
             if(currentChatId===chatId) currentChatId=null;
             await loadChats();
+            
+            // Limpar mensagens e mostrar boas-vindas
             chatMessages.innerHTML = '';
+            
+            // Aguardar um pouco antes de mostrar a mensagem de boas-vindas
+            setTimeout(() => {
+                showWelcomeMessage();
+            }, 100);
+            
             // Mostrar mensagem de sucesso
             if (responseData.message) {
                 // Criar uma notificação temporária
@@ -255,8 +387,9 @@ document.getElementById('new-chat-btn').addEventListener('click', async function
     currentChatId = chat.id;
     await loadChats();
     selectChat(chat.id);
-    // Limpa mensagens e foca no input
+    // Limpa mensagens e mostra mensagem de boas-vindas
     chatMessages.innerHTML = '';
+    showWelcomeMessage();
     document.getElementById('question').focus();
 });
 // Carrega chats ao iniciar
@@ -326,9 +459,16 @@ chatForm.addEventListener('submit', async function(e) {
             return;
         }
     }
+    // Guarda o nome do ficheiro antes de limpar o input
+    let attachedFileName = null;
+    if (fileInput.files.length > 0) {
+        attachedFileName = fileInput.files[0].name;
+    }
+    
     fileInput.value = '';
     fileChip.style.display = 'none';
     document.getElementById('question').value = '';
+    
     const resp = await fetch('/ai/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -336,11 +476,15 @@ chatForm.addEventListener('submit', async function(e) {
     });
     if (resp.ok) {
         const data = await resp.json();
+        
         if (data.maskedQuestion) {
-            addMessage('Você', data.maskedQuestion, 'user');
+            // Mostra apenas a pergunta original, não o conteúdo dos ficheiros
+            addMessage('Você', data.maskedQuestion, 'user', false, attachedFileName);
         }
         if (data.llmAnswers && Array.isArray(data.llmAnswers)) {
-            data.llmAnswers.forEach(ans => addLLMAnswers(ans));
+            data.llmAnswers.forEach(ans => {
+                addLLMAnswers(ans);
+            });
         }
     } else {
         addMessage('Erro', 'Falha ao obter resposta do chatbot.', 'error');
@@ -348,51 +492,91 @@ chatForm.addEventListener('submit', async function(e) {
 });
 
 function addLLMAnswers(answerText) {
-    // Agrupa todas as linhas do mesmo modelo numa só mensagem
-    const lines = answerText.split(/\n+/).filter(Boolean);
-    const llmMap = {};
-    for (const line of lines) {
-        const match = line.match(/^(OpenAI|Ollama):\s*(.*)$/i);
-        if (match) {
-            const llm = match[1];
-            const msg = match[2];
-            if (!llmMap[llm]) llmMap[llm] = [];
-            llmMap[llm].push(msg);
-        } else {
-            // Não mostrar mensagens "LLM:" soltas
-        }
-    }
-    for (const llm in llmMap) {
-        addMessage(llm, llmMap[llm].join('<br>'), 'llm-' + llm.toLowerCase(), true);
+    // Verifica se a resposta começa com um identificador de modelo
+    const modelMatch = answerText.match(/^(OpenAI|Ollama):\s*(.*)/i);
+    
+    if (modelMatch) {
+        const model = modelMatch[1];
+        const content = modelMatch[2];
+        
+        // Se há mais conteúdo após o identificador, inclui tudo
+        const fullContent = answerText.substring(answerText.indexOf(':') + 1).trim();
+        
+        // Processa quebras de linha mantendo a formatação
+        const processedContent = fullContent
+            .replace(/\n\n/g, '<br><br>') // Duplas quebras de linha
+            .replace(/\n/g, '<br>'); // Quebras de linha simples
+        
+        addMessage(model, processedContent, 'llm-' + model.toLowerCase(), true);
+    } else {
+        // Se não há identificador de modelo, trata como resposta genérica
+        const processedContent = answerText
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+        
+        addMessage('LLM', processedContent, 'llm-llm', true);
     }
 }
 
-function addMessage(author, text, type, typingEffect = false) {
+function addMessage(author, text, type, typingEffect = false, attachedFile = null) {
+    // Esconder mensagem de boas-vindas quando a primeira mensagem é adicionada
+    hideWelcomeMessage();
+    
     const msgDiv = document.createElement('div');
     msgDiv.className = 'chat-message ' + type;
-    msgDiv.innerHTML = `<strong>${author}:</strong> <span></span>`;
+    
+    // Se há ficheiro anexado, adiciona o chip do ficheiro
+    let fileChipHTML = '';
+    if (attachedFile) {
+        fileChipHTML = `
+            <div class="message-file-chip">
+                <span class="file-chip-icon">📎</span>
+                <span class="file-chip-name">${attachedFile}</span>
+            </div>
+        `;
+    }
+    
+    msgDiv.innerHTML = `
+        <strong>${author}:</strong>
+        ${fileChipHTML}
+        <span class="message-content"></span>
+    `;
     chatMessages.appendChild(msgDiv);
     
     // Scroll para baixo imediatamente
     scrollToBottom();
     
-    const span = msgDiv.querySelector('span');
+    const span = msgDiv.querySelector('.message-content');
+    
+    // Processa o texto para quebras de linha adequadas
+    const processedText = text
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+    
     if (typingEffect) {
+        // Para efeito de digitação com HTML, vamos processar de forma diferente
+        const textWithoutHTML = text.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '');
         let i = 0;
+        let currentHTML = '';
+        
         function typeChar() {
-            if (i <= text.length) {
-                span.innerHTML = text.slice(0, i).replace(/\n/g, '<br>');
+            if (i <= textWithoutHTML.length) {
+                // Reconstrói o HTML progressivamente
+                const currentText = textWithoutHTML.slice(0, i);
+                currentHTML = currentText.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+                span.innerHTML = currentHTML;
                 scrollToBottom();
                 i++;
                 setTimeout(typeChar, 8); // velocidade do efeito
             } else {
-                span.innerHTML = text.replace(/\n/g, '<br>');
+                // Garante que o HTML final está correto
+                span.innerHTML = processedText;
                 scrollToBottom();
             }
         }
         typeChar();
     } else {
-        span.innerHTML = text.replace(/\n/g, '<br>');
+        span.innerHTML = processedText;
         scrollToBottom();
     }
 }

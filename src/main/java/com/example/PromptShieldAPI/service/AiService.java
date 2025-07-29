@@ -47,24 +47,19 @@ public class AiService {
 
         // Carregar histórico do chat para contexto
         String context = buildChatContext(chatId);
-        String finalPrompt = context + "Usuário: " + question + "\nOpenAI: ";
+        
+        // Aplica mascaramento à pergunta antes de enviar para a IA
+        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
+        String maskedQuestion = maskingResult.getMaskedText();
+        
+        String finalPrompt = context + "Usuário: " + maskedQuestion + "\nOpenAI: ";
         
         // log.info("Prompt final para OpenAI: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
-        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
-        String maskedQuestion = maskingResult.getMaskedText();
-        long total = maskingResult.getTotal();
-
         try {
             String answer = chatModel.call(finalPrompt) + "\n";
-            questionService.saveQuestion(maskedQuestion, answer, "openai", chatId);
-
-            if (total > 0) {
-                answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
-                        + total + " dado" + (total > 1 ? "s " : " ")
-                        + (total > 1 ? "sensíveis" : "sensível")
-                        + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
-            }
+            // Salva apenas a pergunta original, não o conteúdo dos ficheiros
+            questionService.saveQuestion(question, answer, "openai", chatId);
 
             // log.info("Resposta OpenAI gerada com sucesso");
             return answer;
@@ -88,24 +83,19 @@ public class AiService {
 
         // Carregar histórico do chat para contexto
         String context = buildChatContext(chatId);
-        String finalPrompt = context + "Usuário: " + question + "\nOllama: ";
+        
+        // Aplica mascaramento à pergunta antes de enviar para a IA
+        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
+        String maskedQuestion = maskingResult.getMaskedText();
+        
+        String finalPrompt = context + "Usuário: " + maskedQuestion + "\nOllama: ";
         
         // log.info("Prompt final para Ollama: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
-        MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
-        String maskedQuestion = maskingResult.getMaskedText();
-        long total = maskingResult.getTotal();
-
         try {
             String answer = ollamaChatModel.call(finalPrompt) + "\n";
-            questionService.saveQuestion(maskedQuestion, answer, "ollama", chatId);
-
-            if (total > 0) {
-                answer += (total > 1 ? "Foram encontrados " : "Foi encontrado ")
-                        + total + " dado" + (total > 1 ? "s " : " ")
-                        + (total > 1 ? "sensíveis" : "sensível")
-                        + " na tua mensagem. Os dados foram mascarados por questões de segurança.\n";
-            }
+            // Salva apenas a pergunta original, não o conteúdo dos ficheiros
+            questionService.saveQuestion(question, answer, "ollama", chatId);
 
             // log.info("Resposta Ollama gerada com sucesso");
             return answer;

@@ -11,6 +11,7 @@ import com.example.PromptShieldAPI.model.User;
 import com.example.PromptShieldAPI.repository.ChatRepository;
 import com.example.PromptShieldAPI.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/ai")
 @RequiredArgsConstructor
+@Slf4j
 public class AiController {
 
     private final AiService aiService;
@@ -92,24 +94,27 @@ public class AiController {
             ));
         }
 
-        // Aplica DataMasker à pergunta do utilizador
+        // Aplica DataMasker à pergunta do utilizador (sem conteúdo de ficheiros)
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
-
+        
         // 🤖 Faz pergunta ao(s) modelo(s) ativo(s)
         List<String> llmAnswers = new ArrayList<>();
 
         try {
             if (useOpenAi) {
                 String a = aiService.askOpenAi(finalPrompt, chatId);
+                log.info("Resposta OpenAI recebida - Tamanho: {} caracteres", a.length());
                 llmAnswers.add("OpenAI: " + a);
             }
 
             if (useOllama) {
                 String a = aiService.askOllama(finalPrompt, chatId);
+                log.info("Resposta Ollama recebida - Tamanho: {} caracteres", a.length());
                 llmAnswers.add("Ollama: " + a);
             }
         } catch (Exception e) {
+            log.error("Erro ao processar pergunta: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of(
                 "error", "Erro ao processar a pergunta: " + e.getMessage()
             ));
@@ -117,7 +122,8 @@ public class AiController {
 
         Map<String, Object> response = Map.of(
             "maskedQuestion", maskedQuestion,
-            "llmAnswers", llmAnswers
+            "llmAnswers", llmAnswers,
+            "attachedFiles", request.getFileIds() != null ? request.getFileIds().size() : 0
         );
         return ResponseEntity.ok(response);
     }
