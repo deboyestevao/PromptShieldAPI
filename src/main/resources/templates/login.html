@@ -22,7 +22,9 @@
             <input type="password" id="password" name="password" class="form-control" placeholder="Digite a sua senha" required>
         </div>
         <div th:if="${param.error}" class="error-message">
-            <span>⚠️ Email ou senha inválidos. Tente novamente.</span>
+            <span class="error-text">
+                ⚠️ Email ou senha inválidos. Tente novamente.
+            </span>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
         <div class="register-link">
@@ -30,5 +32,7 @@
         </div>
     </form>
 </div>
+
+
 </body>
 </html>

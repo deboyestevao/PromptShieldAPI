@@ -29,17 +29,9 @@ public class AuthControllerWeb {
         return "register";
     }
 
-    @PostMapping("/login")
-    public String processLogin(@RequestParam String email, @RequestParam String password, HttpSession session) {
-        // Atualizar last_login_at quando o login for bem-sucedido
-        userRepository.findByEmail(email).ifPresent(user -> {
-            user.setLastLoginAt(LocalDateTime.now());
-            userRepository.save(user);
-        });
-        
-        // O Spring Security vai processar a autenticação automaticamente
-        return "redirect:/chat";
-    }
+
+
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {

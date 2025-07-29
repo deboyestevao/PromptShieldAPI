@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/accountDisabled.css" rel="stylesheet" type="text/css">
+    <title>Conta Desativada - PromptShield</title>
+</head>
+<body>
+<div class="container">
+    <div class="account-disabled-card">
+        <div class="header">
+            <div class="logo">
+                <h1>PromptShield</h1>
+            </div>
+            <div class="status-icon">
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                    <circle cx="12" cy="16" r="1"></circle>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>Conta Temporariamente Desativada</h2>
+            <p>A sua conta foi desativada pelo administrador do sistema. Para mais informações ou para solicitar a reativação, utilize as opções abaixo.</p>
+            
+            <div class="actions">
+                <button class="btn btn-primary" onclick="showReportForm()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    Solicitar Reativação
+                </button>
+                <button class="btn btn-secondary" onclick="logout()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16,17 21,12 16,7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Terminar Sessão
+                </button>
+            </div>
+        </div>
+        
+        <!-- Formulário de Report (inicialmente escondido) -->
+        <div id="reportForm" class="report-form" style="display: none;">
+            <h3>Formulário de Solicitação</h3>
+            <form method="post" action="/report-account-issue">
+                <div class="form-group">
+                    <label for="reason">Motivo da Solicitação:</label>
+                    <textarea id="reason" name="reason" rows="4" placeholder="Explique o motivo pelo qual a sua conta deveria ser reativada..." required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Enviar Solicitação</button>
+                    <button type="button" class="btn btn-outline" onclick="hideReportForm()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Mensagem de sucesso -->
+        <div th:if="${param.reported}" class="success-message">
+            <div class="success-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+            </div>
+            <p>A sua solicitação foi enviada com sucesso. O administrador irá analisar o seu pedido.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function showReportForm() {
+    document.getElementById('reportForm').style.display = 'block';
+    document.getElementById('reason').focus();
+}
+
+function hideReportForm() {
+    document.getElementById('reportForm').style.display = 'none';
+    document.getElementById('reason').value = '';
+}
+
+function logout() {
+    if (confirm('Tem a certeza que deseja terminar a sessão?')) {
+        window.location.href = '/auth/logout';
+    }
+}
+</script>
+</body>
+</html> 

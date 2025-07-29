@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/", "/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**", "/css/**", "/api/auth/test-email", "/api/auth/register", "/api/auth/login", "/admin/llm-status", "/admin/llm-user-prefs").permitAll()
                 .requestMatchers("/admin/**", "/auth/delete/**").hasRole("ADMIN")
+                .requestMatchers("/check-account-status", "/account-disabled").authenticated()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin(form -> form
@@ -35,7 +36,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/auth/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/chat", true)
+                        .defaultSuccessUrl("/check-account-status", true)
                         .failureUrl("/auth/login?error=true")
                         .permitAll()
                 )

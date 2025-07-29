@@ -240,6 +240,28 @@
     border: 1px solid rgba(220, 38, 38, 0.2);
 }
 
+/* Badges de role */
+.role-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.role-badge.user {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    color: #3730a3;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
 /* Ações do utilizador */
 .user-actions {
     display: flex;
@@ -294,6 +316,22 @@
 
 .delete-btn:hover {
     background: rgba(239, 68, 68, 0.1);
+}
+
+.make-admin-btn {
+    color: #f59e0b;
+}
+
+.make-admin-btn:hover {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.remove-admin-btn {
+    color: #8b5cf6;
+}
+
+.remove-admin-btn:hover {
+    background: rgba(139, 92, 246, 0.1);
 }
 
 /* Estado vazio */
