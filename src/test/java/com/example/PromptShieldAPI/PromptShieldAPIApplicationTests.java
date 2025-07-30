@@ -9,5 +9,4 @@ class PromptShieldAPIApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

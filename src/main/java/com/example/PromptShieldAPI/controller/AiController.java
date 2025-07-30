@@ -2,9 +2,7 @@ package com.example.PromptShieldAPI.controller;
 
 import com.example.PromptShieldAPI.dto.QuestionWithFilesRequest;
 import com.example.PromptShieldAPI.dto.QuestionYearMonthRequest;
-import com.example.PromptShieldAPI.service.AiService;
-import com.example.PromptShieldAPI.service.FileService;
-import com.example.PromptShieldAPI.service.SystemConfigService;
+import com.example.PromptShieldAPI.service.*;
 import com.example.PromptShieldAPI.model.SystemConfig.ModelType;
 import com.example.PromptShieldAPI.model.Chat;
 import com.example.PromptShieldAPI.model.User;
@@ -13,10 +11,10 @@ import com.example.PromptShieldAPI.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.example.PromptShieldAPI.util.DataMasker;
-import com.example.PromptShieldAPI.service.MaskingResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +30,7 @@ public class AiController {
     private final SystemConfigService configService;
     private final FileService fileService;
     private final ChatRepository chatRepository;
+
     private final UserRepository userRepository;
 
     @GetMapping("/welcome")
@@ -141,4 +140,6 @@ public class AiController {
             .map(a -> a.getAuthority().replace("ROLE_", "").toLowerCase())
             .findFirst().orElse("");
     }
+
+
 }

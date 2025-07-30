@@ -31,6 +31,7 @@ public class AiService {
     private final SystemConfigService systemConfigService;
     private final QuestionService questionService;
 
+
     private static final String INPUT_FOLDER = "InputFiles";
 
     public String askOpenAi(String question, Long chatId) {
@@ -106,20 +107,29 @@ public class AiService {
     }
 
     private String buildChatContext(Long chatId) {
+        StringBuilder context = new StringBuilder();
+        
+        // Carrega o prompt do sistema do arquivo de texto
+        try {
+            String systemPrompt = new String(getClass().getResourceAsStream("/system-prompt.txt").readAllBytes());
+            context.append(systemPrompt).append("NOME DO USER: ").append(getCurrentUser().getFirstName()).append("\n\n=== HISTÓRICO DA CONVERSA ===\n");
+        } catch (Exception e) {
+            log.error("Erro ao carregar prompt do sistema: {}", e.getMessage());
+            context.append("Erro ao carregar configurações do sistema.\n\n=== HISTÓRICO DA CONVERSA ===\n");
+        }
+        
         if (chatId == null) {
-            // log.info("ChatId é null, retornando contexto vazio");
-            return "";
+            return context.toString();
         }
 
         try {
             List<Question> history = questionService.getQuestionsByChat(chatId);
-            // log.info("Carregando histórico do chat {} - {} mensagens encontradas", chatId, history.size());
             
             if (history.isEmpty()) {
-                return "";
+                context.append("Nenhuma conversa anterior.\n");
+                return context.toString();
             }
 
-            StringBuilder context = new StringBuilder();
             for (Question q : history) {
                 context.append("Usuário: ").append(q.getQuestion()).append("\n");
                 context.append(q.getModel()).append(": ").append(q.getAnswer()).append("\n");
@@ -129,7 +139,8 @@ public class AiService {
             return context.toString();
         } catch (Exception e) {
             log.error("Erro ao carregar histórico do chat {}: {}", chatId, e.getMessage(), e);
-            return "";
+            context.append("Erro ao carregar histórico da conversa.\n");
+            return context.toString();
         }
     }
 

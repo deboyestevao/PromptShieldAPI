@@ -4,10 +4,11 @@ import com.example.PromptShieldAPI.dto.LoginRequest;
 import com.example.PromptShieldAPI.dto.RegisterRequest;
 import com.example.PromptShieldAPI.model.User;
 import com.example.PromptShieldAPI.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,9 +16,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
@@ -81,12 +84,14 @@ class AuthServiceTest {
     @Test
     void shouldRegisterUserSuccessfully() {
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("newuser");
         registerRequest.setEmail("new@example.com");
+        registerRequest.setFirstName("João");
+        registerRequest.setLastName("Silva");
         registerRequest.setPassword("pass123");
-        registerRequest.setRole("USER");
+        registerRequest.setConfirmPassword("pass123");
 
-        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pass123")).thenReturn("hashedPassword");
 
         ResponseEntity<?> response = authService.register(registerRequest);
@@ -99,10 +104,13 @@ class AuthServiceTest {
     @Test
     void shouldFailRegisterWhenUserExists() {
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("existinguser");
         registerRequest.setEmail("existing@example.com");
+        registerRequest.setFirstName("João");
+        registerRequest.setLastName("Silva");
+        registerRequest.setPassword("pass123");
+        registerRequest.setConfirmPassword("pass123");
 
-        when(userRepository.findByUsername("existinguser"))
+        when(userRepository.findByEmail("existing@example.com"))
                 .thenReturn(Optional.of(new User()));
 
         ResponseEntity<?> response = authService.register(registerRequest);

@@ -19,7 +19,12 @@
     </header>
     
     <main class="admin-main">
-        <a href="/admin/dashboard" class="admin-back">← Voltar ao Dashboard</a>
+        <a href="/admin/dashboard" class="admin-back">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2"/>
+            </svg>
+            Voltar ao Dashboard
+        </a>
         <h1>Gestão de Utilizadores</h1>
         
         <!-- Estatísticas -->
@@ -41,7 +46,7 @@
             <div class="stat-card">
                 <div class="stat-icon">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <path d="M9 12l2 2 4-4M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" stroke-width="2"/>
                     </svg>
                 </div>
                 <div class="stat-content">
@@ -52,11 +57,7 @@
             <div class="stat-card">
                 <div class="stat-icon">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M9 12l2 2 4-4"></path>
-                        <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>
-                        <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"></path>
-                        <path d="M12 3c0 1-1 2-2 2s-2-1-2-2 1-2 2-2 2 1 2 2z"></path>
-                        <path d="M12 21c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z"></path>
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
                     </svg>
                 </div>
                 <div class="stat-content">
@@ -120,7 +121,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Detalhes do Utilizador</h2>
-                    <button class="modal-close" onclick="closeUserModal()">×</button>
+                    <button class="modal-close" onclick="closeUserModal()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="modal-body" id="user-modal-body">
                     <!-- Conteúdo do modal será carregado via JavaScript -->
@@ -133,7 +138,11 @@
             <div class="modal-content confirm-modal">
                 <div class="modal-header">
                     <h2>Confirmar Ação</h2>
-                    <button class="modal-close" onclick="closeConfirmModal()">×</button>
+                    <button class="modal-close" onclick="closeConfirmModal()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p id="confirm-message"></p>
@@ -289,37 +298,36 @@
                     <td>${user.chatCount || 0}</td>
                     <td>
                         <div class="user-actions">
-                            <button class="action-btn view-btn" onclick="viewUser(${user.id})" title="Ver detalhes">
+                            <button class="action-btn view-btn" onclick="viewUser(${user.id})">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
+                                <span>Ver</span>
                             </button>
                             <button class="action-btn ${user.active ? 'deactivate-btn' : 'activate-btn'}" 
-                                    onclick="${user.active ? 'deactivateUser' : 'activateUser'}(${user.id})" 
-                                    title="${user.active ? 'Desativar' : 'Ativar'}">
+                                    onclick="${user.active ? 'deactivateUser' : 'activateUser'}(${user.id})">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     ${user.active ? 
                                         '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>' :
                                         '<path d="M9 12l2 2 4-4"></path><path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>'
                                     }
                                 </svg>
+                                <span>${user.active ? 'Desativar' : 'Ativar'}</span>
                             </button>
                             <button class="action-btn ${user.role === 'ADMIN' ? 'remove-admin-btn' : 'make-admin-btn'}" 
-                                    onclick="${user.role === 'ADMIN' ? 'removeUserAdmin' : 'makeUserAdmin'}(${user.id})" 
-                                    title="${user.role === 'ADMIN' ? 'Remover Admin' : 'Tornar Admin'}">
+                                    onclick="${user.role === 'ADMIN' ? 'removeUserAdmin' : 'makeUserAdmin'}(${user.id})">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    ${user.role === 'ADMIN' ? 
-                                        '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>' :
-                                        '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>'
-                                    }
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                                 </svg>
+                                <span>${user.role === 'ADMIN' ? 'Remover Admin' : 'Tornar Admin'}</span>
                             </button>
-                            <button class="action-btn delete-btn" onclick="deleteUser(${user.id})" title="Eliminar">
+                            <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <polyline points="3,6 5,6 21,6"></polyline>
                                     <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
                                 </svg>
+                                <span>Eliminar</span>
                             </button>
                         </div>
                     </td>
@@ -343,7 +351,10 @@
             paginationHTML += `
                 <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
                         onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    ← Anterior
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 18l-6-6 6-6" stroke-width="2"/>
+                    </svg>
+                    Anterior
                 </button>
             `;
 
@@ -365,7 +376,10 @@
             paginationHTML += `
                 <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
                         onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Seguinte →
+                    Seguinte
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 18l6-6-6-6" stroke-width="2"/>
+                    </svg>
                 </button>
             `;
 

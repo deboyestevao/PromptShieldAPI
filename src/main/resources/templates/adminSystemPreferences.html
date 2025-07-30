@@ -18,144 +18,312 @@
     </div>
 </header>
 <main class="admin-main">
-    <a href="/admin/dashboard" class="admin-back">← Voltar ao Dashboard</a>
+    <a href="/admin/dashboard" class="admin-back">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2"/>
+        </svg>
+        Voltar ao Dashboard
+    </a>
     <h1>Configurações do Sistema</h1>
-    <section id="llm-status-panel" style="margin-bottom:32px;">
-        <h2 style="color:#183c7c; font-size:1.08em; font-weight:700; margin-bottom:10px;">Estado dos Modelos LLM</h2>
-        <div style="display:flex; gap:32px;">
-            <div id="status-openai" style="display:flex; align-items:center; gap:10px;">
-                <span style="font-weight:600;">OpenAI:</span>
-                <span id="status-openai-indicator" style="width:14px; height:14px; border-radius:50%; display:inline-block; background:#ccc;"></span>
-                <span id="status-openai-text" style="font-size:0.98em; color:#555;">...</span>
+    
+    <!-- Painel de Estado dos Modelos -->
+    <section class="llm-status-panel">
+        <div class="status-header">
+            <h2>
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="2"/>
+                </svg>
+                Estado dos Modelos LLM
+            </h2>
+        </div>
+        <div class="status-grid">
+            <div class="status-card" id="status-openai">
+                <div class="status-icon">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="status-content">
+                    <span class="status-label">OpenAI</span>
+                    <div class="status-badge" id="status-openai-badge">
+                        <span id="status-openai-text">...</span>
+                    </div>
+                </div>
             </div>
-            <div id="status-ollama" style="display:flex; align-items:center; gap:10px;">
-                <span style="font-weight:600;">Ollama:</span>
-                <span id="status-ollama-indicator" style="width:14px; height:14px; border-radius:50%; display:inline-block; background:#ccc;"></span>
-                <span id="status-ollama-text" style="font-size:0.98em; color:#555;">...</span>
+            <div class="status-card" id="status-ollama">
+                <div class="status-icon">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="status-content">
+                    <span class="status-label">Ollama</span>
+                    <div class="status-badge" id="status-ollama-badge">
+                        <span id="status-ollama-text">...</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-    <form id="system-prefs-form" class="admin-system-prefs-form">
-        <h2 style="color:#183c7c; font-size:1.15em; font-weight:800; margin-bottom:18px;">Modelos LLM disponíveis</h2>
-        <div class="admin-system-switch-group">
-            <label class="admin-system-switch-label">
-                <input type="checkbox" id="openai-enabled" name="openai" class="admin-system-switch"> Ativar OpenAI
-            </label>
-            <div style="font-size:0.98em; color:#555; margin-left:38px; margin-bottom:10px;">Permite que todos os utilizadores usem o modelo OpenAI no chat.</div>
-            <label class="admin-system-switch-label">
-                <input type="checkbox" id="ollama-enabled" name="ollama" class="admin-system-switch"> Ativar Ollama
-            </label>
-            <div style="font-size:0.98em; color:#555; margin-left:38px;">Permite que todos os utilizadores usem o modelo Ollama no chat.</div>
-        </div>
-        <button type="submit" class="admin-system-save-btn"><span id="save-btn-icon" style="margin-right:6px;"></span>Guardar Alterações</button>
-        <div id="system-prefs-feedback" class="admin-system-feedback"></div>
-    </form>
 
-        <!-- Seção de Histórico de Configurações -->
-    <section id="config-history-section" class="admin-config-history-section">
-        <div class="config-history-header">
-            <h2 style="color:#183c7c; font-size:1.15em; font-weight:800; margin-bottom:0;">Histórico de Alterações</h2>
-            <a href="/admin/config-history" class="config-history-link">
+    <!-- Formulário de Configurações -->
+    <section class="system-config-section">
+        <div class="config-header">
+            <h2>
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                </svg>
+                Modelos LLM Disponíveis
+            </h2>
+        </div>
+        
+        <form id="system-prefs-form" class="system-config-form">
+            <div class="config-options">
+                <div class="config-option">
+                    <label class="config-switch-label">
+                        <input type="checkbox" id="openai-enabled" name="openai" class="config-switch">
+                        <span class="switch-slider"></span>
+                        <div class="option-content">
+                            <div class="option-header">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
+                                </svg>
+                                <span class="option-title">Ativar OpenAI</span>
+                            </div>
+                            <p class="option-description">Permite que todos os utilizadores usem o modelo OpenAI no chat.</p>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="config-option">
+                    <label class="config-switch-label">
+                        <input type="checkbox" id="ollama-enabled" name="ollama" class="config-switch">
+                        <span class="switch-slider"></span>
+                        <div class="option-content">
+                            <div class="option-header">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2"/>
+                                </svg>
+                                <span class="option-title">Ativar Ollama</span>
+                            </div>
+                            <p class="option-description">Permite que todos os utilizadores usem o modelo Ollama no chat.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="save-btn">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke-width="2"/>
+                        <polyline points="17,21 17,13 7,13 7,21" stroke-width="2"/>
+                        <polyline points="7,3 7,8 15,8" stroke-width="2"/>
+                    </svg>
+                    <span>Guardar Alterações</span>
+                </button>
+                <div id="system-prefs-feedback" class="feedback-message"></div>
+            </div>
+        </form>
+    </section>
+
+    <!-- Seção de Histórico de Configurações -->
+    <section class="config-history-section">
+        <div class="history-header">
+            <h2>
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" stroke-width="2"/>
+                </svg>
+                Histórico de Alterações
+            </h2>
+            <a href="/admin/config-history" class="history-link">
+                <span>Ver Histórico Completo</span>
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M9 18l6-6-6-6" stroke-width="2"/>
                 </svg>
-                Ver Histórico Completo
             </a>
         </div>
-        <div class="config-history-preview">
-            <div id="config-history-loading" class="config-history-loading">
+        
+        <div class="history-preview">
+            <div id="config-history-loading" class="history-loading">
                 <div class="loading-spinner"></div>
                 <span>A carregar histórico...</span>
             </div>
-            <div id="config-history-content" class="config-history-content" style="display:none;">
-                <div id="config-history-list" class="config-history-list"></div>
+            
+            <div id="config-history-content" class="history-content" style="display:none;">
+                <div id="config-history-list" class="history-list"></div>
             </div>
-            <div id="config-history-empty" class="config-history-empty" style="display:none;">
+            
+            <div id="config-history-empty" class="history-empty" style="display:none;">
+                <div class="empty-icon">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" stroke-width="2"/>
+                    </svg>
+                </div>
                 <p>Nenhuma alteração registada ainda.</p>
             </div>
         </div>
     </section>
 </main>
-</main>
+
 <script>
 // Carrega status atual dos modelos
 async function loadSystemPrefs() {
-    const resp = await fetch('/admin/llm-status');
-    if (resp.ok) {
-        const data = await resp.json();
-        document.getElementById('openai-enabled').checked = !!data.openai;
-        document.getElementById('ollama-enabled').checked = !!data.ollama;
-        // Atualiza painel de estado
-        updateLlmStatusPanel(data);
+    try {
+        const resp = await fetch('/admin/llm-status');
+        if (resp.ok) {
+            const data = await resp.json();
+            console.log('Dados recebidos:', data);
+            
+            document.getElementById('openai-enabled').checked = !!data.openai;
+            document.getElementById('ollama-enabled').checked = !!data.ollama;
+            updateLlmStatusPanel(data);
+        } else {
+            console.error('Erro na resposta:', resp.status, resp.statusText);
+            // Manter estado offline em caso de erro
+            updateLlmStatusPanel({ openai: false, ollama: false });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+        // Manter estado offline em caso de erro
+        updateLlmStatusPanel({ openai: false, ollama: false });
     }
 }
+
 function updateLlmStatusPanel(data) {
     const openai = !!data.openai;
     const ollama = !!data.ollama;
-    const openaiIndicator = document.getElementById('status-openai-indicator');
+    
+    // OpenAI Status
     const openaiText = document.getElementById('status-openai-text');
-    const ollamaIndicator = document.getElementById('status-ollama-indicator');
-    const ollamaText = document.getElementById('status-ollama-text');
+    const openaiBadge = document.getElementById('status-openai-badge');
+    const openaiCard = document.getElementById('status-openai');
+    
     if (openai) {
-        openaiIndicator.style.background = '#2ecc40';
         openaiText.textContent = 'Online';
-        openaiText.style.color = '#2ecc40';
+        openaiBadge.className = 'status-badge online';
+        openaiCard.className = 'status-card online';
     } else {
-        openaiIndicator.style.background = '#e74c3c';
         openaiText.textContent = 'Offline';
-        openaiText.style.color = '#e74c3c';
+        openaiBadge.className = 'status-badge offline';
+        openaiCard.className = 'status-card offline';
     }
+    
+    // Ollama Status
+    const ollamaText = document.getElementById('status-ollama-text');
+    const ollamaBadge = document.getElementById('status-ollama-badge');
+    const ollamaCard = document.getElementById('status-ollama');
+    
     if (ollama) {
-        ollamaIndicator.style.background = '#2ecc40';
         ollamaText.textContent = 'Online';
-        ollamaText.style.color = '#2ecc40';
+        ollamaBadge.className = 'status-badge online';
+        ollamaCard.className = 'status-card online';
     } else {
-        ollamaIndicator.style.background = '#e74c3c';
         ollamaText.textContent = 'Offline';
-        ollamaText.style.color = '#e74c3c';
+        ollamaBadge.className = 'status-badge offline';
+        ollamaCard.className = 'status-card offline';
     }
+    
+    console.log('Status atualizado:', { openai, ollama });
 }
-loadSystemPrefs();
 
 // Submete alterações
 const form = document.getElementById('system-prefs-form');
-const saveBtnIcon = document.getElementById('save-btn-icon');
+const saveBtn = form.querySelector('.save-btn');
+const feedback = document.getElementById('system-prefs-feedback');
+
 form.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
     const openai = document.getElementById('openai-enabled').checked;
     const ollama = document.getElementById('ollama-enabled').checked;
-    const feedback = document.getElementById('system-prefs-feedback');
-    saveBtnIcon.innerHTML = '<svg width="18" height="18" fill="none" stroke="#183c7c" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#183c7c" stroke-width="2" fill="none"/><path d="M12 6v6l4 2" stroke="#183c7c" stroke-width="2" fill="none"/></svg>';
-    feedback.textContent = 'A guardar...';
+    
+    // Estado de loading
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="spinning">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <path d="M12 6v6l4 2" stroke-width="2"/>
+        </svg>
+        <span>A guardar...</span>
+    `;
+    
+    feedback.textContent = '';
+    feedback.className = 'feedback-message';
+    
     try {
         const resp = await fetch('/admin/system-preferences', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ openai, ollama })
         });
+        
         if (resp.ok) {
-            saveBtnIcon.innerHTML = '<svg width="18" height="18" fill="none" stroke="#2ecc40" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#2ecc40" stroke-width="2" fill="none"/><path d="M7 13l3 3 7-7" stroke="#2ecc40" stroke-width="2" fill="none"/></svg>';
+            // Sucesso
+            saveBtn.innerHTML = `
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5" stroke-width="2"/>
+                </svg>
+                <span>Guardado!</span>
+            `;
             feedback.textContent = 'Preferências guardadas com sucesso!';
-            feedback.style.color = '#183c7c';
+            feedback.className = 'feedback-message success';
+            
+            // Atualiza status após 1 segundo
+            setTimeout(() => {
+                loadSystemPrefs();
+                loadConfigHistory();
+            }, 1000);
+            
         } else if (resp.status === 409) {
-            saveBtnIcon.innerHTML = '<svg width="18" height="18" fill="none" stroke="orange" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="orange" stroke-width="2" fill="none"/><path d="M12 8v4" stroke="orange" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="orange"/></svg>';
+            // Conflito - alterado por outro utilizador
+            saveBtn.innerHTML = `
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 8v4m0 4h.01" stroke-width="2"/>
+                </svg>
+                <span>Conflito</span>
+            `;
             feedback.textContent = 'As preferências foram alteradas por outro utilizador. Tente novamente.';
-            feedback.style.color = 'orange';
+            feedback.className = 'feedback-message warning';
+            
         } else {
-            saveBtnIcon.innerHTML = '<svg width="18" height="18" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="red" stroke-width="2" fill="none"/><path d="M8 8l8 8M16 8l-8 8" stroke="red" stroke-width="2"/></svg>';
+            // Erro
+            saveBtn.innerHTML = `
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                </svg>
+                <span>Erro</span>
+            `;
             feedback.textContent = 'Erro ao guardar preferências.';
-            feedback.style.color = 'red';
+            feedback.className = 'feedback-message error';
         }
-    } catch {
-        saveBtnIcon.innerHTML = '<svg width="18" height="18" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="red" stroke-width="2" fill="none"/><path d="M8 8l8 8M16 8l-8 8" stroke="red" stroke-width="2"/></svg>';
-        feedback.textContent = 'Erro ao guardar preferências.';
-        feedback.style.color = 'red';
+        
+    } catch (error) {
+        // Erro de rede
+        saveBtn.innerHTML = `
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+            </svg>
+            <span>Erro</span>
+        `;
+        feedback.textContent = 'Erro de conexão.';
+        feedback.className = 'feedback-message error';
     }
-    setTimeout(() => { feedback.textContent = ''; saveBtnIcon.innerHTML = ''; }, 2500);
-    // Atualiza painel de estado após guardar
-    loadSystemPrefs();
-    // Recarrega o histórico após alterações
-    loadConfigHistory();
+    
+    // Restaura botão após 3 segundos
+    setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke-width="2"/>
+                <polyline points="17,21 17,13 7,13 7,21" stroke-width="2"/>
+                <polyline points="7,3 7,8 15,8" stroke-width="2"/>
+            </svg>
+            <span>Guardar Alterações</span>
+        `;
+        feedback.textContent = '';
+        feedback.className = 'feedback-message';
+    }, 3000);
 });
 
 // Carrega histórico de configurações
@@ -183,16 +351,30 @@ async function loadConfigHistory() {
             // Mostrar apenas os últimos 5 registos na preview
             const recentHistory = history.slice(0, 5);
             listDiv.innerHTML = recentHistory.map(entry => `
-                <div class="config-history-item">
-                    <div class="config-history-header">
-                        <span class="config-history-model">${entry.modelDisplay}</span>
-                        <span class="config-history-action ${entry.enabled ? 'action-enabled' : 'action-disabled'}">
+                <div class="history-item">
+                    <div class="history-main">
+                        <div class="history-model-badge ${entry.model.toLowerCase()}">
+                            ${entry.modelDisplay}
+                        </div>
+                        <div class="history-action-badge ${entry.enabled ? 'enabled' : 'disabled'}">
                             ${entry.action}
-                        </span>
+                        </div>
                     </div>
-                    <div class="config-history-details">
-                        <span class="config-history-user">Por: ${entry.changedBy}</span>
-                        <span class="config-history-date">${formatDateTime(entry.changedAt)}</span>
+                    <div class="history-details">
+                        <div class="history-user">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                                <circle cx="12" cy="7" r="4" stroke-width="2"/>
+                            </svg>
+                            ${entry.changedBy}
+                        </div>
+                        <div class="history-date">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                <polyline points="12,6 12,12 16,14" stroke-width="2"/>
+                            </svg>
+                            ${formatDateTime(entry.changedAt)}
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -200,8 +382,11 @@ async function loadConfigHistory() {
             // Adicionar indicador se há mais registos
             if (history.length > 5) {
                 listDiv.innerHTML += `
-                    <div class="config-history-more">
+                    <div class="history-more">
                         <span>+${history.length - 5} mais registos</span>
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 18l6-6-6-6" stroke-width="2"/>
+                        </svg>
                     </div>
                 `;
             }
@@ -213,7 +398,14 @@ async function loadConfigHistory() {
         }
     } catch (error) {
         loadingDiv.style.display = 'none';
-        emptyDiv.innerHTML = '<p>Erro ao carregar histórico de configurações.</p>';
+        emptyDiv.innerHTML = `
+            <div class="empty-icon">
+                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01" stroke-width="2"/>
+                </svg>
+            </div>
+            <p>Erro ao carregar histórico de configurações.</p>
+        `;
         emptyDiv.style.display = 'block';
     }
 }
@@ -230,8 +422,29 @@ function formatDateTime(dateTimeString) {
     });
 }
 
-// Carrega o histórico quando a página carrega
-loadConfigHistory();
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Definir estado inicial dos indicadores
+    const openaiText = document.getElementById('status-openai-text');
+    const openaiBadge = document.getElementById('status-openai-badge');
+    const openaiCard = document.getElementById('status-openai');
+    const ollamaText = document.getElementById('status-ollama-text');
+    const ollamaBadge = document.getElementById('status-ollama-badge');
+    const ollamaCard = document.getElementById('status-ollama');
+    
+    // Estado inicial - offline
+    openaiText.textContent = 'Offline';
+    openaiBadge.className = 'status-badge offline';
+    openaiCard.className = 'status-card offline';
+    
+    ollamaText.textContent = 'Offline';
+    ollamaBadge.className = 'status-badge offline';
+    ollamaCard.className = 'status-card offline';
+    
+    // Carregar dados reais
+    loadSystemPrefs();
+    loadConfigHistory();
+});
 </script>
 </body>
 </html> 
