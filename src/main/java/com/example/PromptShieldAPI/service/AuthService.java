@@ -3,7 +3,9 @@ package com.example.PromptShieldAPI.service;
 import com.example.PromptShieldAPI.dto.LoginRequest;
 import com.example.PromptShieldAPI.dto.RegisterRequest;
 import com.example.PromptShieldAPI.model.User;
+import com.example.PromptShieldAPI.model.UserPreferences;
 import com.example.PromptShieldAPI.repository.UserRepository;
+import com.example.PromptShieldAPI.repository.UserPreferencesRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -28,6 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserPreferencesRepository userPreferencesRepository;
     // Removido: private final JavaMailSender mailSender;
 
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
@@ -86,6 +89,13 @@ public class AuthService {
         user.setActive(true);
         user.setRole("USER");
         userRepository.save(user);
+
+        // Criar UserPreferences por padrão
+        UserPreferences userPreferences = new UserPreferences();
+        userPreferences.setUser(user);
+        userPreferences.setOpenaiPreferred(true);
+        userPreferences.setOllamaPreferred(false);
+        userPreferencesRepository.save(userPreferences);
 
         String mensagem = "Registo efetuado com sucesso. O seu username é: " + username;
         if (!username.equals(baseUsername)) {

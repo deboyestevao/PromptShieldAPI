@@ -25,6 +25,9 @@ public class DataMasker {
         result = maskPhoneNumbers(masked);
         masked = result.getMaskedText();
 
+        result = maskCreditCard(masked);
+        masked = result.getMaskedText();
+
         result = maskNineDigitNumber(masked);
         masked = result.getMaskedText();
 
@@ -41,9 +44,6 @@ public class DataMasker {
         masked = result.getMaskedText();
 
         result = maskName(masked);
-        masked = result.getMaskedText();
-
-        result = maskCreditCard(masked);
         masked = result.getMaskedText();
 
         result = maskAddress(masked);
@@ -212,14 +212,22 @@ public class DataMasker {
     }
 
     private static MaskingResult maskCreditCard(String input) {
-        Pattern pattern = Pattern.compile("\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\\b");
+        // Captura números de 16 dígitos com ou sem espaços
+        Pattern pattern = Pattern.compile("\\b(\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4})\\b");
         Matcher matcher = pattern.matcher(input);
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            String cardNumber = matcher.group();
-            String masked = cardNumber.substring(0, 4) + " **** **** " + cardNumber.substring(cardNumber.length() - 4);
-            matcher.appendReplacement(result, masked);
+            String cardNumber = matcher.group(1);
+            // Remove espaços e hífens para obter apenas os dígitos
+            String cleanNumber = cardNumber.replaceAll("[\\s-]", "");
+            
+            if (cleanNumber.length() == 16) {
+                String masked = cleanNumber.substring(0, 4) + " **** **** " + cleanNumber.substring(12);
+                matcher.appendReplacement(result, masked);
+            } else {
+                matcher.appendReplacement(result, cardNumber);
+            }
         }
 
         matcher.appendTail(result);
@@ -266,7 +274,7 @@ public class DataMasker {
             if (cvc.length() >= 3 && cvc.length() <= 4) {
                 String masked = "*".repeat(cvc.length());
                 matcher.appendReplacement(result, masked);
-            }
+        }
         }
 
         matcher.appendTail(result);
@@ -330,7 +338,7 @@ public class DataMasker {
             String masked = parts[0].charAt(0) + "*".repeat(parts[0].length() - 1) + " " +
                           parts[1].charAt(0) + "*".repeat(parts[1].length() - 1);
             matcher.appendReplacement(result, masked);
-        }
+            }
 
         matcher.appendTail(result);
         return new MaskingResult(result.toString());

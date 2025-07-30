@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="chat-layout">
+<div class="chat-layout">
         <!-- Sidebar -->
         <div class="chat-sidebar">
             <div class="sidebar-header">
@@ -55,39 +55,45 @@
             <div class="chat-main">
                 <div class="chat-messages" id="chat-messages">
                     <!-- Mensagem de boas-vindas -->
-                    <div id="welcome-message" class="welcome-message" style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 40px 20px;">
-                        <div class="welcome-content" style="text-align: center; max-width: 500px; background: #fff; border-radius: 20px; padding: 40px 30px; box-shadow: 0 4px 20px rgba(24, 60, 124, 0.1); border: 1px solid rgba(24, 60, 124, 0.1);">
-                            <h2 style="color: #183c7c; margin: 0 0 15px 0; font-size: 1.8rem; font-weight: 600;"><i class="fas fa-shield-alt"></i> Bem-vindo ao PromptShield</h2>
-                            <p style="color: #64748b; margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">Comece uma nova conversa para começar a usar a IA de forma segura.</p>
+                    <div id="welcome-message" class="welcome-message">
+                        <div class="welcome-content">
+                            <h2><i class="fas fa-shield-alt"></i> Bem-vindo ao PromptShield</h2>
+                            <p>Comece uma nova conversa para começar a usar a IA de forma segura.</p>
                             
                             <div class="welcome-features">
                                 <div class="feature-card">
                                     <div class="feature-icon">
                                         <i class="fas fa-file-upload"></i>
                                     </div>
-                                    <div class="feature-title">Upload de Ficheiros</div>
-                                    <div class="feature-desc">Analise documentos com IA segura</div>
+                                    <div>
+                                        <div class="feature-title">Upload de Ficheiros</div>
+                                        <div class="feature-desc">Analise documentos com IA segura</div>
+                                    </div>
                                 </div>
                                 
                                 <div class="feature-card">
                                     <div class="feature-icon">
                                         <i class="fas fa-comments"></i>
                                     </div>
-                                    <div class="feature-title">Chat Inteligente</div>
-                                    <div class="feature-desc">Conversas privadas e seguras</div>
+                                    <div>
+                                        <div class="feature-title">Chat Inteligente</div>
+                                        <div class="feature-desc">Conversas privadas e seguras</div>
+                                    </div>
                                 </div>
                                 
                                 <div class="feature-card">
                                     <div class="feature-icon">
                                         <i class="fas fa-lock"></i>
                                     </div>
-                                    <div class="feature-title">Proteção de Dados</div>
-                                    <div class="feature-desc">Seus dados sempre protegidos</div>
+                                    <div>
+                                        <div class="feature-title">Proteção de Dados</div>
+                                        <div class="feature-desc">Seus dados sempre protegidos</div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="welcome-tips" style="background: rgba(24, 60, 124, 0.05); border-radius: 12px; padding: 15px; border-left: 4px solid #183c7c;">
-                                <p style="margin: 0; font-size: 0.95rem; color: #475569;"><strong>💡 Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
+                            <div class="welcome-tips">
+                                <p><strong>💡 Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
                             </div>
                         </div>
                     </div>
@@ -96,20 +102,20 @@
                 <!-- Formulário de chat -->
                 <div class="chat-form">
                     <form id="chat-form" autocomplete="off">
-                        <div id="file-chip" class="file-chip" style="display:none;"></div>
-                        <div class="input-group">
+                <div id="file-chip" class="file-chip" style="display:none;"></div>
+                <div class="input-group">
                             <label for="file-upload" class="upload-label" title="Anexar ficheiro">
                                 <i class="fas fa-paperclip"></i>
-                            </label>
+                    </label>
                             <input type="file" id="file-upload" name="files" multiple style="display: none;">
-                            <input type="text" id="question" name="question" class="form-control" placeholder="Escreva a sua mensagem..." required autofocus>
+                            <textarea id="question" name="question" class="form-control" placeholder="Escreva a sua mensagem..." required autofocus rows="1"></textarea>
                             <button type="submit" class="btn btn-primary" title="Enviar mensagem">
                                 <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </form>
+                    </button>
                 </div>
-            </div>
+            </form>
+                </div>
+    </div>
         </div>
     </div>
 
@@ -137,7 +143,7 @@
                         <button type="submit" id="save-prefs-btn" class="save-btn" disabled>
                             <i class="fas fa-save"></i>
                             <span class="save-text">Salvar Alterações</span>
-                        </button>
+        </button>
                     </div>
                     
                     <div id="llm-status-info" class="status-grid">
@@ -148,46 +154,56 @@
                 </div>
             </div>
         </div>
-    </div>
+</div>
 
-    <script>
-    // Busca nome do utilizador autenticado
-    fetch('/ai/welcome').then(r => r.text()).then(txt => {
-        const match = txt.match(/Bem vindo\/a (.+)/);
-        if (match) document.getElementById('username').textContent = match[1];
-    });
+<script>
+// Busca nome do utilizador autenticado
+fetch('/ai/welcome').then(r => r.text()).then(txt => {
+    const match = txt.match(/Bem vindo\/a (.+)/);
+    if (match) document.getElementById('username').textContent = match[1];
+});
 
-    // Função para mostrar o botão Dashboard se for admin
-    fetch('/ai/role').then(r => r.text()).then(role => {
-        if (role.trim().toLowerCase() === 'admin') {
-            document.getElementById('dashboard-btn').style.display = 'block';
-        }
-    });
+// Função para mostrar o botão Dashboard se for admin
+fetch('/ai/role').then(r => r.text()).then(role => {
+    if (role.trim().toLowerCase() === 'admin') {
+        document.getElementById('dashboard-btn').style.display = 'block';
+    }
+});
 
-    // Carrega status dos LLMs e preferências do user e gera checkboxes
-    let lastPrefs = {};
-    async function loadLLMStatusAndPrefs() {
+// Carrega status dos LLMs e preferências do user e gera checkboxes
+let lastPrefs = {};
+async function loadLLMStatusAndPrefs() {
         try {
-            const [statusResp, prefsResp] = await Promise.all([
-                fetch('/admin/llm-status'),
-                fetch('/admin/llm-user-prefs')
+            const [statusResp, prefsResp, maintenanceResp] = await Promise.all([
+                fetch('/admin/llm-status-simple'),
+                fetch('/admin/llm-user-prefs'),
+                fetch('/admin/llm-maintenance-status')
             ]);
             
             const status = await statusResp.json();
             const prefs = await prefsResp.json();
-            lastPrefs = { ...prefs };
+            const maintenance = await maintenanceResp.json();
+    lastPrefs = { ...prefs };
             
-            // Gera checkboxes
-            const list = document.getElementById('llm-checkbox-list');
-            list.innerHTML = '';
-            Object.keys(status).forEach(llm => {
-                const checked = !!prefs[llm];
-                const disabled = !status[llm];
-                const label = document.createElement('label');
-                label.className = 'llm-checkbox-label' + (disabled ? ' llm-disabled' : '');
-                label.innerHTML = `<input type="checkbox" name="llm-${llm}" value="${llm}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}> ${llm.charAt(0).toUpperCase() + llm.slice(1)}`;
-                list.appendChild(label);
-            });
+    // Gera checkboxes
+    const list = document.getElementById('llm-checkbox-list');
+    list.innerHTML = '';
+    Object.keys(status).forEach(llm => {
+        const checked = !!prefs[llm];
+        const disabled = !status[llm];
+        const inMaintenance = maintenance[llm] && maintenance[llm].inMaintenance;
+        
+        const label = document.createElement('label');
+        label.className = 'llm-checkbox-label' + (disabled ? ' llm-disabled' : '') + (inMaintenance ? ' llm-maintenance' : '');
+        
+        let labelText = `${llm.charAt(0).toUpperCase() + llm.slice(1)}`;
+        if (inMaintenance) {
+            labelText += ` (Em manutenção até ${formatDateTime(maintenance[llm].until)})`;
+        }
+        
+        label.innerHTML = `<input type="checkbox" name="llm-${llm}" value="${llm}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}> ${labelText}`;
+        list.appendChild(label);
+    });
             
             // Adiciona listeners aos checkboxes
             addCheckboxListeners();
@@ -195,27 +211,103 @@
             // Verifica mudanças iniciais
             checkForChanges();
             
-            // Mostra info
-            document.getElementById('llm-status-info').innerHTML =
-                Object.entries(status).map(([llm, active]) => `
-                    <div class="llm-status ${active ? 'active' : 'inactive'}">
-                        <i class="fas fa-${active ? 'check-circle' : 'times-circle'}"></i>
-                        ${llm.charAt(0).toUpperCase() + llm.slice(1)}: ${active ? 'Ativo' : 'Inativo'}
-                    </div>
-                `).join('');
+    // Mostra info
+    document.getElementById('llm-status-info').innerHTML =
+                Object.entries(status).map(([llm, active]) => {
+                    const inMaintenance = maintenance[llm] && maintenance[llm].inMaintenance;
+                    let statusText = active ? 'Ativo' : 'Inativo';
+                    let statusClass = active ? 'active' : 'inactive';
+                    
+                    if (inMaintenance) {
+                        statusText = 'Em manutenção';
+                        statusClass = 'maintenance';
+                    }
+                    
+                    return `
+                        <div class="llm-status ${statusClass}">
+                            <i class="fas fa-${active && !inMaintenance ? 'check-circle' : inMaintenance ? 'tools' : 'times-circle'}"></i>
+                            ${llm.charAt(0).toUpperCase() + llm.slice(1)}: ${statusText}
+                        </div>
+                    `;
+                }).join('');
+                
+            // Mostrar mensagem de manutenção se necessário
+            showMaintenanceMessage(maintenance);
         } catch (error) {
             console.error('Erro ao carregar status/preferências:', error);
         }
     }
 
-    // Ativa botão se houver alterações
+// Função para mostrar mensagem de manutenção
+function showMaintenanceMessage(maintenance) {
+    const maintenanceModels = [];
+    
+    if (maintenance.openai && maintenance.openai.inMaintenance) {
+        maintenanceModels.push({
+            name: 'OpenAI',
+            until: maintenance.openai.until,
+            reason: maintenance.openai.reason
+        });
+    }
+    
+    if (maintenance.ollama && maintenance.ollama.inMaintenance) {
+        maintenanceModels.push({
+            name: 'Ollama',
+            until: maintenance.ollama.until,
+            reason: maintenance.ollama.reason
+        });
+    }
+    
+    if (maintenanceModels.length > 0) {
+        const message = maintenanceModels.map(model => 
+            `${model.name} está em manutenção até ${formatDateTime(model.until)}. Motivo: ${model.reason}`
+        ).join('<br>');
+        
+        // Criar ou atualizar mensagem de manutenção
+        let maintenanceDiv = document.getElementById('maintenance-message');
+        if (!maintenanceDiv) {
+            maintenanceDiv = document.createElement('div');
+            maintenanceDiv.id = 'maintenance-message';
+            maintenanceDiv.className = 'maintenance-message';
+            maintenanceDiv.innerHTML = `
+                <div class="maintenance-content">
+                    <i class="fas fa-tools"></i>
+                    <div class="maintenance-text">
+                        <strong>Manutenção em Curso</strong><br>
+                        ${message}
+                    </div>
+                    <button class="maintenance-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Inserir no início da área de chat
+            const chatMain = document.querySelector('.chat-main');
+            chatMain.insertBefore(maintenanceDiv, chatMain.firstChild);
+        } else {
+            maintenanceDiv.querySelector('.maintenance-text').innerHTML = `
+                <strong>Manutenção em Curso</strong><br>
+                ${message}
+            `;
+        }
+    } else {
+        // Remover mensagem se não há manutenção
+        const maintenanceDiv = document.getElementById('maintenance-message');
+        if (maintenanceDiv) {
+            maintenanceDiv.remove();
+        }
+    }
+}
+
+// Ativa botão se houver alterações
     function checkForChanges() {
         const checkboxes = document.querySelectorAll('#llm-checkbox-list input[type=checkbox]');
-        let changed = false;
-        checkboxes.forEach(cb => {
-            if (lastPrefs[cb.value] !== cb.checked) changed = true;
-        });
-        document.getElementById('save-prefs-btn').disabled = !changed;
+    let changed = false;
+    checkboxes.forEach(cb => {
+        if (lastPrefs[cb.value] !== cb.checked) changed = true;
+    });
+    document.getElementById('save-prefs-btn').disabled = !changed;
     }
 
     // Adiciona event listeners aos checkboxes quando são criados
@@ -226,74 +318,106 @@
         });
     }
 
-    // Guardar preferências
+// Guardar preferências
     document.getElementById('save-prefs-btn').addEventListener('click', async function(e) {
-        e.preventDefault();
+    e.preventDefault();
         const checkboxes = document.querySelectorAll('#llm-checkbox-list input[type=checkbox]');
-        const prefs = {};
-        checkboxes.forEach(cb => {
-            prefs[cb.value] = cb.checked;
-        });
-        const btn = document.getElementById('save-prefs-btn');
-        btn.disabled = true;
-        const feedback = document.getElementById('llm-prefs-feedback');
-        feedback.textContent = 'A guardar...';
+    const prefs = {};
+    checkboxes.forEach(cb => {
+        prefs[cb.value] = cb.checked;
+    });
+    const btn = document.getElementById('save-prefs-btn');
+    btn.disabled = true;
+    const feedback = document.getElementById('llm-prefs-feedback');
+    feedback.textContent = 'A guardar...';
         feedback.className = 'feedback-message';
-        try {
-            await fetch('/admin/llm-user-prefs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(prefs)
-            });
-            feedback.textContent = 'Preferências guardadas com sucesso!';
+    try {
+        await fetch('/admin/llm-user-prefs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
+        });
+        feedback.textContent = 'Preferências guardadas com sucesso!';
             feedback.className = 'feedback-message success';
-            lastPrefs = { ...prefs };
+        lastPrefs = { ...prefs };
             checkForChanges(); // Verifica se ainda há mudanças
             setTimeout(() => {
                 feedback.textContent = '';
                 feedback.className = 'feedback-message';
             }, 2000);
-        } catch {
-            feedback.textContent = 'Erro ao guardar preferências.';
+    } catch {
+        feedback.textContent = 'Erro ao guardar preferências.';
             feedback.className = 'feedback-message error';
-        }
-    });
+    }
+});
 
-    // Mostrar aba do ficheiro carregado junto ao input
-    const fileInput = document.getElementById('file-upload');
-    const fileChip = document.getElementById('file-chip');
-    fileInput.addEventListener('change', function() {
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            fileChip.innerHTML = `<span class='file-chip-icon'>📎</span> <span class='file-chip-name'>${file.name}</span> <span class='file-chip-remove' title='Remover'>&times;</span>`;
-            fileChip.style.display = 'flex';
-        } else {
-            fileChip.style.display = 'none';
-        }
-    });
-    fileChip.addEventListener('click', function(e) {
-        if (e.target.classList.contains('file-chip-remove')) {
-            fileInput.value = '';
-            fileChip.style.display = 'none';
-        }
-    });
+// Mostrar aba do ficheiro carregado junto ao input
+const fileInput = document.getElementById('file-upload');
+const fileChip = document.getElementById('file-chip');
+fileInput.addEventListener('change', function() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileChip.innerHTML = `<span class='file-chip-icon'>📎</span> <span class='file-chip-name'>${file.name}</span> <span class='file-chip-remove' title='Remover'>&times;</span>`;
+        fileChip.style.display = 'flex';
+    } else {
+        fileChip.style.display = 'none';
+    }
+});
+fileChip.addEventListener('click', function(e) {
+    if (e.target.classList.contains('file-chip-remove')) {
+        fileInput.value = '';
+        fileChip.style.display = 'none';
+    }
+});
 
-    // Função para mostrar mensagem de boas-vindas
+    // Função para mostrar mensagem de boas-vindas moderna
     function showWelcomeMessage() {
         let welcomeMessage = document.getElementById('welcome-message');
         
-        // Se o elemento não existe, recriá-lo
+        // Se o elemento não existe, recriá-lo com o design moderno
         if (!welcomeMessage) {
             welcomeMessage = document.createElement('div');
             welcomeMessage.id = 'welcome-message';
             welcomeMessage.className = 'welcome-message';
-            welcomeMessage.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; padding: 40px 20px;';
             welcomeMessage.innerHTML = `
-                <div class="welcome-content" style="text-align: center; max-width: 500px; background: #fff; border-radius: 20px; padding: 40px 30px; box-shadow: 0 4px 20px rgba(24, 60, 124, 0.1); border: 1px solid rgba(24, 60, 124, 0.1);">
-                    <h2 style="color: #183c7c; margin: 0 0 15px 0; font-size: 1.8rem; font-weight: 600;"><i class="fas fa-shield-alt"></i> Bem-vindo ao PromptShield</h2>
-                    <p style="color: #64748b; margin: 0 0 20px 0; font-size: 1.1rem; line-height: 1.6;">Comece uma nova conversa para começar a usar a IA de forma segura.</p>
-                    <div class="welcome-tips" style="background: rgba(24, 60, 124, 0.05); border-radius: 12px; padding: 15px; border-left: 4px solid #183c7c;">
-                        <p style="margin: 0; font-size: 0.95rem; color: #475569;"><strong>💡 Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
+                <div class="welcome-content">
+                    <h2><i class="fas fa-shield-alt"></i> Bem-vindo ao PromptShield</h2>
+                    <p>Comece uma nova conversa para começar a usar a IA de forma segura.</p>
+                    
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <div>
+                                <div class="feature-title">Upload de Ficheiros</div>
+                                <div class="feature-desc">Analise documentos com IA segura</div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div>
+                                <div class="feature-title">Chat Inteligente</div>
+                                <div class="feature-desc">Conversas privadas e seguras</div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div>
+                                <div class="feature-title">Proteção de Dados</div>
+                                <div class="feature-desc">Seus dados sempre protegidos</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="welcome-tips">
+                        <p><strong>💡 Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
                     </div>
                 </div>
             `;
@@ -311,14 +435,14 @@
         }
     }
 
-    // === MULTICHAT UI MODERNA ===
-    let currentChatId = null;
-    const sidebarChats = document.getElementById('sidebar-chats');
-    const chatMessages = document.getElementById('chat-messages');
+// === MULTICHAT UI MODERNA ===
+let currentChatId = null;
+const sidebarChats = document.getElementById('sidebar-chats');
+const chatMessages = document.getElementById('chat-messages');
 
-    async function loadChats() {
-        const chats = await fetch('/api/chat').then(r => r.json());
-        sidebarChats.innerHTML = '';
+async function loadChats() {
+    const chats = await fetch('/api/chat').then(r => r.json());
+    sidebarChats.innerHTML = '';
         
         // Se não há chats, mostrar mensagem de estado vazio
         if (chats.length === 0) {
@@ -335,40 +459,36 @@
             return;
         }
         
-        chats.forEach((chat, idx) => {
-            const div = document.createElement('div');
-            div.className = 'chat-list-item' + (currentChatId===chat.id?' selected':'');
-            
-            // Mostrar nome do chat ou "Novo chat" se estiver vazio
-            const chatName = chat.name && chat.name.trim() !== '' ? chat.name : 'Novo chat';
-            div.textContent = chatName;
-            
-            div.onclick = () => selectChat(chat.id);
-            // Botão deletar (SVG minimalista)
-            const del = document.createElement('button');
-            del.className = 'delete-chat-btn';
-            del.title = 'Apagar chat';
-            del.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-            del.onclick = (e) => { e.stopPropagation(); deleteChat(chat.id); };
-            div.appendChild(del);
-            sidebarChats.appendChild(div);
-        });
-    }
-    async function selectChat(chatId) {
-        currentChatId = chatId;
-        await loadChats();
-        // Limpa mensagens
-        chatMessages.innerHTML = '';
-        // Carrega histórico
-        const hist = await fetch(`/api/chat/${chatId}/questions`).then(r=>r.json());
+    chats.forEach((chat, idx) => {
+        const div = document.createElement('div');
+        div.className = 'chat-list-item' + (currentChatId===chat.id?' selected':'');
         
-        // Se há histórico, esconder mensagem de boas-vindas
-        if (hist.length > 0) {
-            hideWelcomeMessage();
-        } else {
-            // Se não há histórico, mostrar mensagem de boas-vindas
-            showWelcomeMessage();
-        }
+        // Mostrar nome do chat ou "Novo chat" se estiver vazio
+        const chatName = chat.name && chat.name.trim() !== '' ? chat.name : 'Novo chat';
+        div.textContent = chatName;
+        
+        div.onclick = () => selectChat(chat.id);
+        // Botão deletar (SVG minimalista)
+        const del = document.createElement('button');
+        del.className = 'delete-chat-btn';
+        del.title = 'Apagar chat';
+        del.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+        del.onclick = (e) => { e.stopPropagation(); deleteChat(chat.id); };
+        div.appendChild(del);
+        sidebarChats.appendChild(div);
+    });
+}
+async function selectChat(chatId) {
+    currentChatId = chatId;
+    await loadChats();
+    // Limpa mensagens
+    chatMessages.innerHTML = '';
+    // Carrega histórico
+    const hist = await fetch(`/api/chat/${chatId}/questions`).then(r=>r.json());
+        
+    // Se há histórico, mostrar as mensagens
+    if (hist.length > 0) {
+        hideWelcomeMessage();
         
         hist.forEach(q => {
             // Para o histórico, não temos informação sobre ficheiros anexados
@@ -397,158 +517,206 @@
                 q.answer, 'llm-' + (q.model ? q.model.toLowerCase() : 'llm')
             );
         });
-        // Scroll para baixo após carregar histórico
-        setTimeout(scrollToBottom, 100);
+    } else {
+        // Se não há histórico, mostrar mensagem de boas-vindas moderna
+        showWelcomeMessage();
     }
-    async function deleteChat(chatId) {
-        try {
-            const response = await fetch(`/api/chat/${chatId}`, {method:'DELETE'});
-            if (response.ok) {
-                const responseData = await response.json();
-                if(currentChatId===chatId) currentChatId=null;
-                await loadChats();
+    
+    // Scroll para baixo após carregar histórico
+    setTimeout(scrollToBottom, 100);
+}
+async function deleteChat(chatId) {
+    try {
+        const response = await fetch(`/api/chat/${chatId}`, {method:'DELETE'});
+        if (response.ok) {
+            const responseData = await response.json();
+            if(currentChatId===chatId) currentChatId=null;
+            await loadChats();
                 
                 // Limpar mensagens e mostrar boas-vindas
-                chatMessages.innerHTML = '';
+            chatMessages.innerHTML = '';
                 
                 // Aguardar um pouco antes de mostrar a mensagem de boas-vindas
                 setTimeout(() => {
                     showWelcomeMessage();
                 }, 100);
                 
-                // Mostrar mensagem de sucesso
-                if (responseData.message) {
-                    // Criar uma notificação temporária
-                    const notification = document.createElement('div');
-                    notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:8px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
-                    notification.textContent = responseData.message;
-                    document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 3000);
-                }
-            } else {
-                const errorData = await response.json();
-                alert('Erro ao apagar chat: ' + (errorData.error || 'Erro desconhecido'));
+            // Mostrar mensagem de sucesso
+            if (responseData.message) {
+                // Criar uma notificação temporária
+                const notification = document.createElement('div');
+                notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:8px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+                notification.textContent = responseData.message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
             }
-        } catch (error) {
-            console.error('Erro ao apagar chat:', error);
-            alert('Erro ao apagar chat. Tente novamente.');
+        } else {
+            const errorData = await response.json();
+            alert('Erro ao apagar chat: ' + (errorData.error || 'Erro desconhecido'));
         }
+    } catch (error) {
+        console.error('Erro ao apagar chat:', error);
+        alert('Erro ao apagar chat. Tente novamente.');
     }
-    document.getElementById('new-chat-btn').addEventListener('click', async function() {
-        // Cria chat vazio (sem nome)
+}
+document.getElementById('new-chat-btn').addEventListener('click', async function() {
+    // Cria chat vazio (sem nome)
+    const chat = await fetch('/api/chat', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name: ''})
+    }).then(r=>r.json());
+    currentChatId = chat.id;
+    await loadChats();
+    
+    // Limpa mensagens e mostra mensagem de boas-vindas moderna
+    chatMessages.innerHTML = '';
+    showWelcomeMessage();
+    document.getElementById('question').focus();
+});
+// Carrega chats ao iniciar
+loadChats();
+
+// Garantir que o input fica sempre visível quando clicado
+document.getElementById('question').addEventListener('focus', function() {
+    setTimeout(scrollToBottom, 100);
+});
+
+    // Permitir CTRL + Enter para quebra de linha e Enter para enviar
+    document.getElementById('question').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            if (e.ctrlKey) {
+                // CTRL + Enter: quebra de linha
+                e.preventDefault();
+                const textarea = this;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const value = textarea.value;
+                
+                // Insere quebra de linha na posição do cursor
+                textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                
+                // Reposiciona o cursor após a quebra de linha
+                textarea.selectionStart = textarea.selectionEnd = start + 1;
+                
+                // Ajusta a altura do textarea
+                autoResize(textarea);
+            } else if (!e.shiftKey) {
+                // Enter (sem CTRL nem SHIFT): envia a mensagem
+                e.preventDefault();
+                document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+            }
+            // SHIFT + Enter: comportamento padrão (quebra de linha)
+        }
+    });
+
+    // Auto-resize do textarea
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+
+    // Aplicar auto-resize quando o conteúdo muda
+    document.getElementById('question').addEventListener('input', function() {
+        autoResize(this);
+    });
+
+// Scroll para baixo quando a página carrega
+window.addEventListener('load', function() {
+    setTimeout(scrollToBottom, 200);
+});
+
+// Lógica de envio de mensagem e upload de ficheiros
+const chatForm = document.getElementById('chat-form');
+
+chatForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+        let question = document.getElementById('question').value.trim();
+        if (!question) return;
+
+    // Se não houver chat selecionado, cria um novo com o nome igual à primeira frase
+    if (!currentChatId) {
+        let firstSentence = question.split(/[.!?]/)[0];
+        if (firstSentence.length > 30) firstSentence = firstSentence.slice(0, 30) + '...';
         const chat = await fetch('/api/chat', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({name: ''})
-        }).then(r=>r.json());
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: firstSentence })
+        }).then(r => r.json());
         currentChatId = chat.id;
         await loadChats();
-        selectChat(chat.id);
-        // Limpa mensagens e mostra mensagem de boas-vindas
-        chatMessages.innerHTML = '';
-        showWelcomeMessage();
-        document.getElementById('question').focus();
-    });
-    // Carrega chats ao iniciar
-    loadChats();
-
-    // Garantir que o input fica sempre visível quando clicado
-    document.getElementById('question').addEventListener('focus', function() {
-        setTimeout(scrollToBottom, 100);
-    });
-
-    // Scroll para baixo quando a página carrega
-    window.addEventListener('load', function() {
-        setTimeout(scrollToBottom, 200);
-    });
-
-    // Lógica de envio de mensagem e upload de ficheiros
-    const chatForm = document.getElementById('chat-form');
-
-    chatForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        let question = document.getElementById('question').value;
-        if (!question.trim()) return;
-
-        // Se não houver chat selecionado, cria um novo com o nome igual à primeira frase
-        if (!currentChatId) {
+    } else {
+        // Se o chat selecionado não tem nome (chat vazio), atualiza o nome na primeira mensagem
+        const selectedChat = Array.from(document.querySelectorAll('.chat-list-item')).find(div => div.classList.contains('selected'));
+        if (selectedChat && (selectedChat.textContent.trim() === '' || selectedChat.textContent.trim() === 'Chat ' + currentChatId || selectedChat.textContent.trim() === 'Novo chat')) {
             let firstSentence = question.split(/[.!?]/)[0];
             if (firstSentence.length > 30) firstSentence = firstSentence.slice(0, 30) + '...';
-            const chat = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: firstSentence })
-            }).then(r => r.json());
-            currentChatId = chat.id;
-            await loadChats();
-        } else {
-            // Se o chat selecionado não tem nome (chat vazio), atualiza o nome na primeira mensagem
-            const selectedChat = Array.from(document.querySelectorAll('.chat-list-item')).find(div => div.classList.contains('selected'));
-            if (selectedChat && (selectedChat.textContent.trim() === '' || selectedChat.textContent.trim() === 'Chat ' + currentChatId || selectedChat.textContent.trim() === 'Novo chat')) {
-                let firstSentence = question.split(/[.!?]/)[0];
-                if (firstSentence.length > 30) firstSentence = firstSentence.slice(0, 30) + '...';
-                try {
-                    const updateResponse = await fetch(`/api/chat/${currentChatId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: firstSentence })
-                    });
-                    if (updateResponse.ok) {
-                        await loadChats();
-                    }
-                } catch (error) {
-                    console.error('Erro ao atualizar nome do chat:', error);
+            try {
+                const updateResponse = await fetch(`/api/chat/${currentChatId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: firstSentence })
+                });
+                if (updateResponse.ok) {
+                    await loadChats();
                 }
+            } catch (error) {
+                console.error('Erro ao atualizar nome do chat:', error);
             }
         }
+    }
 
-        let fileIds = [];
-        if (fileInput.files.length > 0) {
-            const formData = new FormData();
-            for (const file of fileInput.files) {
-                formData.append('files', file);
-            }
-            const uploadResp = await fetch('/files/upload', { method: 'POST', body: formData });
-            if (uploadResp.ok) {
-                fileIds = await uploadResp.json();
-            } else {
-                alert('Erro ao fazer upload dos ficheiros.');
-                return;
-            }
+    let fileIds = [];
+    if (fileInput.files.length > 0) {
+        const formData = new FormData();
+        for (const file of fileInput.files) {
+            formData.append('files', file);
         }
+        const uploadResp = await fetch('/files/upload', { method: 'POST', body: formData });
+        if (uploadResp.ok) {
+            fileIds = await uploadResp.json();
+        } else {
+            alert('Erro ao fazer upload dos ficheiros.');
+            return;
+        }
+    }
         // Guarda o nome do ficheiro antes de limpar o input
         let attachedFileName = null;
         if (fileInput.files.length > 0) {
             attachedFileName = fileInput.files[0].name;
         }
         
-        fileInput.value = '';
-        fileChip.style.display = 'none';
-        document.getElementById('question').value = '';
+    fileInput.value = '';
+    fileChip.style.display = 'none';
         
-        const resp = await fetch('/ai/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, fileIds, chatId: currentChatId })
-        });
-        if (resp.ok) {
-            const data = await resp.json();
+        // Limpa o textarea e reseta a altura
+        const textarea = document.getElementById('question');
+        textarea.value = '';
+        textarea.style.height = '40px'; // Reset para altura mínima
+        
+    const resp = await fetch('/ai/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, fileIds, chatId: currentChatId })
+    });
+    if (resp.ok) {
+        const data = await resp.json();
             
-            if (data.maskedQuestion) {
+        if (data.maskedQuestion) {
                 // Mostra apenas a pergunta original, não o conteúdo dos ficheiros
                 addMessage('Você', data.maskedQuestion, 'user', false, attachedFileName);
-            }
-            if (data.llmAnswers && Array.isArray(data.llmAnswers)) {
+        }
+        if (data.llmAnswers && Array.isArray(data.llmAnswers)) {
                 data.llmAnswers.forEach(ans => {
                     addLLMAnswers(ans);
                 });
-            }
-        } else {
-            addMessage('Erro', 'Falha ao obter resposta do chatbot.', 'error');
         }
-    });
+    } else {
+        addMessage('Erro', 'Falha ao obter resposta do chatbot.', 'error');
+    }
+});
 
-    function addLLMAnswers(answerText) {
+function addLLMAnswers(answerText) {
         // Verifica se a resposta começa com um identificador de modelo
         const modelMatch = answerText.match(/^(OpenAI|Ollama):\s*(.*)/i);
         
@@ -579,8 +747,8 @@
         // Esconder mensagem de boas-vindas quando a primeira mensagem é adicionada
         hideWelcomeMessage();
         
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'chat-message ' + type;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-message ' + type;
         
         // Se há ficheiro anexado, adiciona o chip do ficheiro
         let fileChipHTML = '';
@@ -598,11 +766,11 @@
             ${fileChipHTML}
             <span class="message-content"></span>
         `;
-        chatMessages.appendChild(msgDiv);
-        
-        // Scroll para baixo imediatamente
-        scrollToBottom();
-        
+    chatMessages.appendChild(msgDiv);
+    
+    // Scroll para baixo imediatamente
+    scrollToBottom();
+    
         const span = msgDiv.querySelector('.message-content');
         
         // Processa o texto para quebras de linha adequadas
@@ -610,50 +778,50 @@
             .replace(/\n\n/g, '<br><br>')
             .replace(/\n/g, '<br>');
         
-        if (typingEffect) {
+    if (typingEffect) {
             // Para efeito de digitação com HTML, vamos processar de forma diferente
             const textWithoutHTML = text.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '');
-            let i = 0;
+        let i = 0;
             let currentHTML = '';
             
-            function typeChar() {
+        function typeChar() {
                 if (i <= textWithoutHTML.length) {
                     // Reconstrói o HTML progressivamente
                     const currentText = textWithoutHTML.slice(0, i);
                     currentHTML = currentText.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
                     span.innerHTML = currentHTML;
-                    scrollToBottom();
-                    i++;
-                    setTimeout(typeChar, 8); // velocidade do efeito
-                } else {
+                scrollToBottom();
+                i++;
+                setTimeout(typeChar, 8); // velocidade do efeito
+            } else {
                     // Garante que o HTML final está correto
                     span.innerHTML = processedText;
-                    scrollToBottom();
-                }
+                scrollToBottom();
             }
-            typeChar();
-        } else {
-            span.innerHTML = processedText;
-            scrollToBottom();
         }
+        typeChar();
+    } else {
+            span.innerHTML = processedText;
+        scrollToBottom();
     }
+}
 
-    // Função para scroll suave para baixo
-    function scrollToBottom() {
-        chatMessages.scrollTo({
-            top: chatMessages.scrollHeight,
-            behavior: 'smooth'
-        });
-    }
+// Função para scroll suave para baixo
+function scrollToBottom() {
+    chatMessages.scrollTo({
+        top: chatMessages.scrollHeight,
+        behavior: 'smooth'
+    });
+}
 
-    // Preferências de LLM em modal
-    const llmPrefsModal = document.getElementById('llm-prefs-modal');
+// Preferências de LLM em modal
+const llmPrefsModal = document.getElementById('llm-prefs-modal');
     const settingsBtn = document.getElementById('settings-btn');
     const closePrefsBtn = document.getElementById('close-prefs-btn');
     
     if (settingsBtn) {
         settingsBtn.addEventListener('click', () => {
-            llmPrefsModal.style.display = 'flex';
+    llmPrefsModal.style.display = 'flex';
             loadLLMStatusAndPrefs();
         });
     }
@@ -668,9 +836,9 @@
     const modalOverlay = document.querySelector('.modal-overlay');
     if (modalOverlay) {
         modalOverlay.addEventListener('click', () => {
-            llmPrefsModal.style.display = 'none';
+    llmPrefsModal.style.display = 'none';
         });
     }
-    </script>
+</script>
 </body>
 </html> 

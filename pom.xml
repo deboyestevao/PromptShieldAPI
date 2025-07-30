@@ -13,7 +13,7 @@
 	<name>PromptShieldAPI</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 		<spring-cloud.version>2023.0.2</spring-cloud.version>
 	</properties>
 	<dependencies>
@@ -21,6 +21,11 @@
 			<!--  Mail  -->
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<!--  Spring Boot Starter (contains SpringApplication) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<!--  JWT  -->
 		<dependency>
@@ -99,12 +104,10 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.7.3</version>
 		</dependency>
-
-		</dependency>
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
-		<artifactId>hibernate-community-dialects</artifactId>
-	</dependency>
+			<artifactId>hibernate-community-dialects</artifactId>
+		</dependency>
 		<!--  Cloud Config  -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

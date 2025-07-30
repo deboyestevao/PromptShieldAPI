@@ -12,12 +12,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.azure.openai.AzureOpenAiChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -111,8 +114,18 @@ public class AiService {
         
         // Carrega o prompt do sistema do arquivo de texto
         try {
-            String systemPrompt = new String(getClass().getResourceAsStream("/system-prompt.txt").readAllBytes());
-            context.append(systemPrompt).append("NOME DO USER: ").append(getCurrentUser().getFirstName()).append("\n\n=== HISTÓRICO DA CONVERSA ===\n");
+            String systemPrompt = new String(getClass().getResourceAsStream("/system-prompt.config").readAllBytes());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM 'de' yyyy, HH:mm", new Locale("pt", "PT"));
+            String dataFormatada = LocalDateTime.now().format(formatter);
+
+            context.append("\nDIA DA SEMANA, DIA E HORA ATUAL: ").append(dataFormatada)
+                    .append(systemPrompt)
+                    .append("\nNOME DO USER: ")
+                    .append(getCurrentUser().getFirstName())
+                    .append("\nROLE:")
+                    .append(getCurrentUser().getRole())
+                    .append("\n\n=== HISTÓRICO DA CONVERSA ===\n");
         } catch (Exception e) {
             log.error("Erro ao carregar prompt do sistema: {}", e.getMessage());
             context.append("Erro ao carregar configurações do sistema.\n\n=== HISTÓRICO DA CONVERSA ===\n");

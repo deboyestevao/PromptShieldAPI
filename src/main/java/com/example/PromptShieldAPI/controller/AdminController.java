@@ -2,6 +2,7 @@ package com.example.PromptShieldAPI.controller;
 
 import com.example.PromptShieldAPI.dto.SystemPreferencesRequest;
 import com.example.PromptShieldAPI.dto.UserPreferencesRequest;
+import com.example.PromptShieldAPI.dto.TemporaryDisableRequest;
 import com.example.PromptShieldAPI.model.SystemConfig;
 import com.example.PromptShieldAPI.model.UserPreferences;
 import com.example.PromptShieldAPI.model.AccountReport;
@@ -81,7 +82,118 @@ public class AdminController {
     public ResponseEntity<?> getLLMStatus() {
         boolean openai = systemConfigService.isModelEnabled(com.example.PromptShieldAPI.model.SystemConfig.ModelType.OPENAI);
         boolean ollama = systemConfigService.isModelEnabled(com.example.PromptShieldAPI.model.SystemConfig.ModelType.OLLAMA);
-        return ResponseEntity.ok(java.util.Map.of("openai", openai, "ollama", ollama));
+        
+        // Obter informações detalhadas sobre desligamentos temporários
+        SystemConfig openaiConfig = systemConfigService.getModelConfig(SystemConfig.ModelType.OPENAI);
+        SystemConfig ollamaConfig = systemConfigService.getModelConfig(SystemConfig.ModelType.OLLAMA);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("openai", openai);
+        response.put("ollama", ollama);
+        
+        // Informações sobre desligamentos temporários
+        Map<String, Object> openaiDetails = new HashMap<>();
+        openaiDetails.put("enabled", openai);
+        openaiDetails.put("temporaryDisabled", openaiConfig != null && openaiConfig.isTemporaryDisabled());
+        if (openaiConfig != null && openaiConfig.isTemporaryDisabled()) {
+            openaiDetails.put("temporaryDisabledUntil", openaiConfig.getTemporaryDisabledEnd());
+            openaiDetails.put("temporaryDisabledReason", openaiConfig.getTemporaryDisabledReason());
+        }
+        response.put("openaiDetails", openaiDetails);
+        
+        Map<String, Object> ollamaDetails = new HashMap<>();
+        ollamaDetails.put("enabled", ollama);
+        ollamaDetails.put("temporaryDisabled", ollamaConfig != null && ollamaConfig.isTemporaryDisabled());
+        if (ollamaConfig != null && ollamaConfig.isTemporaryDisabled()) {
+            ollamaDetails.put("temporaryDisabledUntil", ollamaConfig.getTemporaryDisabledEnd());
+            ollamaDetails.put("temporaryDisabledReason", ollamaConfig.getTemporaryDisabledReason());
+        }
+        response.put("ollamaDetails", ollamaDetails);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/llm-status-simple")
+    public ResponseEntity<?> getLLMStatusSimple() {
+        boolean openai = systemConfigService.isModelEnabled(com.example.PromptShieldAPI.model.SystemConfig.ModelType.OPENAI);
+        boolean ollama = systemConfigService.isModelEnabled(com.example.PromptShieldAPI.model.SystemConfig.ModelType.OLLAMA);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("openai", openai);
+        response.put("ollama", ollama);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/llm-maintenance-status")
+    public ResponseEntity<?> getLLMMaintenanceStatus() {
+        SystemConfig openaiConfig = systemConfigService.getModelConfig(SystemConfig.ModelType.OPENAI);
+        SystemConfig ollamaConfig = systemConfigService.getModelConfig(SystemConfig.ModelType.OLLAMA);
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        // Verificar OpenAI
+        if (openaiConfig != null && openaiConfig.isTemporaryDisabled()) {
+            Map<String, Object> openaiMaintenance = new HashMap<>();
+            openaiMaintenance.put("inMaintenance", true);
+            openaiMaintenance.put("until", openaiConfig.getTemporaryDisabledEnd());
+            openaiMaintenance.put("reason", openaiConfig.getTemporaryDisabledReason());
+            response.put("openai", openaiMaintenance);
+        } else {
+            response.put("openai", Map.of("inMaintenance", false));
+        }
+        
+        // Verificar Ollama
+        if (ollamaConfig != null && ollamaConfig.isTemporaryDisabled()) {
+            Map<String, Object> ollamaMaintenance = new HashMap<>();
+            ollamaMaintenance.put("inMaintenance", true);
+            ollamaMaintenance.put("until", ollamaConfig.getTemporaryDisabledEnd());
+            ollamaMaintenance.put("reason", ollamaConfig.getTemporaryDisabledReason());
+            response.put("ollama", ollamaMaintenance);
+        } else {
+            response.put("ollama", Map.of("inMaintenance", false));
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/llm/temporary-disable")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> temporarilyDisableLLM(@RequestBody TemporaryDisableRequest request) {
+        try {
+            String adminName = SecurityContextHolder.getContext().getAuthentication().getName();
+            SystemConfig.ModelType modelType = SystemConfig.ModelType.valueOf(request.getModel().toUpperCase());
+            
+            systemConfigService.temporarilyDisableModel(
+                modelType, 
+                request.getDisableUntil(), 
+                request.getReason(), 
+                adminName
+            );
+            
+            return ResponseEntity.ok(Map.of("message", "Modelo " + request.getModel() + " desligado temporariamente até " + request.getDisableUntil()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Modelo inválido. Use 'OPENAI' ou 'OLLAMA'"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao desligar modelo temporariamente"));
+        }
+    }
+
+    @PostMapping("/llm/remove-temporary-disable")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> removeTemporaryDisable(@RequestBody Map<String, String> request) {
+        try {
+            String adminName = SecurityContextHolder.getContext().getAuthentication().getName();
+            SystemConfig.ModelType modelType = SystemConfig.ModelType.valueOf(request.get("model").toUpperCase());
+            
+            systemConfigService.removeTemporaryDisable(modelType, adminName);
+            
+            return ResponseEntity.ok(Map.of("message", "Desligamento temporário removido para o modelo " + request.get("model")));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Modelo inválido. Use 'OPENAI' ou 'OLLAMA'"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao remover desligamento temporário"));
+        }
     }
 
     @GetMapping("/api/config-history")

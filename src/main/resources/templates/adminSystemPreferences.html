@@ -48,6 +48,11 @@
                     <div class="status-badge" id="status-openai-badge">
                         <span id="status-openai-text">...</span>
                     </div>
+                    <div id="openai-temp-info" class="temp-disable-info" style="display: none;">
+                        <span class="temp-disable-text">Desligado temporariamente</span>
+                        <span class="temp-disable-time" id="openai-temp-time"></span>
+                        <span class="temp-disable-reason" id="openai-temp-reason"></span>
+                    </div>
                 </div>
             </div>
             <div class="status-card" id="status-ollama">
@@ -60,6 +65,11 @@
                     <span class="status-label">Ollama</span>
                     <div class="status-badge" id="status-ollama-badge">
                         <span id="status-ollama-text">...</span>
+                    </div>
+                    <div id="ollama-temp-info" class="temp-disable-info" style="display: none;">
+                        <span class="temp-disable-text">Desligado temporariamente</span>
+                        <span class="temp-disable-time" id="ollama-temp-time"></span>
+                        <span class="temp-disable-reason" id="ollama-temp-reason"></span>
                     </div>
                 </div>
             </div>
@@ -76,6 +86,11 @@
                 </svg>
                 Modelos LLM Disponíveis
             </h2>
+        </div>
+        
+        <!-- Mensagens informativas -->
+        <div id="status-messages" class="status-messages">
+            <!-- Mensagens serão adicionadas dinamicamente -->
         </div>
         
         <form id="system-prefs-form" class="system-config-form">
@@ -127,6 +142,103 @@
         </form>
     </section>
 
+    <!-- Seção de Desligamento Temporário -->
+    <section class="temporary-disable-section">
+        <div class="temp-disable-header">
+            <h2>
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"/>
+                </svg>
+                Desligamento Temporário
+            </h2>
+            <p class="section-description">Desligue temporariamente um modelo LLM para evitar reativações automáticas durante manutenções ou testes.</p>
+        </div>
+
+        <div class="temp-disable-options">
+            <!-- OpenAI Temporary Disable -->
+            <div class="temp-disable-card">
+                <div class="temp-disable-card-header">
+                    <div class="model-info">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
+                        </svg>
+                        <span>OpenAI</span>
+                    </div>
+                    <button type="button" class="temp-disable-btn" id="openai-temp-disable-btn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"/>
+                        </svg>
+                        Desligar Temporariamente
+                    </button>
+                </div>
+                <div id="openai-temp-form" class="temp-disable-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="openai-disable-until">Desligar até:</label>
+                        <input type="datetime-local" id="openai-disable-until" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="openai-disable-reason">Motivo:</label>
+                        <textarea id="openai-disable-reason" class="form-control" placeholder="Ex: Manutenção programada, Testes de sistema..." rows="2" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="hideTempForm('openai')">Cancelar</button>
+                        <button type="button" class="confirm-btn" onclick="confirmTempDisable('OPENAI')">Confirmar</button>
+                    </div>
+                </div>
+                <div id="openai-temp-remove" class="temp-remove-section" style="display: none;">
+                    <p>Este modelo está desligado temporariamente.</p>
+                    <button type="button" class="remove-temp-btn" onclick="removeTempDisable('OPENAI')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                        </svg>
+                        Remover Desligamento
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ollama Temporary Disable -->
+            <div class="temp-disable-card">
+                <div class="temp-disable-card-header">
+                    <div class="model-info">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2"/>
+                        </svg>
+                        <span>Ollama</span>
+                    </div>
+                    <button type="button" class="temp-disable-btn" id="ollama-temp-disable-btn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"/>
+                        </svg>
+                        Desligar Temporariamente
+                    </button>
+                </div>
+                <div id="ollama-temp-form" class="temp-disable-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="ollama-disable-until">Desligar até:</label>
+                        <input type="datetime-local" id="ollama-disable-until" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ollama-disable-reason">Motivo:</label>
+                        <textarea id="ollama-disable-reason" class="form-control" placeholder="Ex: Manutenção programada, Testes de sistema..." rows="2" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="hideTempForm('ollama')">Cancelar</button>
+                        <button type="button" class="confirm-btn" onclick="confirmTempDisable('OLLAMA')">Confirmar</button>
+                    </div>
+                </div>
+                <div id="ollama-temp-remove" class="temp-remove-section" style="display: none;">
+                    <p>Este modelo está desligado temporariamente.</p>
+                    <button type="button" class="remove-temp-btn" onclick="removeTempDisable('OLLAMA')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                        </svg>
+                        Remover Desligamento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Seção de Histórico de Configurações -->
     <section class="config-history-section">
         <div class="history-header">
@@ -144,24 +256,8 @@
             </a>
         </div>
         
-        <div class="history-preview">
-            <div id="config-history-loading" class="history-loading">
-                <div class="loading-spinner"></div>
-                <span>A carregar histórico...</span>
-            </div>
-            
-            <div id="config-history-content" class="history-content" style="display:none;">
-                <div id="config-history-list" class="history-list"></div>
-            </div>
-            
-            <div id="config-history-empty" class="history-empty" style="display:none;">
-                <div class="empty-icon">
-                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" stroke-width="2"/>
-                    </svg>
-                </div>
-                <p>Nenhuma alteração registada ainda.</p>
-            </div>
+        <div class="history-list" id="config-history-list">
+            <!-- Histórico será carregado dinamicamente -->
         </div>
     </section>
 </main>
@@ -422,6 +518,284 @@ function formatDateTime(dateTimeString) {
     });
 }
 
+// Funções para desligamento temporário
+function showTempForm(model) {
+    document.getElementById(`${model}-temp-form`).style.display = 'block';
+    document.getElementById(`${model}-temp-disable-btn`).style.display = 'none';
+    
+    // Definir data mínima como agora
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById(`${model}-disable-until`).min = localDateTime;
+    document.getElementById(`${model}-disable-until`).value = localDateTime;
+}
+
+function hideTempForm(model) {
+    document.getElementById(`${model}-temp-form`).style.display = 'none';
+    document.getElementById(`${model}-temp-disable-btn`).style.display = 'block';
+    
+    // Limpar campos
+    document.getElementById(`${model}-disable-until`).value = '';
+    document.getElementById(`${model}-disable-reason`).value = '';
+}
+
+async function confirmTempDisable(model) {
+    const disableUntil = document.getElementById(`${model.toLowerCase()}-disable-until`).value;
+    const reason = document.getElementById(`${model.toLowerCase()}-disable-reason`).value;
+    
+    if (!disableUntil || !reason) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/admin/llm/temporary-disable', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: model,
+                disableUntil: disableUntil,
+                reason: reason
+            })
+        });
+        
+        if (response.ok) {
+            hideTempForm(model.toLowerCase());
+            loadSystemPrefs();
+            loadConfigHistory();
+            alert('Modelo desligado temporariamente com sucesso!');
+        } else {
+            const error = await response.json();
+            alert('Erro: ' + (error.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        alert('Erro de conexão: ' + error.message);
+    }
+}
+
+async function removeTempDisable(model) {
+    if (!confirm('Tem certeza que deseja remover o desligamento temporário?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/admin/llm/remove-temporary-disable', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: model
+            })
+        });
+        
+        if (response.ok) {
+            loadSystemPrefs();
+            loadConfigHistory();
+            alert('Desligamento temporário removido com sucesso!');
+        } else {
+            const error = await response.json();
+            alert('Erro: ' + (error.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        alert('Erro de conexão: ' + error.message);
+    }
+}
+
+// Atualizar função updateLlmStatusPanel para incluir informações de desligamento temporário
+function updateLlmStatusPanel(data) {
+    const openai = !!data.openai;
+    const ollama = !!data.ollama;
+    
+    // OpenAI Status
+    const openaiText = document.getElementById('status-openai-text');
+    const openaiBadge = document.getElementById('status-openai-badge');
+    const openaiCard = document.getElementById('status-openai');
+    const openaiTempInfo = document.getElementById('openai-temp-info');
+    const openaiTempTime = document.getElementById('openai-temp-time');
+    const openaiTempReason = document.getElementById('openai-temp-reason');
+    
+    // OpenAI Switch
+    const openaiSwitch = document.getElementById('openai-enabled');
+    const openaiOption = openaiSwitch.closest('.config-option');
+    
+    if (openai) {
+        openaiText.textContent = 'Online';
+        openaiBadge.className = 'status-badge online';
+        openaiCard.className = 'status-card online';
+        openaiTempInfo.style.display = 'none';
+        
+        // Switch normal
+        openaiOption.className = 'config-option';
+        openaiSwitch.disabled = false;
+    } else {
+        openaiText.textContent = 'Offline';
+        openaiBadge.className = 'status-badge offline';
+        openaiCard.className = 'status-card offline';
+        
+        // Verificar se está em desligamento temporário
+        if (data.openaiDetails && data.openaiDetails.temporaryDisabled) {
+            openaiTempInfo.style.display = 'block';
+            openaiTempTime.textContent = 'Até: ' + formatDateTime(data.openaiDetails.temporaryDisabledUntil);
+            openaiTempReason.textContent = 'Motivo: ' + data.openaiDetails.temporaryDisabledReason;
+            
+            // Mostrar seção de remoção
+            document.getElementById('openai-temp-remove').style.display = 'block';
+            document.getElementById('openai-temp-disable-btn').style.display = 'none';
+            
+            // Switch temporariamente desativado
+            openaiOption.className = 'config-option temporarily-disabled';
+            openaiSwitch.disabled = true;
+            openaiOption.setAttribute('data-tooltip', `Em manutenção até ${formatDateTime(data.openaiDetails.temporaryDisabledUntil)}. Motivo: ${data.openaiDetails.temporaryDisabledReason}`);
+        } else {
+            openaiTempInfo.style.display = 'none';
+            document.getElementById('openai-temp-remove').style.display = 'none';
+            document.getElementById('openai-temp-disable-btn').style.display = 'block';
+            
+            // Switch permanentemente desativado
+            openaiOption.className = 'config-option permanently-disabled';
+            openaiSwitch.disabled = false;
+            openaiOption.setAttribute('data-tooltip', 'Modelo desativado no sistema');
+        }
+    }
+    
+    // Ollama Status
+    const ollamaText = document.getElementById('status-ollama-text');
+    const ollamaBadge = document.getElementById('status-ollama-badge');
+    const ollamaCard = document.getElementById('status-ollama');
+    const ollamaTempInfo = document.getElementById('ollama-temp-info');
+    const ollamaTempTime = document.getElementById('ollama-temp-time');
+    const ollamaTempReason = document.getElementById('ollama-temp-reason');
+    
+    // Ollama Switch
+    const ollamaSwitch = document.getElementById('ollama-enabled');
+    const ollamaOption = ollamaSwitch.closest('.config-option');
+    
+    if (ollama) {
+        ollamaText.textContent = 'Online';
+        ollamaBadge.className = 'status-badge online';
+        ollamaCard.className = 'status-card online';
+        ollamaTempInfo.style.display = 'none';
+        
+        // Switch normal
+        ollamaOption.className = 'config-option';
+        ollamaSwitch.disabled = false;
+    } else {
+        ollamaText.textContent = 'Offline';
+        ollamaBadge.className = 'status-badge offline';
+        ollamaCard.className = 'status-card offline';
+        
+        // Verificar se está em desligamento temporário
+        if (data.ollamaDetails && data.ollamaDetails.temporaryDisabled) {
+            ollamaTempInfo.style.display = 'block';
+            ollamaTempTime.textContent = 'Até: ' + formatDateTime(data.ollamaDetails.temporaryDisabledUntil);
+            ollamaTempReason.textContent = 'Motivo: ' + data.ollamaDetails.temporaryDisabledReason;
+            
+            // Mostrar seção de remoção
+            document.getElementById('ollama-temp-remove').style.display = 'block';
+            document.getElementById('ollama-temp-disable-btn').style.display = 'none';
+            
+            // Switch temporariamente desativado
+            ollamaOption.className = 'config-option temporarily-disabled';
+            ollamaSwitch.disabled = true;
+            ollamaOption.setAttribute('data-tooltip', `Em manutenção até ${formatDateTime(data.ollamaDetails.temporaryDisabledUntil)}. Motivo: ${data.ollamaDetails.temporaryDisabledReason}`);
+        } else {
+            ollamaTempInfo.style.display = 'none';
+            document.getElementById('ollama-temp-remove').style.display = 'none';
+            document.getElementById('ollama-temp-disable-btn').style.display = 'block';
+            
+            // Switch permanentemente desativado
+            ollamaOption.className = 'config-option permanently-disabled';
+            ollamaSwitch.disabled = false;
+            ollamaOption.setAttribute('data-tooltip', 'Modelo desativado no sistema');
+        }
+    }
+    
+    // Adicionar tooltips dinamicamente
+    addTooltips();
+    
+    // Gerar mensagens informativas
+    generateStatusMessages(data);
+    
+    console.log('Status atualizado:', { openai, ollama });
+}
+
+// Função para adicionar tooltips
+function addTooltips() {
+    const configOptions = document.querySelectorAll('.config-option[data-tooltip]');
+    configOptions.forEach(option => {
+        const tooltip = option.querySelector('.tooltip');
+        if (!tooltip) {
+            const tooltipElement = document.createElement('div');
+            tooltipElement.className = 'tooltip';
+            tooltipElement.textContent = option.getAttribute('data-tooltip');
+            option.appendChild(tooltipElement);
+        } else {
+            tooltip.textContent = option.getAttribute('data-tooltip');
+        }
+    });
+}
+
+// Função para gerar mensagens informativas
+function generateStatusMessages(data) {
+    const messagesContainer = document.getElementById('status-messages');
+    const messages = [];
+    
+    // Verificar OpenAI
+    if (data.openaiDetails && data.openaiDetails.temporaryDisabled) {
+        messages.push({
+            type: 'maintenance',
+            icon: '🔧',
+            text: `OpenAI está em manutenção até ${formatDateTime(data.openaiDetails.temporaryDisabledUntil)}. Motivo: ${data.openaiDetails.temporaryDisabledReason}`
+        });
+    } else if (!data.openai) {
+        messages.push({
+            type: 'disabled',
+            icon: '❌',
+            text: 'OpenAI está desativado no sistema. Os utilizadores não poderão utilizá-lo.'
+        });
+    }
+    
+    // Verificar Ollama
+    if (data.ollamaDetails && data.ollamaDetails.temporaryDisabled) {
+        messages.push({
+            type: 'maintenance',
+            icon: '🔧',
+            text: `Ollama está em manutenção até ${formatDateTime(data.ollamaDetails.temporaryDisabledUntil)}. Motivo: ${data.ollamaDetails.temporaryDisabledReason}`
+        });
+    } else if (!data.ollama) {
+        messages.push({
+            type: 'disabled',
+            icon: '❌',
+            text: 'Ollama está desativado no sistema. Os utilizadores não poderão utilizá-lo.'
+        });
+    }
+    
+    // Mensagem geral se ambos estão desativados
+    if (!data.openai && !data.ollama) {
+        messages.push({
+            type: 'info',
+            icon: '⚠️',
+            text: 'Todos os modelos LLM estão desativados. Os utilizadores não poderão usar o chat até que pelo menos um modelo seja ativado.'
+        });
+    }
+    
+    // Gerar HTML das mensagens
+    if (messages.length > 0) {
+        messagesContainer.innerHTML = messages.map(msg => `
+            <div class="status-message ${msg.type}">
+                <span>${msg.icon}</span>
+                <span>${msg.text}</span>
+            </div>
+        `).join('');
+        messagesContainer.style.display = 'block';
+    } else {
+        messagesContainer.style.display = 'none';
+    }
+}
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     // Definir estado inicial dos indicadores
@@ -440,6 +814,10 @@ document.addEventListener('DOMContentLoaded', function() {
     ollamaText.textContent = 'Offline';
     ollamaBadge.className = 'status-badge offline';
     ollamaCard.className = 'status-card offline';
+    
+    // Adicionar event listeners para os botões de desligamento temporário
+    document.getElementById('openai-temp-disable-btn').addEventListener('click', () => showTempForm('openai'));
+    document.getElementById('ollama-temp-disable-btn').addEventListener('click', () => showTempForm('ollama'));
     
     // Carregar dados reais
     loadSystemPrefs();

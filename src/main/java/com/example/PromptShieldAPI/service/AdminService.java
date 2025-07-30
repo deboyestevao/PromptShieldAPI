@@ -34,7 +34,7 @@ public class AdminService {
         openaiConfig.setEnabled(openaiEnabled);
         systemConfigRepository.save(openaiConfig);
         // Registrar histórico
-        systemConfigService.updateModelStatusManually(SystemConfig.ModelType.OPENAI, openaiEnabled, adminName);
+        systemConfigService .updateModelStatusManually(SystemConfig.ModelType.OPENAI, openaiEnabled, adminName);
         // Criar notificação
         notificationService.createSystemChangeNotification("OpenAI", openaiEnabled ? "ativado" : "desativado", adminName);
 
