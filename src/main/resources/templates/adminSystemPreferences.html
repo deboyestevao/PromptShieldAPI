@@ -1,266 +1,434 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/css/adminDashboard.css" rel="stylesheet" type="text/css">
     <link href="/css/adminSystemPreferences.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <title>Configurações do Sistema - PromptShield</title>
 </head>
 <body>
-<header class="admin-header">
-    <div class="admin-logo">
-        <a href="/chat">PromptShield</a>
-        <span class="admin-badge">Admin</span>
-    </div>
-    <div class="admin-user-info">
-        <span class="admin-avatar">A</span>
-    </div>
-</header>
-<main class="admin-main">
-    <a href="/admin/dashboard" class="admin-back">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2"/>
-        </svg>
-        Voltar ao Dashboard
-    </a>
-    <h1>Configurações do Sistema</h1>
-    
-    <!-- Painel de Estado dos Modelos -->
-    <section class="llm-status-panel">
-        <div class="status-header">
-            <h2>
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="2"/>
-                </svg>
-                Estado dos Modelos LLM
-            </h2>
-        </div>
-        <div class="status-grid">
-            <div class="status-card" id="status-openai">
-                <div class="status-icon">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="status-content">
-                    <span class="status-label">OpenAI</span>
-                    <div class="status-badge" id="status-openai-badge">
-                        <span id="status-openai-text">...</span>
-                    </div>
-                    <div id="openai-temp-info" class="temp-disable-info" style="display: none;">
-                        <span class="temp-disable-text">Desligado temporariamente</span>
-                        <span class="temp-disable-time" id="openai-temp-time"></span>
-                        <span class="temp-disable-reason" id="openai-temp-reason"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="status-card" id="status-ollama">
-                <div class="status-icon">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="status-content">
-                    <span class="status-label">Ollama</span>
-                    <div class="status-badge" id="status-ollama-badge">
-                        <span id="status-ollama-text">...</span>
-                    </div>
-                    <div id="ollama-temp-info" class="temp-disable-info" style="display: none;">
-                        <span class="temp-disable-text">Desligado temporariamente</span>
-                        <span class="temp-disable-time" id="ollama-temp-time"></span>
-                        <span class="temp-disable-reason" id="ollama-temp-reason"></span>
-                    </div>
-                </div>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <span class="logo-text">PromptShield</span>
+                <span class="admin-badge">Admin</span>
             </div>
         </div>
-    </section>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3 class="nav-title">Dashboard</h3>
+                <a href="/admin/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Visão Geral</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Gestão</h3>
+                <a href="/admin/users" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Utilizadores</span>
+                </a>
+                <a href="/admin/reports" class="nav-item">
+                    <i class="fas fa-flag"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/admin/system-preferences" class="nav-item active">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="/admin/config-history" class="nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Histórico</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Sistema</h3>
+                <a href="/chat" class="nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
 
-    <!-- Formulário de Configurações -->
-    <section class="system-config-section">
-        <div class="config-header">
-            <h2>
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke-width="2"/>
-                    <circle cx="12" cy="12" r="3" stroke-width="2"/>
-                </svg>
-                Modelos LLM Disponíveis
-            </h2>
-        </div>
-        
-        <!-- Mensagens informativas -->
-        <div id="status-messages" class="status-messages">
-            <!-- Mensagens serão adicionadas dinamicamente -->
-        </div>
-        
-        <form id="system-prefs-form" class="system-config-form">
-            <div class="config-options">
-                <div class="config-option">
-                    <label class="config-switch-label">
-                        <input type="checkbox" id="openai-enabled" name="openai" class="config-switch">
-                        <span class="switch-slider"></span>
-                        <div class="option-content">
-                            <div class="option-header">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
-                                </svg>
-                                <span class="option-title">Ativar OpenAI</span>
-                            </div>
-                            <p class="option-description">Permite que todos os utilizadores usem o modelo OpenAI no chat.</p>
-                        </div>
-                    </label>
-                </div>
-                
-                <div class="config-option">
-                    <label class="config-switch-label">
-                        <input type="checkbox" id="ollama-enabled" name="ollama" class="config-switch">
-                        <span class="switch-slider"></span>
-                        <div class="option-content">
-                            <div class="option-header">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2"/>
-                                </svg>
-                                <span class="option-title">Ativar Ollama</span>
-                            </div>
-                            <p class="option-description">Permite que todos os utilizadores usem o modelo Ollama no chat.</p>
-                        </div>
-                    </label>
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Configurações</span>
                 </div>
             </div>
             
-            <div class="form-actions">
-                <button type="submit" class="save-btn">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke-width="2"/>
-                        <polyline points="17,21 17,13 7,13 7,21" stroke-width="2"/>
-                        <polyline points="7,3 7,8 15,8" stroke-width="2"/>
-                    </svg>
-                    <span>Guardar Alterações</span>
-                </button>
-                <div id="system-prefs-feedback" class="feedback-message"></div>
-            </div>
-        </form>
-    </section>
-
-    <!-- Seção de Desligamento Temporário -->
-    <section class="temporary-disable-section">
-        <div class="temp-disable-header">
-            <h2>
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"/>
-                </svg>
-                Desligamento Temporário
-            </h2>
-            <p class="section-description">Desligue temporariamente um modelo LLM para evitar reativações automáticas durante manutenções ou testes.</p>
-        </div>
-
-        <div class="temp-disable-options">
-            <!-- OpenAI Temporary Disable -->
-            <div class="temp-disable-card">
-                <div class="temp-disable-card-header">
-                    <div class="model-info">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
-                        </svg>
-                        <span>OpenAI</span>
-                    </div>
-                    <button type="button" class="temp-disable-btn" id="openai-temp-disable-btn">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"/>
-                        </svg>
-                        Desligar Temporariamente
+            <div class="header-right">
+                <div class="notification-container">
+                    <button class="notification-bell" id="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-count">0</span>
                     </button>
-                </div>
-                <div id="openai-temp-form" class="temp-disable-form" style="display: none;">
-                    <div class="form-group">
-                        <label for="openai-disable-until">Desligar até:</label>
-                        <input type="datetime-local" id="openai-disable-until" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="openai-disable-reason">Motivo:</label>
-                        <textarea id="openai-disable-reason" class="form-control" placeholder="Ex: Manutenção programada, Testes de sistema..." rows="2" required></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn" onclick="hideTempForm('openai')">Cancelar</button>
-                        <button type="button" class="confirm-btn" onclick="confirmTempDisable('OPENAI')">Confirmar</button>
+                    
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h3>Notificações</h3>
+                            <button id="mark-all-read" class="mark-all-read-btn">
+                                <i class="fas fa-check-double"></i>
+                                Marcar todas
+                            </button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <!-- Notificações serão carregadas aqui -->
+                        </div>
+                        <div class="notification-empty" id="notification-empty" style="display:none;">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>Nenhuma notificação</p>
+                        </div>
                     </div>
                 </div>
-                <div id="openai-temp-remove" class="temp-remove-section" style="display: none;">
-                    <p>Este modelo está desligado temporariamente.</p>
-                    <button type="button" class="remove-temp-btn" onclick="removeTempDisable('OPENAI')">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
-                        </svg>
-                        Remover Desligamento
-                    </button>
+                
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Administrador</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                    <a href="/auth/logout" class="logout-link" title="Sair">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
                 </div>
             </div>
+        </header>
 
-            <!-- Ollama Temporary Disable -->
-            <div class="temp-disable-card">
-                <div class="temp-disable-card-header">
-                    <div class="model-info">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2"/>
-                        </svg>
-                        <span>Ollama</span>
+        <!-- System Preferences Content -->
+        <div class="system-preferences-container">
+            <div class="page-header">
+                <h1>Configurações do Sistema</h1>
+                <p>Gerencie as configurações dos modelos LLM e preferências do sistema</p>
+            </div>
+
+            <!-- Dashboard Overview Cards -->
+            <div class="overview-cards">
+                <div class="overview-card status-overview">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="card-title">
+                            <h3>Estado dos Modelos</h3>
+                            <p>Monitorize o status atual dos LLMs</p>
+                        </div>
                     </div>
-                    <button type="button" class="temp-disable-btn" id="ollama-temp-disable-btn">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2v6m0 0v6m0-6h6m-6 0H6" stroke-width="2"/>
-                        </svg>
-                        Desligar Temporariamente
-                    </button>
+                    <div class="card-content">
+                        <div class="status-indicators">
+                            <div class="status-indicator" id="openai-status-indicator">
+                                <div class="indicator-dot"></div>
+                                <span class="indicator-label">OpenAI</span>
+                                <span class="indicator-status" id="openai-status-text">Carregando...</span>
+                            </div>
+                            <div class="status-indicator" id="ollama-status-indicator">
+                                <div class="indicator-dot"></div>
+                                <span class="indicator-label">Ollama</span>
+                                <span class="indicator-status" id="ollama-status-text">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="ollama-temp-form" class="temp-disable-form" style="display: none;">
-                    <div class="form-group">
-                        <label for="ollama-disable-until">Desligar até:</label>
-                        <input type="datetime-local" id="ollama-disable-until" class="form-control" required>
+
+                <div class="overview-card quick-actions">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="card-title">
+                            <h3>Ações Rápidas</h3>
+                            <p>Acesso rápido às funcionalidades principais</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="ollama-disable-reason">Motivo:</label>
-                        <textarea id="ollama-disable-reason" class="form-control" placeholder="Ex: Manutenção programada, Testes de sistema..." rows="2" required></textarea>
+                    <div class="card-content">
+                        <div class="quick-actions-grid">
+                            <button class="quick-action-btn" onclick="scrollToSection('llm-config')">
+                                <i class="fas fa-cog"></i>
+                                <span>Configurar LLMs</span>
+                            </button>
+                            <button class="quick-action-btn" onclick="scrollToSection('temp-disable')">
+                                <i class="fas fa-clock"></i>
+                                <span>Desligamento Temporário</span>
+                            </button>
+                            <a href="/admin/config-history" class="quick-action-btn">
+                                <i class="fas fa-history"></i>
+                                <span>Ver Histórico</span>
+                            </a>
+                        </div>
                     </div>
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn" onclick="hideTempForm('ollama')">Cancelar</button>
-                        <button type="button" class="confirm-btn" onclick="confirmTempDisable('OLLAMA')">Confirmar</button>
-                    </div>
-                </div>
-                <div id="ollama-temp-remove" class="temp-remove-section" style="display: none;">
-                    <p>Este modelo está desligado temporariamente.</p>
-                    <button type="button" class="remove-temp-btn" onclick="removeTempDisable('OLLAMA')">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
-                        </svg>
-                        Remover Desligamento
-                    </button>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Seção de Histórico de Configurações -->
-    <section class="config-history-section">
-        <div class="history-header">
-            <h2>
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" stroke-width="2"/>
-                </svg>
-                Histórico de Alterações
-            </h2>
-            <a href="/admin/config-history" class="history-link">
-                <span>Ver Histórico Completo</span>
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 18l6-6-6-6" stroke-width="2"/>
-                </svg>
-            </a>
+            <!-- Main Configuration Sections -->
+            <div class="config-sections">
+                <!-- LLM Configuration Section -->
+                <section class="config-section" id="llm-config">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="section-info">
+                            <h2>Modelos LLM Disponíveis</h2>
+                            <p>Ative ou desative os modelos de linguagem para os utilizadores</p>
+                        </div>
+                    </div>
+
+                    <!-- Status Messages -->
+                    <div id="status-messages" class="status-messages">
+                        <!-- Messages will be added dynamically -->
+                    </div>
+
+                    <!-- Configuration Form -->
+                    <div class="config-form-container">
+                        <form id="system-prefs-form" class="system-config-form">
+                            <div class="config-options">
+                                <div class="config-option" id="openai-option">
+                                    <div class="option-header">
+                                        <div class="option-info">
+                                            <div class="option-icon">
+                                                <i class="fab fa-openai"></i>
+                                            </div>
+                                            <div class="option-details">
+                                                <h4>OpenAI</h4>
+                                                <p>Modelo GPT avançado para conversas inteligentes</p>
+                                            </div>
+                                        </div>
+                                        <div class="option-control">
+                                            <label class="config-switch-label">
+                                                <input type="checkbox" id="openai-enabled" name="openai" class="config-switch">
+                                                <span class="switch-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="option-status" id="openai-option-status">
+                                        <!-- Status info will be added dynamically -->
+                                    </div>
+                                </div>
+
+                                <div class="config-option" id="ollama-option">
+                                    <div class="option-header">
+                                        <div class="option-info">
+                                            <div class="option-icon">
+                                                <i class="fas fa-server"></i>
+                                            </div>
+                                            <div class="option-details">
+                                                <h4>Ollama</h4>
+                                                <p>Modelo local para processamento privado</p>
+                                            </div>
+                                        </div>
+                                        <div class="option-control">
+                                            <label class="config-switch-label">
+                                                <input type="checkbox" id="ollama-enabled" name="ollama" class="config-switch">
+                                                <span class="switch-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="option-status" id="ollama-option-status">
+                                        <!-- Status info will be added dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="save-btn">
+                                    <i class="fas fa-save"></i>
+                                    <span>Guardar Alterações</span>
+                                </button>
+                                <div id="system-prefs-feedback" class="feedback-message"></div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Temporary Disable Section -->
+                <section class="config-section" id="temp-disable">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="section-info">
+                            <h2>Desligamento Temporário</h2>
+                            <p>Desligue temporariamente um modelo para manutenção ou testes</p>
+                        </div>
+                    </div>
+
+                    <div class="temp-disable-grid">
+                        <!-- OpenAI Temporary Disable Card -->
+                        <div class="temp-disable-card" id="openai-temp-card">
+                            <div class="temp-card-header">
+                                <div class="temp-card-icon">
+                                    <i class="fab fa-openai"></i>
+                                </div>
+                                <div class="temp-card-info">
+                                    <h4>OpenAI</h4>
+                                    <p>Desligamento temporário para manutenção</p>
+                                </div>
+                                <button type="button" class="temp-disable-btn" id="openai-temp-disable-btn">
+                                    <i class="fas fa-pause"></i>
+                                    <span>Desligar Temporariamente</span>
+                                </button>
+                            </div>
+
+                            <div id="openai-temp-form" class="temp-disable-form" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="openai-disable-until">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Desligar até:
+                                        </label>
+                                        <input type="datetime-local" id="openai-disable-until" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="openai-disable-reason">
+                                            <i class="fas fa-comment"></i>
+                                            Motivo:
+                                        </label>
+                                        <textarea id="openai-disable-reason" class="form-control" placeholder="Ex: Manutenção programada, Testes de sistema..." rows="2" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="cancel-btn" onclick="hideTempForm('openai')">
+                                        <i class="fas fa-times"></i>
+                                        Cancelar
+                                    </button>
+                                    <button type="button" class="confirm-btn" onclick="confirmTempDisable('OPENAI')">
+                                        <i class="fas fa-check"></i>
+                                        Confirmar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="openai-temp-remove" class="temp-remove-section" style="display: none;">
+                                <div class="temp-remove-content">
+                                    <div class="temp-remove-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="temp-remove-info">
+                                        <h5>Modelo Temporariamente Desligado</h5>
+                                        <p>Este modelo está em manutenção e será reativado automaticamente.</p>
+                                    </div>
+                                    <button type="button" class="remove-temp-btn" onclick="removeTempDisable('OPENAI')">
+                                        <i class="fas fa-play"></i>
+                                        Reativar Agora
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ollama Temporary Disable Card -->
+                        <div class="temp-disable-card" id="ollama-temp-card">
+                            <div class="temp-card-header">
+                                <div class="temp-card-icon">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="temp-card-info">
+                                    <h4>Ollama</h4>
+                                    <p>Desligamento temporário para manutenção</p>
+                                </div>
+                                <button type="button" class="temp-disable-btn" id="ollama-temp-disable-btn">
+                                    <i class="fas fa-pause"></i>
+                                    <span>Desligar Temporariamente</span>
+                                </button>
+                            </div>
+
+                            <div id="ollama-temp-form" class="temp-disable-form" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="ollama-disable-until">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Desligar até:
+                                        </label>
+                                        <input type="datetime-local" id="ollama-disable-until" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ollama-disable-reason">
+                                            <i class="fas fa-comment"></i>
+                                            Motivo:
+                                        </label>
+                                        <textarea id="ollama-disable-reason" class="form-control" placeholder="Ex: Manutenção programada, Testes de sistema..." rows="2" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="cancel-btn" onclick="hideTempForm('ollama')">
+                                        <i class="fas fa-times"></i>
+                                        Cancelar
+                                    </button>
+                                    <button type="button" class="confirm-btn" onclick="confirmTempDisable('OLLAMA')">
+                                        <i class="fas fa-check"></i>
+                                        Confirmar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="ollama-temp-remove" class="temp-remove-section" style="display: none;">
+                                <div class="temp-remove-content">
+                                    <div class="temp-remove-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="temp-remove-info">
+                                        <h5>Modelo Temporariamente Desligado</h5>
+                                        <p>Este modelo está em manutenção e será reativado automaticamente.</p>
+                                    </div>
+                                    <button type="button" class="remove-temp-btn" onclick="removeTempDisable('OLLAMA')">
+                                        <i class="fas fa-play"></i>
+                                        Reativar Agora
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuration History Section -->
+                <section class="config-section" id="config-history">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="section-info">
+                            <h2>Histórico de Alterações</h2>
+                            <p>Registo das últimas modificações nas configurações</p>
+                        </div>
+                        <a href="/admin/config-history" class="history-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>Ver Histórico Completo</span>
+                        </a>
+                    </div>
+
+                    <div class="history-container">
+                        <div class="history-list" id="config-history-list">
+                            <!-- History will be loaded dynamically -->
+                        </div>
+                        <div class="history-loading" id="config-history-loading" style="display: none;">
+                            <div class="loading-spinner"></div>
+                            <span>A carregar histórico...</span>
+                        </div>
+                        <div class="history-empty" id="config-history-empty" style="display: none;">
+                            <div class="empty-icon">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <p>Nenhuma alteração registada</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
-        
-        <div class="history-list" id="config-history-list">
-            <!-- Histórico será carregado dinamicamente -->
-        </div>
-    </section>
-</main>
 
 <script>
 // Carrega status atual dos modelos
@@ -290,37 +458,115 @@ function updateLlmStatusPanel(data) {
     const openai = !!data.openai;
     const ollama = !!data.ollama;
     
-    // OpenAI Status
-    const openaiText = document.getElementById('status-openai-text');
-    const openaiBadge = document.getElementById('status-openai-badge');
-    const openaiCard = document.getElementById('status-openai');
+    // Update overview status indicators
+    updateStatusIndicator('openai', openai, data.openaiDetails);
+    updateStatusIndicator('ollama', ollama, data.ollamaDetails);
     
-    if (openai) {
-        openaiText.textContent = 'Online';
-        openaiBadge.className = 'status-badge online';
-        openaiCard.className = 'status-card online';
-    } else {
-        openaiText.textContent = 'Offline';
-        openaiBadge.className = 'status-badge offline';
-        openaiCard.className = 'status-card offline';
-    }
+    // Update configuration options
+    updateConfigOption('openai', openai, data.openaiDetails);
+    updateConfigOption('ollama', ollama, data.ollamaDetails);
     
-    // Ollama Status
-    const ollamaText = document.getElementById('status-ollama-text');
-    const ollamaBadge = document.getElementById('status-ollama-badge');
-    const ollamaCard = document.getElementById('status-ollama');
+    // Update temporary disable cards
+    updateTempDisableCard('openai', openai, data.openaiDetails);
+    updateTempDisableCard('ollama', ollama, data.ollamaDetails);
     
-    if (ollama) {
-        ollamaText.textContent = 'Online';
-        ollamaBadge.className = 'status-badge online';
-        ollamaCard.className = 'status-card online';
-    } else {
-        ollamaText.textContent = 'Offline';
-        ollamaBadge.className = 'status-badge offline';
-        ollamaCard.className = 'status-card offline';
-    }
+    // Generate status messages
+    generateStatusMessages(data);
     
     console.log('Status atualizado:', { openai, ollama });
+}
+
+function updateStatusIndicator(model, isOnline, details) {
+    const indicator = document.getElementById(`${model}-status-indicator`);
+    const statusText = document.getElementById(`${model}-status-text`);
+    const indicatorDot = indicator.querySelector('.indicator-dot');
+    
+    if (isOnline) {
+        statusText.textContent = 'Online';
+        indicatorDot.className = 'indicator-dot online';
+        indicator.className = 'status-indicator online';
+    } else {
+        if (details && details.temporaryDisabled) {
+            statusText.textContent = 'Em Manutenção';
+            indicatorDot.className = 'indicator-dot maintenance';
+            indicator.className = 'status-indicator maintenance';
+        } else {
+            statusText.textContent = 'Offline';
+            indicatorDot.className = 'indicator-dot offline';
+            indicator.className = 'status-indicator offline';
+        }
+    }
+}
+
+function updateConfigOption(model, isOnline, details) {
+    const option = document.getElementById(`${model}-option`);
+    const switchElement = document.getElementById(`${model}-enabled`);
+    const statusDiv = document.getElementById(`${model}-option-status`);
+    
+    if (isOnline) {
+        option.className = 'config-option online';
+        switchElement.disabled = false;
+        statusDiv.innerHTML = '<div class="status-badge online">Online</div>';
+    } else {
+        if (details && details.temporaryDisabled) {
+            option.className = 'config-option temporarily-disabled';
+            switchElement.disabled = true;
+            
+            let statusHtml = `
+                <div class="status-badge maintenance">
+                    <i class="fas fa-clock"></i>
+                    Em Manutenção até ${formatDateTime(details.temporaryDisabledUntil)}
+                </div>
+                <div class="maintenance-reason">${details.temporaryDisabledReason}</div>
+            `;
+            
+            // Adicionar informação sobre o estado que será restaurado
+            if (details.willRestoreTo) {
+                statusHtml += `
+                    <div class="restore-info">
+                        <i class="fas fa-undo"></i>
+                        Será restaurado para: <strong>${details.willRestoreTo}</strong>
+                    </div>
+                `;
+            }
+            
+            statusDiv.innerHTML = statusHtml;
+        } else {
+            option.className = 'config-option offline';
+            switchElement.disabled = false;
+            statusDiv.innerHTML = '<div class="status-badge offline">Offline</div>';
+        }
+    }
+}
+
+function updateTempDisableCard(model, isOnline, details) {
+    const card = document.getElementById(`${model}-temp-card`);
+    const disableBtn = document.getElementById(`${model}-temp-disable-btn`);
+    const removeSection = document.getElementById(`${model}-temp-remove`);
+    
+    if (isOnline) {
+        card.className = 'temp-disable-card online';
+        disableBtn.style.display = 'flex';
+        removeSection.style.display = 'none';
+    } else {
+        if (details && details.temporaryDisabled) {
+            card.className = 'temp-disable-card maintenance';
+            disableBtn.style.display = 'none';
+            removeSection.style.display = 'block';
+            
+            // Update remove section content
+            const removeInfo = removeSection.querySelector('.temp-remove-info');
+            removeInfo.innerHTML = `
+                <h5>Modelo Temporariamente Desligado</h5>
+                <p>Este modelo está em manutenção até ${formatDateTime(details.temporaryDisabledUntil)}.</p>
+                <p><strong>Motivo:</strong> ${details.temporaryDisabledReason}</p>
+            `;
+        } else {
+            card.className = 'temp-disable-card offline';
+            disableBtn.style.display = 'flex';
+            removeSection.style.display = 'none';
+        }
+    }
 }
 
 // Submete alterações
@@ -604,122 +850,114 @@ async function removeTempDisable(model) {
     }
 }
 
-// Atualizar função updateLlmStatusPanel para incluir informações de desligamento temporário
-function updateLlmStatusPanel(data) {
-    const openai = !!data.openai;
-    const ollama = !!data.ollama;
-    
-    // OpenAI Status
-    const openaiText = document.getElementById('status-openai-text');
-    const openaiBadge = document.getElementById('status-openai-badge');
-    const openaiCard = document.getElementById('status-openai');
-    const openaiTempInfo = document.getElementById('openai-temp-info');
-    const openaiTempTime = document.getElementById('openai-temp-time');
-    const openaiTempReason = document.getElementById('openai-temp-reason');
-    
-    // OpenAI Switch
-    const openaiSwitch = document.getElementById('openai-enabled');
-    const openaiOption = openaiSwitch.closest('.config-option');
-    
-    if (openai) {
-        openaiText.textContent = 'Online';
-        openaiBadge.className = 'status-badge online';
-        openaiCard.className = 'status-card online';
-        openaiTempInfo.style.display = 'none';
-        
-        // Switch normal
-        openaiOption.className = 'config-option';
-        openaiSwitch.disabled = false;
-    } else {
-        openaiText.textContent = 'Offline';
-        openaiBadge.className = 'status-badge offline';
-        openaiCard.className = 'status-card offline';
-        
-        // Verificar se está em desligamento temporário
-        if (data.openaiDetails && data.openaiDetails.temporaryDisabled) {
-            openaiTempInfo.style.display = 'block';
-            openaiTempTime.textContent = 'Até: ' + formatDateTime(data.openaiDetails.temporaryDisabledUntil);
-            openaiTempReason.textContent = 'Motivo: ' + data.openaiDetails.temporaryDisabledReason;
-            
-            // Mostrar seção de remoção
-            document.getElementById('openai-temp-remove').style.display = 'block';
-            document.getElementById('openai-temp-disable-btn').style.display = 'none';
-            
-            // Switch temporariamente desativado
-            openaiOption.className = 'config-option temporarily-disabled';
-            openaiSwitch.disabled = true;
-            openaiOption.setAttribute('data-tooltip', `Em manutenção até ${formatDateTime(data.openaiDetails.temporaryDisabledUntil)}. Motivo: ${data.openaiDetails.temporaryDisabledReason}`);
-        } else {
-            openaiTempInfo.style.display = 'none';
-            document.getElementById('openai-temp-remove').style.display = 'none';
-            document.getElementById('openai-temp-disable-btn').style.display = 'block';
-            
-            // Switch permanentemente desativado
-            openaiOption.className = 'config-option permanently-disabled';
-            openaiSwitch.disabled = false;
-            openaiOption.setAttribute('data-tooltip', 'Modelo desativado no sistema');
-        }
+// Helper function to scroll to sections
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    
-    // Ollama Status
-    const ollamaText = document.getElementById('status-ollama-text');
-    const ollamaBadge = document.getElementById('status-ollama-badge');
-    const ollamaCard = document.getElementById('status-ollama');
-    const ollamaTempInfo = document.getElementById('ollama-temp-info');
-    const ollamaTempTime = document.getElementById('ollama-temp-time');
-    const ollamaTempReason = document.getElementById('ollama-temp-reason');
-    
-    // Ollama Switch
-    const ollamaSwitch = document.getElementById('ollama-enabled');
-    const ollamaOption = ollamaSwitch.closest('.config-option');
-    
-    if (ollama) {
-        ollamaText.textContent = 'Online';
-        ollamaBadge.className = 'status-badge online';
-        ollamaCard.className = 'status-card online';
-        ollamaTempInfo.style.display = 'none';
-        
-        // Switch normal
-        ollamaOption.className = 'config-option';
-        ollamaSwitch.disabled = false;
-    } else {
-        ollamaText.textContent = 'Offline';
-        ollamaBadge.className = 'status-badge offline';
-        ollamaCard.className = 'status-card offline';
-        
-        // Verificar se está em desligamento temporário
-        if (data.ollamaDetails && data.ollamaDetails.temporaryDisabled) {
-            ollamaTempInfo.style.display = 'block';
-            ollamaTempTime.textContent = 'Até: ' + formatDateTime(data.ollamaDetails.temporaryDisabledUntil);
-            ollamaTempReason.textContent = 'Motivo: ' + data.ollamaDetails.temporaryDisabledReason;
-            
-            // Mostrar seção de remoção
-            document.getElementById('ollama-temp-remove').style.display = 'block';
-            document.getElementById('ollama-temp-disable-btn').style.display = 'none';
-            
-            // Switch temporariamente desativado
-            ollamaOption.className = 'config-option temporarily-disabled';
-            ollamaSwitch.disabled = true;
-            ollamaOption.setAttribute('data-tooltip', `Em manutenção até ${formatDateTime(data.ollamaDetails.temporaryDisabledUntil)}. Motivo: ${data.ollamaDetails.temporaryDisabledReason}`);
-        } else {
-            ollamaTempInfo.style.display = 'none';
-            document.getElementById('ollama-temp-remove').style.display = 'none';
-            document.getElementById('ollama-temp-disable-btn').style.display = 'block';
-            
-            // Switch permanentemente desativado
-            ollamaOption.className = 'config-option permanently-disabled';
-            ollamaSwitch.disabled = false;
-            ollamaOption.setAttribute('data-tooltip', 'Modelo desativado no sistema');
-        }
+}
+
+// Header functionality
+function setupHeaderFunctionality() {
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    const markAllReadBtn = document.getElementById('mark-all-read');
+
+    if (notificationBell) {
+        notificationBell.addEventListener('click', function() {
+            notificationDropdown.classList.toggle('show');
+            if (notificationDropdown.classList.contains('show')) {
+                loadNotifications();
+            }
+        });
     }
-    
-    // Adicionar tooltips dinamicamente
-    addTooltips();
-    
-    // Gerar mensagens informativas
-    generateStatusMessages(data);
-    
-    console.log('Status atualizado:', { openai, ollama });
+
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', markAllNotificationsAsRead);
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.notification-container')) {
+            notificationDropdown.classList.remove('show');
+        }
+    });
+}
+
+async function loadNotifications() {
+    try {
+        const response = await fetch('/admin/api/notifications');
+        if (response.ok) {
+            const notifications = await response.json();
+            renderNotifications(notifications);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar notificações:', error);
+    }
+}
+
+function renderNotifications(notifications) {
+    const notificationList = document.getElementById('notification-list');
+    const notificationCount = document.getElementById('notification-count');
+    const notificationEmpty = document.getElementById('notification-empty');
+
+    if (notifications.length === 0) {
+        notificationList.style.display = 'none';
+        notificationEmpty.style.display = 'block';
+        notificationCount.textContent = '0';
+        return;
+    }
+
+    notificationList.style.display = 'block';
+    notificationEmpty.style.display = 'none';
+    notificationCount.textContent = notifications.length.toString();
+
+    notificationList.innerHTML = notifications.map(notification => `
+        <div class="notification-item ${notification.read ? 'read' : 'unread'}">
+            <div class="notification-icon">
+                <i class="${getNotificationIcon(notification.type)}"></i>
+            </div>
+            <div class="notification-content">
+                <p class="notification-text">${notification.message}</p>
+                <span class="notification-time">${formatNotificationTime(notification.createdAt)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        'info': 'fas fa-info-circle',
+        'warning': 'fas fa-exclamation-triangle',
+        'error': 'fas fa-times-circle',
+        'success': 'fas fa-check-circle'
+    };
+    return icons[type] || 'fas fa-bell';
+}
+
+function formatNotificationTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Agora';
+    if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h atrás`;
+    return date.toLocaleDateString('pt-PT');
+}
+
+async function markAllNotificationsAsRead() {
+    try {
+        const response = await fetch('/admin/api/notifications/mark-all-read', {
+            method: 'POST'
+        });
+        if (response.ok) {
+            loadNotifications();
+        }
+    } catch (error) {
+        console.error('Erro ao marcar notificações como lidas:', error);
+    }
 }
 
 // Função para adicionar tooltips
@@ -798,22 +1036,8 @@ function generateStatusMessages(data) {
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    // Definir estado inicial dos indicadores
-    const openaiText = document.getElementById('status-openai-text');
-    const openaiBadge = document.getElementById('status-openai-badge');
-    const openaiCard = document.getElementById('status-openai');
-    const ollamaText = document.getElementById('status-ollama-text');
-    const ollamaBadge = document.getElementById('status-ollama-badge');
-    const ollamaCard = document.getElementById('status-ollama');
-    
-    // Estado inicial - offline
-    openaiText.textContent = 'Offline';
-    openaiBadge.className = 'status-badge offline';
-    openaiCard.className = 'status-card offline';
-    
-    ollamaText.textContent = 'Offline';
-    ollamaBadge.className = 'status-badge offline';
-    ollamaCard.className = 'status-card offline';
+    // Setup header functionality
+    setupHeaderFunctionality();
     
     // Adicionar event listeners para os botões de desligamento temporário
     document.getElementById('openai-temp-disable-btn').addEventListener('click', () => showTempForm('openai'));
@@ -823,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSystemPrefs();
     loadConfigHistory();
 });
-</script>
+    </script>
+    </main>
 </body>
 </html> 

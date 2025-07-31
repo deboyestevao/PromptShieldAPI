@@ -40,17 +40,22 @@ public class AuthService {
             Authentication authentication = authenticationManager.authenticate(authToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Atualizar last_login_at
+            // Atualizar last_login_at e marcar como online
             String email = request.getEmail();
-            userRepository.findByEmail(email).ifPresent(user -> {
+            User user = userRepository.findByEmail(email).orElse(null);
+            
+            if (user != null) {
                 user.setLastLoginAt(java.time.LocalDateTime.now());
+                user.setIsOnline(Boolean.TRUE);
+                user.setLastActive(java.time.LocalDateTime.now());
                 userRepository.save(user);
-            });
+                
+                // Armazenar username na sessão
+                session.setAttribute("username", user.getUsername());
+            }
 
             // Buscar o username do utilizador
-            String username = userRepository.findByEmail(email)
-                    .map(User::getUsername)
-                    .orElse("User");
+            String username = user != null ? user.getUsername() : "User";
             
             return ResponseEntity.ok("Welcome, " + username + "! Login successful.");
 
@@ -119,6 +124,8 @@ public class AuthService {
     public void updateLastLogin(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             user.setLastLoginAt(java.time.LocalDateTime.now());
+            user.setIsOnline(Boolean.TRUE);
+            user.setLastActive(java.time.LocalDateTime.now());
             userRepository.save(user);
         });
     }

@@ -1,88 +1,199 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/css/adminDashboard.css" rel="stylesheet" type="text/css">
     <link href="/css/adminReports.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <title>Gestão de Reports - PromptShield</title>
 </head>
 <body>
-    <header class="admin-header">
-        <div class="admin-logo">
-            <a href="/chat">PromptShield</a>
-            <span class="admin-badge">Admin</span>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <span class="logo-text">PromptShield</span>
+                <span class="admin-badge">Admin</span>
+            </div>
         </div>
-        <div class="admin-user-info">
-            <span class="admin-avatar">A</span>
-        </div>
-    </header>
-    
-    <main class="admin-main">
-        <a href="/admin/dashboard" class="admin-back">← Voltar ao Dashboard</a>
-        <h1>Gestão de Reports</h1>
         
-        <!-- Estatísticas -->
-        <div class="reports-stats">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-number" id="total-reports">0</span>
-                    <span class="stat-label">Total de Reports</span>
-                </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3 class="nav-title">Dashboard</h3>
+                <a href="/admin/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Visão Geral</span>
+                </a>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12,6 12,12 16,14"></polyline>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-number" id="pending-reports">0</span>
-                    <span class="stat-label">Reports Pendentes</span>
-                </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Gestão</h3>
+                <a href="/admin/users" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Utilizadores</span>
+                </a>
+                <a href="/admin/reports" class="nav-item active">
+                    <i class="fas fa-flag"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/admin/system-preferences" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="/admin/config-history" class="nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Histórico</span>
+                </a>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-number" id="resolved-reports">0</span>
-                    <span class="stat-label">Reports Resolvidos</span>
-                </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Sistema</h3>
+                <a href="/chat" class="nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
             </div>
-        </div>
+        </nav>
+    </aside>
 
-        <!-- Filtros -->
-        <div class="reports-controls">
-            <div class="filter-controls">
-                <select id="status-filter">
-                    <option value="">Todos os estados</option>
-                    <option value="PENDING">Pendentes</option>
-                    <option value="APPROVED">Aprovados</option>
-                    <option value="REJECTED">Rejeitados</option>
-                </select>
-                <select id="sort-filter">
-                    <option value="date-desc">Mais recentes</option>
-                    <option value="date-asc">Mais antigos</option>
-                </select>
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Reports</span>
+                </div>
             </div>
-        </div>
+            
+            <div class="header-right">
+                <div class="notification-container">
+                    <button class="notification-bell" id="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-count">0</span>
+                    </button>
+                    
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h3>Notificações</h3>
+                            <button id="mark-all-read" class="mark-all-read-btn">
+                                <i class="fas fa-check-double"></i>
+                                Marcar todas
+                            </button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <!-- Notificações serão carregadas aqui -->
+                        </div>
+                        <div class="notification-empty" id="notification-empty" style="display:none;">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>Nenhuma notificação</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Administrador</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                    <a href="/auth/logout" class="logout-link" title="Sair">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </header>
 
-        <!-- Lista de reports -->
-        <div class="reports-container" id="reports-container">
-            <!-- Os reports serão carregados aqui via JavaScript -->
+        <!-- Reports Content -->
+        <div class="dashboard-container">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <h1>Gestão de Reports</h1>
+                    <p>Analise e gerencie solicitações de reativação de contas desativadas</p>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section class="metrics-section">
+                <div class="metrics-grid">
+                    <div class="metric-card" data-metric="total">
+                        <div class="metric-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="total-reports">0</div>
+                            <div class="metric-label">Total de Reports</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card" data-metric="pending">
+                        <div class="metric-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="pending-reports">0</div>
+                            <div class="metric-label">Reports Pendentes</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card" data-metric="resolved">
+                        <div class="metric-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" id="resolved-reports">0</div>
+                            <div class="metric-label">Reports Resolvidos</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filters Section -->
+            <section class="quick-actions-section">
+                <div class="section-header">
+                    <h2>Filtros e Controles</h2>
+                    <p>Filtre e organize os reports conforme necessário</p>
+                </div>
+                
+                <div class="reports-controls">
+                    <div class="filter-controls">
+                        <select id="status-filter" class="filter-select">
+                            <option value="">Todos os estados</option>
+                            <option value="PENDING">Pendentes</option>
+                            <option value="APPROVED">Aprovados</option>
+                            <option value="REJECTED">Rejeitados</option>
+                        </select>
+                        <select id="sort-filter" class="filter-select">
+                            <option value="date-desc">Mais recentes</option>
+                            <option value="date-asc">Mais antigos</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports List Section -->
+            <section class="activity-section">
+                <div class="activity-panel">
+                    <div class="panel-header">
+                        <h3>Lista de Reports</h3>
+                        <button class="refresh-btn" id="refresh-reports">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="reports-container" id="reports-container">
+                        <!-- Os reports serão carregados aqui via JavaScript -->
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -94,11 +205,50 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadReports();
             setupEventListeners();
+            loadNotifications();
         });
 
         function setupEventListeners() {
             document.getElementById('status-filter').addEventListener('change', filterReports);
             document.getElementById('sort-filter').addEventListener('change', filterReports);
+            
+            // Refresh button
+            const refreshBtn = document.getElementById('refresh-reports');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    this.classList.add('rotating');
+                    setTimeout(() => {
+                        this.classList.remove('rotating');
+                    }, 1000);
+                    loadReports();
+                });
+            }
+            
+            // Notification bell
+            const notificationBell = document.getElementById('notification-bell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function() {
+                    const dropdown = document.getElementById('notification-dropdown');
+                    dropdown.classList.toggle('active');
+                });
+            }
+            
+            // Mark all as read
+            const markAllReadBtn = document.getElementById('mark-all-read');
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function() {
+                    markAllNotificationsAsRead();
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const bell = document.getElementById('notification-bell');
+                const dropdown = document.getElementById('notification-dropdown');
+                if (bell && dropdown && !bell.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
         }
 
         async function loadReports() {
@@ -157,16 +307,14 @@
 
             if (filteredReports.length === 0) {
                 container.innerHTML = `
-                    <div class="no-reports">
-                        <div class="no-reports-content">
-                            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14,2 14,8 20,8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10,9 9,9 8,9"></polyline>
-                            </svg>
-                            <p>Nenhum report encontrado</p>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Nenhum report encontrado</div>
+                            <div class="activity-detail">Não há reports para mostrar com os filtros atuais</div>
+                            <div class="activity-time">Agora</div>
                         </div>
                     </div>
                 `;
@@ -174,48 +322,45 @@
             }
 
             container.innerHTML = filteredReports.map(report => `
-                <div class="report-card ${report.status.toLowerCase()}">
-                    <div class="report-header">
-                        <div class="report-user">
-                            <div class="user-avatar">${report.userName.charAt(0)}</div>
-                            <div class="user-info">
-                                <span class="user-name">${report.userName}</span>
-                                <span class="user-email">${report.userEmail}</span>
+                <div class="activity-item report-item ${report.status.toLowerCase()}">
+                    <div class="activity-icon">
+                        <i class="${getReportIcon(report.status)}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">
+                            ${report.userName} - ${report.userEmail}
+                            <span class="status-badge ${report.status.toLowerCase()}">${report.statusDisplay}</span>
+                        </div>
+                        <div class="activity-detail">${report.reason}</div>
+                        <div class="activity-time">
+                            Solicitado: ${formatTime(report.createdAt)}
+                            ${report.resolvedAt ? ` • Resolvido: ${formatTime(report.resolvedAt)}` : ''}
+                            ${report.resolvedBy ? ` • Por: ${report.resolvedBy}` : ''}
+                        </div>
+                        ${report.status === 'PENDING' ? `
+                            <div class="report-actions">
+                                <button class="btn btn-success" onclick="approveReport(${report.id})">
+                                    <i class="fas fa-check"></i>
+                                    Aprovar
+                                </button>
+                                <button class="btn btn-danger" onclick="rejectReport(${report.id})">
+                                    <i class="fas fa-times"></i>
+                                    Rejeitar
+                                </button>
                             </div>
-                        </div>
-                        <div class="report-status ${report.status.toLowerCase()}">
-                            <span class="status-badge">${report.statusDisplay}</span>
-                        </div>
+                        ` : ''}
                     </div>
-                    
-                    <div class="report-content">
-                        <p class="report-reason">${report.reason}</p>
-                        <div class="report-meta">
-                            <span class="report-date">Solicitado em: ${formatDate(report.createdAt)}</span>
-                            ${report.resolvedAt ? `<span class="report-resolved">Resolvido em: ${formatDate(report.resolvedAt)}</span>` : ''}
-                            ${report.resolvedBy ? `<span class="report-resolved-by">Por: ${report.resolvedBy}</span>` : ''}
-                        </div>
-                    </div>
-                    
-                    ${report.status === 'PENDING' ? `
-                        <div class="report-actions">
-                            <button class="btn btn-success" onclick="approveReport(${report.id})">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <polyline points="20,6 9,17 4,12"></polyline>
-                                </svg>
-                                Aprovar
-                            </button>
-                            <button class="btn btn-danger" onclick="rejectReport(${report.id})">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                                Rejeitar
-                            </button>
-                        </div>
-                    ` : ''}
                 </div>
             `).join('');
+        }
+
+        function getReportIcon(status) {
+            const icons = {
+                'PENDING': 'fas fa-clock',
+                'APPROVED': 'fas fa-check-circle',
+                'REJECTED': 'fas fa-times-circle'
+            };
+            return icons[status] || 'fas fa-file-alt';
         }
 
         async function approveReport(reportId) {
@@ -250,15 +395,15 @@
             }
         }
 
-        function formatDate(dateString) {
+        function formatTime(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('pt-PT', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Agora';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m atrás`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h atrás`;
+            return date.toLocaleDateString('pt-PT');
         }
 
         function showNotification(message, type) {
@@ -278,6 +423,92 @@
                     document.body.removeChild(notification);
                 }, 300);
             }, 3000);
+        }
+
+        // Notification functions
+        function loadNotifications() {
+            fetch('/admin/api/notifications/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('notification-count').textContent = data.unreadCount;
+                })
+                .catch(error => {
+                    document.getElementById('notification-count').textContent = '0';
+                });
+            
+            fetch('/admin/api/notifications')
+                .then(response => response.json())
+                .then(notifications => {
+                    const list = document.getElementById('notification-list');
+                    const empty = document.getElementById('notification-empty');
+                    
+                    if (notifications.length === 0) {
+                        list.style.display = 'none';
+                        empty.style.display = 'block';
+                        return;
+                    }
+                    
+                    list.style.display = 'block';
+                    empty.style.display = 'none';
+                    
+                    list.innerHTML = notifications.map(notification => `
+                        <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
+                            <div class="notification-icon">
+                                <i class="${getNotificationIcon(notification.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">${notification.title}</div>
+                                <div class="notification-message">${notification.message}</div>
+                                <div class="notification-time">${formatTime(notification.createdAt)}</div>
+                            </div>
+                            ${!notification.read ? '<div class="notification-dot"></div>' : ''}
+                        </div>
+                    `).join('');
+                    
+                    document.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const notificationId = this.dataset.id;
+                            markNotificationAsRead(notificationId);
+                            this.classList.remove('unread');
+                            this.classList.add('read');
+                            this.querySelector('.notification-dot')?.remove();
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar notificações:', error);
+                });
+        }
+        
+        function markNotificationAsRead(notificationId) {
+            fetch(`/admin/api/notifications/${notificationId}/read`, {
+                method: 'POST'
+            }).then(() => {
+                loadNotifications();
+            }).catch(error => {
+                console.error('Erro ao marcar notificação como lida:', error);
+            });
+        }
+        
+        function markAllNotificationsAsRead() {
+            fetch('/admin/api/notifications/read-all', {
+                method: 'POST'
+            }).then(() => {
+                loadNotifications();
+            }).catch(error => {
+                console.error('Erro ao marcar todas como lidas:', error);
+            });
+        }
+        
+        function getNotificationIcon(type) {
+            const icons = {
+                'REPORT': 'fas fa-flag',
+                'SYSTEM': 'fas fa-cog',
+                'USER': 'fas fa-user',
+                'ALERT': 'fas fa-exclamation-triangle',
+                'STATS': 'fas fa-chart-bar'
+            };
+            return icons[type] || icons['SYSTEM'];
         }
     </script>
 </body>

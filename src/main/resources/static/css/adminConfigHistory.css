@@ -1,3 +1,38 @@
+/* ===== LOGOUT BUTTON ===== */
+.logout-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-normal);
+    margin-left: 16px;
+}
+
+.logout-link:hover {
+    color: var(--accent-danger);
+    background: rgba(239, 68, 68, 0.1);
+    transform: translateY(-1px);
+}
+
+.logout-link i {
+    font-size: 14px;
+}
+
+.logout-link span {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .logout-link span {
+        display: inline;
+    }
+}
+
 /* Reset e configurações base */
 * {
     margin: 0;

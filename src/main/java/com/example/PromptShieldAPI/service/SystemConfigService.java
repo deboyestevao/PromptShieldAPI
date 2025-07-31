@@ -5,6 +5,7 @@ import com.example.PromptShieldAPI.model.SystemConfig;
 import com.example.PromptShieldAPI.model.SystemConfig.ModelType;
 import com.example.PromptShieldAPI.repository.ConfigHistoryRepository;
 import com.example.PromptShieldAPI.repository.SystemConfigRepository;
+import com.example.PromptShieldAPI.service.ActivityLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ public class SystemConfigService {
     private final SystemConfigRepository repository;
     private final ConfigHistoryRepository configHistoryRepository;
     private final AzureService azureService;
+    private final ActivityLogService activityLogService;
 
     public boolean isOllamaEnabled() {
         checkAndUpdateModelStatus(ModelType.OLLAMA);
@@ -36,6 +38,7 @@ public class SystemConfigService {
 
     /**
      * Verifica se um modelo está realmente habilitado, considerando desligamentos temporários
+     * Nota: A reativação automática agora é tratada pelo LLMAutoReactivationService em background
      */
     private boolean isModelActuallyEnabled(SystemConfig config) {
         // Se não está habilitado, retorna false
@@ -51,22 +54,9 @@ public class SystemConfigService {
         // Se está em desligamento temporário, verifica se já expirou
         LocalDateTime now = LocalDateTime.now();
         if (config.getTemporaryDisabledEnd() != null && now.isAfter(config.getTemporaryDisabledEnd())) {
-            // Desligamento temporário expirou, reativar automaticamente
-            config.setTemporaryDisabled(false);
-            config.setTemporaryDisabledStart(null);
-            config.setTemporaryDisabledEnd(null);
-            config.setTemporaryDisabledReason(null);
-            repository.save(config);
-
-            // Registrar no histórico
-            ConfigHistory history = new ConfigHistory();
-            history.setSystemConfig(config);
-            history.setModel(config.getModel());
-            history.setEnabled(true);
-            history.setChangedBy("sistema (expiração automática)");
-            configHistoryRepository.save(history);
-
-            return true;
+            // Desligamento temporário expirou, mas a reativação será tratada pelo serviço de background
+            // Por enquanto, retorna false para manter a consistência
+            return false;
         }
 
         // Ainda está em desligamento temporário
@@ -111,12 +101,13 @@ public class SystemConfigService {
     public void updateModelStatusManually(ModelType model, boolean enabled, String changedBy) {
         repository.findByModel(model).ifPresent(cfg -> {
             cfg.setEnabled(enabled);
-            // Se está a ativar manualmente, remover desligamento temporário
+            // Se está a ativar manualmente, remover desligamento temporário e limpar estado original
             if (enabled) {
                 cfg.setTemporaryDisabled(false);
                 cfg.setTemporaryDisabledStart(null);
                 cfg.setTemporaryDisabledEnd(null);
                 cfg.setTemporaryDisabledReason(null);
+                cfg.setOriginalEnabledState(null); // Limpar estado original em alteração manual
             }
             repository.save(cfg);
 
@@ -134,6 +125,9 @@ public class SystemConfigService {
      */
     public void temporarilyDisableModel(ModelType model, LocalDateTime disableUntil, String reason, String changedBy) {
         repository.findByModel(model).ifPresent(cfg -> {
+            // Guardar o estado original antes do desligamento temporário
+            cfg.setOriginalEnabledState(cfg.isEnabled());
+            
             cfg.setEnabled(false);
             cfg.setTemporaryDisabled(true);
             cfg.setTemporaryDisabledStart(LocalDateTime.now());
@@ -156,11 +150,17 @@ public class SystemConfigService {
      */
     public void removeTemporaryDisable(ModelType model, String changedBy) {
         repository.findByModel(model).ifPresent(cfg -> {
+            // Restaurar o estado original se existir
+            Boolean originalState = cfg.getOriginalEnabledState();
+            if (originalState != null) {
+                cfg.setEnabled(originalState);
+                cfg.setOriginalEnabledState(null); // Limpar o estado original
+            }
+            
             cfg.setTemporaryDisabled(false);
             cfg.setTemporaryDisabledStart(null);
             cfg.setTemporaryDisabledEnd(null);
             cfg.setTemporaryDisabledReason(null);
-            // Não alterar o status enabled, apenas remover o desligamento temporário
             repository.save(cfg);
 
             // Registrar no histórico
@@ -168,7 +168,10 @@ public class SystemConfigService {
             history.setSystemConfig(cfg);
             history.setModel(model);
             history.setEnabled(cfg.isEnabled());
-            history.setChangedBy(changedBy + " (removido desligamento temporário)");
+            String actionDescription = originalState != null ? 
+                " (removido desligamento temporário - estado original restaurado: " + (originalState ? "ativo" : "inativo") + ")" :
+                " (removido desligamento temporário)";
+            history.setChangedBy(changedBy + actionDescription);
             configHistoryRepository.save(history);
         });
     }

@@ -1,0 +1,40 @@
+[2025-07-31 12:17:56] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: false, Ollama: false) | jreis
+[2025-07-31 12:28:04] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: false, Ollama: false) | jreis
+[2025-07-31 12:28:47] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: false, Ollama: false) | jreis
+[2025-07-31 12:28:52] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: true, Ollama: false) | jreis
+[2025-07-31 12:29:33] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: false, Ollama: false) | jreis
+[2025-07-31 12:37:11] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-07-31T12:37 por jreis | jreis
+[2025-07-31 12:39:57] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'a1' foi desativado por jreis | jreis
+[2025-07-31 12:40:39] REPORT_CREATED | Novo Report Criado | Utilizador 'a1' criou um report de problema de conta | a1
+[2025-07-31 12:41:14] REPORT_APPROVED | Report Aprovado | Report do utilizador 'a1' foi aprovado por jreis | jreis
+[2025-07-31 12:42:00] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado após expiração do desligamento temporário | sistema
+[2025-07-31 12:46:03] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'a1' por jreis | jreis
+[2025-07-31 12:46:05] USER_MADE_ADMIN | Novo Admin | Utilizador 'a1' foi tornado administrador por jreis | jreis
+[2025-07-31 12:49:30] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'a1' por jreis | jreis
+[2025-07-31 12:49:38] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'tteste' por jreis | jreis
+[2025-07-31 12:49:39] USER_MADE_ADMIN | Novo Admin | Utilizador 'tteste' foi tornado administrador por jreis | jreis
+[2025-07-31 12:49:41] USER_MADE_ADMIN | Novo Admin | Utilizador 'a1' foi tornado administrador por jreis | jreis
+[2025-07-31 13:01:13] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'a1' foi desativado por jreis | jreis
+[2025-07-31 13:01:20] USER_ACTIVATED | Utilizador Ativado | Utilizador 'a1' foi ativado por jreis | jreis
+[2025-07-31 13:02:26] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'jreis' foi desativado por a1 | a1
+[2025-07-31 13:04:09] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'jreis' por a1 | a1
+[2025-07-31 13:04:13] USER_ACTIVATED | Utilizador Ativado | Utilizador 'jreis' foi ativado por a1 | a1
+[2025-07-31 13:04:32] USER_MADE_ADMIN | Novo Admin | Utilizador 'jreis' foi tornado administrador por a1 | a1
+[2025-07-31 13:17:08] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'maria@gmail.com' registado no sistema | maria@gmail.com
+[2025-07-31 13:17:35] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'reis2@gmail.com' registado no sistema | reis2@gmail.com
+[2025-07-31 13:17:48] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'reis1@gmail.com' registado no sistema | reis1@gmail.com
+[2025-07-31 13:18:12] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'dssdsdsd@gmail.com' registado no sistema | dssdsdsd@gmail.com
+[2025-07-31 14:50:33] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por a1 (OpenAI: false, Ollama: false) | a1
+[2025-07-31 14:50:44] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por a1 (OpenAI: true, Ollama: false) | a1
+[2025-07-31 14:50:56] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-07-31T14:51 por a1 | a1
+[2025-07-31 14:54:33] LLM_TEMPORARY_DISABLE_REMOVED | Desligamento Temporário Removido | Desligamento temporário removido para o modelo OPENAI por jreis | jreis
+[2025-07-31 14:54:46] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: true, Ollama: false) | jreis
+[2025-07-31 15:00:57] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-07-31T15:02 por jreis | jreis
+[2025-07-31 15:02:50] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado após expiração do desligamento temporário | sistema
+[2025-07-31 15:17:07] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-07-31T15:18 por a1 | a1
+[2025-07-31 15:18:27] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado para o estado original (ativado) após expiração do desligamento temporário | sistema
+[2025-07-31 15:40:13] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OLLAMA desligado temporariamente até 2025-07-31T15:42 por a1 | a1
+[2025-07-31 15:42:04] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo Ollama foi automaticamente reativado para o estado original (desativado) após expiração do desligamento temporário | sistema
+[2025-07-31 15:42:53] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-07-31T15:44 por a1 | a1
+[2025-07-31 15:44:04] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado para o estado original (ativado) após expiração do desligamento temporário | sistema
+[2025-07-31 15:45:30] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por a1 (OpenAI: false, Ollama: false) | a1

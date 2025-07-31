@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ConfigHistoryRepository extends JpaRepository<ConfigHistory, Long> {
     List<ConfigHistory> findAllByOrderByChangedAtDesc();
+    List<ConfigHistory> findTop5ByOrderByChangedAtDesc();
 }

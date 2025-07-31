@@ -13,6 +13,8 @@ import com.example.PromptShieldAPI.repository.ConfigHistoryRepository;
 import com.example.PromptShieldAPI.model.ConfigHistory;
 import com.example.PromptShieldAPI.model.Notification;
 import com.example.PromptShieldAPI.service.NotificationService;
+import com.example.PromptShieldAPI.service.ActivityLogService;
+import com.example.PromptShieldAPI.service.LLMAutoReactivationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +30,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/admin")
@@ -42,12 +46,24 @@ public class AdminController {
     private final AccountReportRepository accountReportRepository;
     private final ConfigHistoryRepository configHistoryRepository;
     private final NotificationService notificationService;
+    private final ActivityLogService activityLogService;
+    private final LLMAutoReactivationService llmAutoReactivationService;
 
     @PatchMapping("/system-preferences")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateSystemPreferences(@RequestBody SystemPreferencesRequest prefs) {
         try {
             SystemConfig updatedConfig = adminService.updateSystemPreferences(prefs.isOpenai(), prefs.isOllama());
+            
+            // Registrar atividade no log
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            activityLogService.logActivity(
+                "SYSTEM_CONFIG_CHANGED",
+                "Configurações do Sistema",
+                "Configurações do sistema alteradas por " + currentUsername + " (OpenAI: " + prefs.isOpenai() + ", Ollama: " + prefs.isOllama() + ")",
+                currentUsername
+            );
+            
             return ResponseEntity.ok(updatedConfig);
         } catch (OptimisticLockingFailureException e) {
             return ResponseEntity.status(409).body("Error: System preferences were updated by another user. Please, try again.");
@@ -98,6 +114,11 @@ public class AdminController {
         if (openaiConfig != null && openaiConfig.isTemporaryDisabled()) {
             openaiDetails.put("temporaryDisabledUntil", openaiConfig.getTemporaryDisabledEnd());
             openaiDetails.put("temporaryDisabledReason", openaiConfig.getTemporaryDisabledReason());
+            // Incluir informação sobre o estado original
+            if (openaiConfig.getOriginalEnabledState() != null) {
+                openaiDetails.put("originalState", openaiConfig.getOriginalEnabledState());
+                openaiDetails.put("willRestoreTo", openaiConfig.getOriginalEnabledState() ? "Ativo" : "Inativo");
+            }
         }
         response.put("openaiDetails", openaiDetails);
         
@@ -107,6 +128,11 @@ public class AdminController {
         if (ollamaConfig != null && ollamaConfig.isTemporaryDisabled()) {
             ollamaDetails.put("temporaryDisabledUntil", ollamaConfig.getTemporaryDisabledEnd());
             ollamaDetails.put("temporaryDisabledReason", ollamaConfig.getTemporaryDisabledReason());
+            // Incluir informação sobre o estado original
+            if (ollamaConfig.getOriginalEnabledState() != null) {
+                ollamaDetails.put("originalState", ollamaConfig.getOriginalEnabledState());
+                ollamaDetails.put("willRestoreTo", ollamaConfig.getOriginalEnabledState() ? "Ativo" : "Inativo");
+            }
         }
         response.put("ollamaDetails", ollamaDetails);
         
@@ -171,6 +197,14 @@ public class AdminController {
                 adminName
             );
             
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "LLM_TEMPORARILY_DISABLED",
+                "LLM Desligado Temporariamente",
+                "Modelo " + request.getModel() + " desligado temporariamente até " + request.getDisableUntil() + " por " + adminName,
+                adminName
+            );
+            
             return ResponseEntity.ok(Map.of("message", "Modelo " + request.getModel() + " desligado temporariamente até " + request.getDisableUntil()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Modelo inválido. Use 'OPENAI' ou 'OLLAMA'"));
@@ -188,11 +222,42 @@ public class AdminController {
             
             systemConfigService.removeTemporaryDisable(modelType, adminName);
             
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "LLM_TEMPORARY_DISABLE_REMOVED",
+                "Desligamento Temporário Removido",
+                "Desligamento temporário removido para o modelo " + request.get("model") + " por " + adminName,
+                adminName
+            );
+            
             return ResponseEntity.ok(Map.of("message", "Desligamento temporário removido para o modelo " + request.get("model")));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Modelo inválido. Use 'OPENAI' ou 'OLLAMA'"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao remover desligamento temporário"));
+        }
+    }
+
+    @PostMapping("/llm/check-auto-reactivation")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkAutoReactivation() {
+        try {
+            String adminName = SecurityContextHolder.getContext().getAuthentication().getName();
+            
+            // Executar verificação manual de reativação automática
+            llmAutoReactivationService.manualCheckAndReactivate();
+            
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "LLM_AUTO_REACTIVATION_CHECK",
+                "Verificação Manual de Reativação Automática",
+                "Verificação manual de reativação automática de LLMs executada por " + adminName,
+                adminName
+            );
+            
+            return ResponseEntity.ok(Map.of("message", "Verificação de reativação automática executada com sucesso"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao executar verificação de reativação automática"));
         }
     }
 
@@ -315,12 +380,30 @@ public class AdminController {
     @GetMapping("/api/users")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
+    public ResponseEntity<Map<String, Object>> getAllUsers() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             List<User> users = userRepository.findAll();
+            
+            // Encontrar o utilizador atual
+            User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
+            Map<String, Object> currentUserData = null;
+            
+            if (currentUser != null) {
+                long chatCount = chatRepository.countByUser(currentUser);
+                currentUserData = new HashMap<>();
+                currentUserData.put("id", currentUser.getId());
+                currentUserData.put("firstName", currentUser.getFirstName() != null ? currentUser.getFirstName() : "");
+                currentUserData.put("lastName", currentUser.getLastName() != null ? currentUser.getLastName() : "");
+                currentUserData.put("email", currentUser.getEmail());
+                currentUserData.put("username", currentUser.getUsername());
+                currentUserData.put("active", currentUser.isActive());
+                currentUserData.put("createdAt", currentUser.getCreatedAt());
+                currentUserData.put("chatCount", chatCount);
+                currentUserData.put("role", currentUser.getRole() != null ? currentUser.getRole() : "USER");
+            }
+            
             List<Map<String, Object>> usersWithStats = users.stream()
-                .filter(user -> !user.getUsername().equals(currentUsername)) // Filtrar o utilizador atual
                 .map(user -> {
                     long chatCount = chatRepository.countByUser(user);
                     Map<String, Object> userMap = new HashMap<>();
@@ -336,7 +419,11 @@ public class AdminController {
                     return userMap;
                 }).collect(Collectors.toList());
             
-            return ResponseEntity.ok(usersWithStats);
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", usersWithStats);
+            response.put("currentUser", currentUserData);
+            
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(null);
         }
@@ -363,6 +450,7 @@ public class AdminController {
             userData.put("createdAt", user.getCreatedAt());
             userData.put("chatCount", chatCount);
             userData.put("lastActivity", user.getLastLoginAt());
+            userData.put("role", user.getRole() != null ? user.getRole() : "USER");
             
             return ResponseEntity.ok(userData);
         } catch (Exception e) {
@@ -375,6 +463,8 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> activateUser(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             User user = userRepository.findById(id).orElse(null);
             if (user == null) {
                 return ResponseEntity.notFound().build();
@@ -389,6 +479,14 @@ public class AdminController {
                 "Utilizador Ativado",
                 "Utilizador '" + user.getUsername() + "' foi ativado",
                 "/admin/users"
+            );
+            
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "USER_ACTIVATED",
+                "Utilizador Ativado",
+                "Utilizador '" + user.getUsername() + "' foi ativado por " + currentUsername,
+                currentUsername
             );
             
             Map<String, String> response = new HashMap<>();
@@ -406,9 +504,18 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> deactivateUser(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             User user = userRepository.findById(id).orElse(null);
             if (user == null) {
                 return ResponseEntity.notFound().build();
+            }
+            
+            // Verificar se o utilizador está tentando desativar a si mesmo
+            if (user.getUsername().equals(currentUsername)) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Não pode desativar a sua própria conta");
+                return ResponseEntity.badRequest().body(errorResponse);
             }
             
             user.setActive(false);
@@ -420,6 +527,14 @@ public class AdminController {
                 "Utilizador Desativado",
                 "Utilizador '" + user.getUsername() + "' foi desativado",
                 "/admin/users"
+            );
+            
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "USER_DEACTIVATED",
+                "Utilizador Desativado",
+                "Utilizador '" + user.getUsername() + "' foi desativado por " + currentUsername,
+                currentUsername
             );
             
             Map<String, String> response = new HashMap<>();
@@ -437,13 +552,14 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             User user = userRepository.findById(id).orElse(null);
             if (user == null) {
                 return ResponseEntity.notFound().build();
             }
             
             // Verificar se não é o próprio admin
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             if (user.getUsername().equals(currentUsername)) {
                 Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Não pode eliminar a sua própria conta");
@@ -461,6 +577,14 @@ public class AdminController {
                 "/admin/users"
             );
             
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "USER_DELETED",
+                "Utilizador Eliminado",
+                "Utilizador '" + username + "' foi eliminado por " + currentUsername,
+                currentUsername
+            );
+            
             return ResponseEntity.ok(Map.of("message", "Utilizador eliminado com sucesso"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao eliminar utilizador"));
@@ -472,13 +596,14 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> makeUserAdmin(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             User user = userRepository.findById(id).orElse(null);
             if (user == null) {
                 return ResponseEntity.notFound().build();
             }
             
             // Verificar se não é o próprio admin
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             if (user.getUsername().equals(currentUsername)) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Não pode alterar a sua própria conta");
@@ -496,6 +621,14 @@ public class AdminController {
                 "/admin/users"
             );
             
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "USER_MADE_ADMIN",
+                "Novo Admin",
+                "Utilizador '" + user.getUsername() + "' foi tornado administrador por " + currentUsername,
+                currentUsername
+            );
+            
             Map<String, String> response = new HashMap<>();
             response.put("message", "Utilizador tornado admin com sucesso");
             return ResponseEntity.ok(response);
@@ -511,13 +644,14 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> removeUserAdmin(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             User user = userRepository.findById(id).orElse(null);
             if (user == null) {
                 return ResponseEntity.notFound().build();
             }
             
             // Verificar se não é o próprio admin
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             if (user.getUsername().equals(currentUsername)) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Não pode alterar a sua própria conta");
@@ -535,6 +669,14 @@ public class AdminController {
                 "/admin/users"
             );
             
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "ADMIN_REMOVED",
+                "Admin Removido",
+                "Privilégios de admin removidos de '" + user.getUsername() + "' por " + currentUsername,
+                currentUsername
+            );
+            
             Map<String, String> response = new HashMap<>();
             response.put("message", "Privilégios de admin removidos com sucesso");
             return ResponseEntity.ok(response);
@@ -546,6 +688,183 @@ public class AdminController {
     }
 
     // API endpoints para gestão de reports
+    @GetMapping("/api/sessions")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getActiveSessions() {
+        try {
+            long onlineUsers = userRepository.countOnlineUsers();
+            long totalUsers = userRepository.count();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("activeSessions", onlineUsers);
+            response.put("totalUsers", totalUsers);
+            response.put("onlineUsers", onlineUsers);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("activeSessions", 0);
+            errorResponse.put("totalUsers", 0);
+            errorResponse.put("onlineUsers", 0);
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
+
+    @GetMapping("/api/performance")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getSystemPerformance() {
+        try {
+            // Calcular performance baseada em métricas do sistema
+            long totalUsers = userRepository.count();
+            long activeUsers = userRepository.countByActiveTrue();
+            long onlineUsers = userRepository.countOnlineUsers();
+            
+            // Performance baseada na proporção de utilizadores ativos e online
+            double performance = 95.0; // Valor padrão
+            if (totalUsers > 0) {
+                double activeRatio = (double) activeUsers / totalUsers;
+                double onlineRatio = totalUsers > 0 ? (double) onlineUsers / totalUsers : 0;
+                performance = Math.min(100.0, (activeRatio * 0.7 + onlineRatio * 0.3) * 100);
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("performance", Math.round(performance));
+            response.put("totalUsers", totalUsers);
+            response.put("activeUsers", activeUsers);
+            response.put("onlineUsers", onlineUsers);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("performance", 95);
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
+
+    @PostMapping("/api/users/online")
+    @ResponseBody
+    public ResponseEntity<?> setUserOnline() {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByUsername(username).orElse(null);
+            
+            if (user != null) {
+                user.setIsOnline(Boolean.TRUE);
+                user.setLastActive(LocalDateTime.now());
+                userRepository.save(user);
+            }
+            
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao marcar utilizador como online");
+        }
+    }
+
+    @PostMapping("/api/users/offline")
+    @ResponseBody
+    public ResponseEntity<?> setUserOffline() {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByUsername(username).orElse(null);
+            
+            if (user != null) {
+                user.setIsOnline(Boolean.FALSE);
+                user.setLastActive(LocalDateTime.now());
+                userRepository.save(user);
+            }
+            
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao marcar utilizador como offline");
+        }
+    }
+
+    @GetMapping("/api/inactive-accounts")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getInactiveAccounts() {
+        try {
+            long inactiveCount = userRepository.countByActiveFalse();
+            long totalUsers = userRepository.count();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("inactiveCount", inactiveCount);
+            response.put("totalUsers", totalUsers);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("inactiveCount", 0);
+            errorResponse.put("totalUsers", 0);
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
+
+    @GetMapping("/api/llms")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getLLMStats() {
+        try {
+            // Obter configurações dos LLMs
+            SystemConfig openaiConfig = systemConfigService.getModelConfig(SystemConfig.ModelType.OPENAI);
+            SystemConfig ollamaConfig = systemConfigService.getModelConfig(SystemConfig.ModelType.OLLAMA);
+            
+            int totalLLMs = 2; // OpenAI e Ollama
+            int activeLLMs = 0;
+            
+            if (openaiConfig != null && openaiConfig.isEnabled() && !openaiConfig.isTemporaryDisabled()) {
+                activeLLMs++;
+            }
+            if (ollamaConfig != null && ollamaConfig.isEnabled() && !ollamaConfig.isTemporaryDisabled()) {
+                activeLLMs++;
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalLLMs", totalLLMs);
+            response.put("activeLLMs", activeLLMs);
+            response.put("format", activeLLMs + " / " + totalLLMs + " Total");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("totalLLMs", 2);
+            errorResponse.put("activeLLMs", 0);
+            errorResponse.put("format", "0 / 2 Total");
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
+
+    @GetMapping("/api/activity")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getRecentActivity() {
+        try {
+            // Usar o novo serviço de logs para obter as últimas 5 entradas
+            List<Map<String, Object>> activities = activityLogService.getRecentActivity();
+            return ResponseEntity.ok(activities);
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+    }
+
+    @GetMapping("/api/activity/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getActivityLogStats() {
+        try {
+            Map<String, Object> stats = activityLogService.getLogStatistics();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                "totalEntries", 0,
+                "fileSize", "0 KB",
+                "lastModified", null
+            ));
+        }
+    }
+
     @GetMapping("/api/reports")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
@@ -579,6 +898,8 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> approveReport(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             AccountReport report = accountReportRepository.findById(id).orElse(null);
             if (report == null) {
                 return ResponseEntity.notFound().build();
@@ -590,7 +911,6 @@ public class AdminController {
             userRepository.save(user);
             
             // Marcar report como aprovado
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             User admin = userRepository.findByUsername(currentUsername).orElse(null);
             
             report.setStatus(AccountReport.Status.APPROVED);
@@ -604,6 +924,14 @@ public class AdminController {
                 "Report Aprovado",
                 "Report do utilizador '" + report.getUser().getUsername() + "' foi aprovado",
                 "/admin/reports"
+            );
+            
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "REPORT_APPROVED",
+                "Report Aprovado",
+                "Report do utilizador '" + report.getUser().getUsername() + "' foi aprovado por " + currentUsername,
+                currentUsername
             );
             
             Map<String, String> response = new HashMap<>();
@@ -621,13 +949,14 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> rejectReport(@PathVariable Long id) {
         try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
             AccountReport report = accountReportRepository.findById(id).orElse(null);
             if (report == null) {
                 return ResponseEntity.notFound().build();
             }
             
             // Marcar report como rejeitado
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             User admin = userRepository.findByUsername(currentUsername).orElse(null);
             
             report.setStatus(AccountReport.Status.REJECTED);
@@ -641,6 +970,14 @@ public class AdminController {
                 "Report Rejeitado",
                 "Report do utilizador '" + report.getUser().getUsername() + "' foi rejeitado",
                 "/admin/reports"
+            );
+            
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "REPORT_REJECTED",
+                "Report Rejeitado",
+                "Report do utilizador '" + report.getUser().getUsername() + "' foi rejeitado por " + currentUsername,
+                currentUsername
             );
             
             Map<String, String> response = new HashMap<>();

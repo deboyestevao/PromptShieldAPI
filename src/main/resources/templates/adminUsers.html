@@ -1,31 +1,122 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/css/adminDashboard.css" rel="stylesheet" type="text/css">
     <link href="/css/adminUsers.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <title>Gestão de Utilizadores - PromptShield</title>
 </head>
 <body>
-    <header class="admin-header">
-        <div class="admin-logo">
-            <a href="/chat">PromptShield</a>
-            <span class="admin-badge">Admin</span>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <span class="logo-text">PromptShield</span>
+                <span class="admin-badge">Admin</span>
+            </div>
         </div>
-        <div class="admin-user-info">
-            <span class="admin-avatar">A</span>
-        </div>
-    </header>
-    
-    <main class="admin-main">
-        <a href="/admin/dashboard" class="admin-back">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2"/>
-            </svg>
-            Voltar ao Dashboard
-        </a>
-        <h1>Gestão de Utilizadores</h1>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3 class="nav-title">Dashboard</h3>
+                <a href="/admin/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Visão Geral</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Gestão</h3>
+                <a href="/admin/users" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Utilizadores</span>
+                </a>
+                <a href="/admin/reports" class="nav-item">
+                    <i class="fas fa-flag"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/admin/system-preferences" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="/admin/config-history" class="nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Histórico</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Sistema</h3>
+                <a href="/chat" class="nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Utilizadores</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="notification-container">
+                    <button class="notification-bell" id="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-count">0</span>
+                    </button>
+                    
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h3>Notificações</h3>
+                            <button id="mark-all-read" class="mark-all-read-btn">
+                                <i class="fas fa-check-double"></i>
+                                Marcar todas
+                            </button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <!-- Notificações serão carregadas aqui -->
+                        </div>
+                        <div class="notification-empty" id="notification-empty" style="display:none;">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>Nenhuma notificação</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Administrador</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                    <a href="/auth/logout" class="logout-link" title="Sair">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Users Content -->
+        <div class="users-container">
+            <div class="page-header">
+                <h1>Gestão de Utilizadores</h1>
+                <p>Gerencie utilizadores, permissões e acessos ao sistema</p>
+            </div>
         
         <!-- Estatísticas -->
         <div class="users-stats">
@@ -54,17 +145,7 @@
                     <span class="stat-label">Utilizadores Ativos</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-number" id="new-users">0</span>
-                    <span class="stat-label">Novos (30 dias)</span>
-                </div>
-            </div>
+
         </div>
 
         <!-- Barra de pesquisa e filtros -->
@@ -112,8 +193,13 @@
         </div>
 
         <!-- Paginação -->
-        <div class="pagination" id="pagination">
-            <!-- Paginação será gerada via JavaScript -->
+        <div class="pagination-container">
+            <div class="pagination-info" id="pagination-info">
+                <!-- Informações da paginação serão geradas via JavaScript -->
+            </div>
+            <div class="pagination" id="pagination">
+                <!-- Paginação será gerada via JavaScript -->
+            </div>
         </div>
 
         <!-- Modal de detalhes do utilizador -->
@@ -160,11 +246,13 @@
         let usersPerPage = 10;
         let allUsers = [];
         let filteredUsers = [];
+        let currentUser = null;
 
         // Carregar utilizadores quando a página carrega
         document.addEventListener('DOMContentLoaded', function() {
             loadUsers();
             setupEventListeners();
+            setupHeaderFunctionality();
         });
 
         function setupEventListeners() {
@@ -176,12 +264,124 @@
             document.getElementById('sort-filter').addEventListener('change', filterUsers);
         }
 
+        function setupHeaderFunctionality() {
+            // Notificações
+            const notificationBell = document.getElementById('notification-bell');
+            const notificationDropdown = document.getElementById('notification-dropdown');
+            const markAllReadBtn = document.getElementById('mark-all-read');
+
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function() {
+                    notificationDropdown.classList.toggle('active');
+                    loadNotifications();
+                });
+            }
+
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function() {
+                    markAllNotificationsAsRead();
+                });
+            }
+
+            // Fechar dropdown ao clicar fora
+            document.addEventListener('click', function(event) {
+                if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
+                    notificationDropdown.classList.remove('active');
+                }
+            });
+
+            // Carregar notificações iniciais
+            loadNotifications();
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/admin/api/notifications');
+                if (response.ok) {
+                    const notifications = await response.json();
+                    renderNotifications(notifications);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar notificações:', error);
+            }
+        }
+
+        function renderNotifications(notifications) {
+            const notificationList = document.getElementById('notification-list');
+            const notificationEmpty = document.getElementById('notification-empty');
+            const notificationCount = document.getElementById('notification-count');
+
+            if (notifications.length === 0) {
+                notificationList.style.display = 'none';
+                notificationEmpty.style.display = 'block';
+                notificationCount.textContent = '0';
+                return;
+            }
+
+            notificationList.style.display = 'block';
+            notificationEmpty.style.display = 'none';
+
+            const unreadCount = notifications.filter(n => !n.read).length;
+            notificationCount.textContent = unreadCount > 0 ? unreadCount.toString() : '';
+
+            notificationList.innerHTML = notifications.slice(0, 5).map(notification => `
+                <div class="notification-item ${!notification.read ? 'unread' : ''}" data-id="${notification.id}">
+                    <div class="notification-icon">
+                        <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-time">${formatNotificationTime(notification.createdAt)}</div>
+                    </div>
+                    ${!notification.read ? '<div class="notification-dot"></div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'USER': 'user',
+                'SYSTEM': 'cog',
+                'REPORT': 'flag',
+                'SECURITY': 'shield-alt'
+            };
+            return icons[type] || 'bell';
+        }
+
+        function formatNotificationTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Agora';
+            if (minutes < 60) return `${minutes}m atrás`;
+            if (hours < 24) return `${hours}h atrás`;
+            if (days < 7) return `${days}d atrás`;
+            return date.toLocaleDateString('pt-PT');
+        }
+
+        async function markAllNotificationsAsRead() {
+            try {
+                const response = await fetch('/admin/api/notifications/read-all', { method: 'POST' });
+                if (response.ok) {
+                    loadNotifications();
+                }
+            } catch (error) {
+                console.error('Erro ao marcar notificações como lidas:', error);
+            }
+        }
+
         async function loadUsers() {
             try {
                 const response = await fetch('/admin/api/users');
                 if (response.ok) {
                     const data = await response.json();
-                    allUsers = data;
+                    allUsers = data.users || data;
+                    currentUser = data.currentUser || null;
                     filteredUsers = [...allUsers];
                     updateStats();
                     renderUsers();
@@ -197,13 +397,9 @@
         function updateStats() {
             const total = allUsers.length;
             const active = allUsers.filter(u => u.active).length;
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            const newUsers = allUsers.filter(u => new Date(u.createdAt) > thirtyDaysAgo).length;
 
             document.getElementById('total-users').textContent = total;
             document.getElementById('active-users').textContent = active;
-            document.getElementById('new-users').textContent = newUsers;
         }
 
         function filterUsers() {
@@ -239,7 +435,10 @@
                 }
             });
 
+            // Reset para primeira página ao aplicar filtros
             currentPage = 1;
+            
+            // Atualizar a listagem automaticamente ao aplicar filtros
             renderUsers();
             renderPagination();
         }
@@ -272,13 +471,24 @@
             }
 
             pageUsers.forEach(user => {
+                const isCurrentUser = currentUser && user.id === currentUser.id;
                 const row = document.createElement('tr');
+                
+                if (isCurrentUser) {
+                    row.classList.add('current-user');
+                }
+                
+                // Determinar se as ações críticas devem ser desativadas
+                const canDeactivate = !isCurrentUser;
+                const canDelete = !isCurrentUser;
+                const canChangeRole = !isCurrentUser;
+                
                 row.innerHTML = `
                     <td>
                         <div class="user-info">
                             <div class="user-avatar">${user.firstName.charAt(0)}${user.lastName.charAt(0)}</div>
                             <div class="user-details">
-                                <span class="user-name">${user.firstName} ${user.lastName}</span>
+                                <span class="user-name">${user.firstName} ${user.lastName}${isCurrentUser ? ' (Você)' : ''}</span>
                                 <span class="user-username">@${user.username}</span>
                             </div>
                         </div>
@@ -292,7 +502,7 @@
                     </td>
                     <td>
                         <span class="role-badge ${user.role === 'ADMIN' ? 'admin' : 'user'}">
-                            ${user.role === 'ADMIN' ? 'Admin' : 'Utilizador'}
+                            ${user.role === 'ADMIN' ? 'Administrador' : 'Utilizador'}
                         </span>
                     </td>
                     <td>${user.chatCount || 0}</td>
@@ -305,30 +515,36 @@
                                 </svg>
                                 <span>Ver</span>
                             </button>
-                            <button class="action-btn ${user.active ? 'deactivate-btn' : 'activate-btn'}" 
-                                    onclick="${user.active ? 'deactivateUser' : 'activateUser'}(${user.id})">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    ${user.active ? 
-                                        '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>' :
-                                        '<path d="M9 12l2 2 4-4"></path><path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>'
-                                    }
-                                </svg>
-                                <span>${user.active ? 'Desativar' : 'Ativar'}</span>
-                            </button>
-                            <button class="action-btn ${user.role === 'ADMIN' ? 'remove-admin-btn' : 'make-admin-btn'}" 
-                                    onclick="${user.role === 'ADMIN' ? 'removeUserAdmin' : 'makeUserAdmin'}(${user.id})">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                                </svg>
-                                <span>${user.role === 'ADMIN' ? 'Remover Admin' : 'Tornar Admin'}</span>
-                            </button>
-                            <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <polyline points="3,6 5,6 21,6"></polyline>
-                                    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
-                                </svg>
-                                <span>Eliminar</span>
-                            </button>
+                            ${canDeactivate ? `
+                                <button class="action-btn ${user.active ? 'deactivate-btn' : 'activate-btn'}" 
+                                        onclick="${user.active ? 'deactivateUser' : 'activateUser'}(${user.id})">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        ${user.active ? 
+                                            '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>' :
+                                            '<path d="M9 12l2 2 4-4"></path><path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"></path>'
+                                        }
+                                    </svg>
+                                    <span>${user.active ? 'Desativar' : 'Ativar'}</span>
+                                </button>
+                            ` : ''}
+                            ${canChangeRole ? `
+                                <button class="action-btn ${user.role === 'ADMIN' ? 'remove-admin-btn' : 'make-admin-btn'}" 
+                                        onclick="${user.role === 'ADMIN' ? 'removeUserAdmin' : 'makeUserAdmin'}(${user.id})">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                                    </svg>
+                                    <span>${user.role === 'ADMIN' ? 'Remover Admin' : 'Tornar Admin'}</span>
+                                </button>
+                            ` : ''}
+                            ${canDelete ? `
+                                <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="3,6 5,6 21,6"></polyline>
+                                        <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                                    </svg>
+                                    <span>Eliminar</span>
+                                </button>
+                            ` : ''}
                         </div>
                     </td>
                 `;
@@ -338,12 +554,23 @@
 
         function renderPagination() {
             const pagination = document.getElementById('pagination');
+            const paginationInfo = document.getElementById('pagination-info');
             const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
             
+            // Mostrar paginação apenas se houver utilizadores suficientes para justificar
             if (totalPages <= 1) {
-                pagination.innerHTML = '';
+                pagination.style.display = 'none';
+                paginationInfo.style.display = 'none';
                 return;
             }
+            
+            pagination.style.display = 'flex';
+            paginationInfo.style.display = 'block';
+            
+            // Atualizar informações da paginação
+            const startIndex = (currentPage - 1) * usersPerPage + 1;
+            const endIndex = Math.min(currentPage * usersPerPage, filteredUsers.length);
+            paginationInfo.textContent = `Mostrando ${startIndex}-${endIndex} de ${filteredUsers.length} utilizadores`;
 
             let paginationHTML = '';
             
@@ -358,18 +585,48 @@
                 </button>
             `;
 
-            // Páginas
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                    paginationHTML += `
-                        <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
-                                onclick="changePage(${i})">
-                            ${i}
-                        </button>
-                    `;
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
+            // Páginas numeradas - mostrar até 5 páginas com ellipsis quando necessário
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Ajustar se estamos no final
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            // Primeira página
+            if (startPage > 1) {
+                paginationHTML += `
+                    <button class="pagination-btn" onclick="changePage(1)">
+                        1
+                    </button>
+                `;
+                if (startPage > 2) {
                     paginationHTML += '<span class="pagination-ellipsis">...</span>';
                 }
+            }
+
+            // Páginas visíveis
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // Última página
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += '<span class="pagination-ellipsis">...</span>';
+                }
+                paginationHTML += `
+                    <button class="pagination-btn" onclick="changePage(${totalPages})">
+                        ${totalPages}
+                    </button>
+                `;
             }
 
             // Botão seguinte
@@ -387,9 +644,21 @@
         }
 
         function changePage(page) {
+            if (page < 1 || page > Math.ceil(filteredUsers.length / usersPerPage)) {
+                return;
+            }
+            
             currentPage = page;
+            
+            // Atualizar a listagem automaticamente ao mudar de página
             renderUsers();
             renderPagination();
+            
+            // Scroll suave para o topo da tabela
+            const tableContainer = document.querySelector('.users-table-container');
+            if (tableContainer) {
+                tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function formatDate(dateString) {
@@ -544,7 +813,7 @@
                             <span class="stat-label">Role</span>
                             <span class="stat-value">
                                 <span class="role-badge ${user.role === 'ADMIN' ? 'admin' : 'user'}">
-                                    ${user.role === 'ADMIN' ? 'Admin' : 'Utilizador'}
+                                    ${user.role === 'ADMIN' ? 'Administrador' : 'Utilizador'}
                                 </span>
                             </span>
                         </div>

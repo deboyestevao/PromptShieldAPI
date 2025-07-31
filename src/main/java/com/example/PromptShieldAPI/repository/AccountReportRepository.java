@@ -17,4 +17,6 @@ public interface AccountReportRepository extends JpaRepository<AccountReport, Lo
     
     @Query("SELECT COUNT(ar) FROM AccountReport ar WHERE ar.status = 'PENDING'")
     long countPendingReports();
+    
+    List<AccountReport> findTop5ByOrderByCreatedAtDesc();
 } 

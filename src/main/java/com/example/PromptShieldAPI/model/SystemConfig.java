@@ -27,6 +27,9 @@ public class SystemConfig {
     private LocalDateTime temporaryDisabledStart;
     private LocalDateTime temporaryDisabledEnd;
     private String temporaryDisabledReason;
+    
+    // Campo para guardar o estado original antes do desligamento temporário
+    private Boolean originalEnabledState;
 
     @Version
     private Long version;

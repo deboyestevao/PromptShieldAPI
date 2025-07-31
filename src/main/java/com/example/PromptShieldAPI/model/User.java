@@ -38,6 +38,12 @@ public class User {
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "is_online")
+    private Boolean isOnline = false;
+
+    @Column(name = "last_active")
+    private LocalDateTime lastActive;
+
     private String role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

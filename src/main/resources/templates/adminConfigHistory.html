@@ -1,30 +1,122 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/css/adminDashboard.css" rel="stylesheet" type="text/css">
     <link href="/css/adminConfigHistory.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <title>Histórico de Configurações - PromptShield</title>
 </head>
 <body>
-<header class="admin-header">
-    <div class="admin-logo">
-        <a href="/chat">PromptShield</a>
-        <span class="admin-badge">Admin</span>
-    </div>
-    <div class="admin-user-info">
-        <span class="admin-avatar">A</span>
-    </div>
-</header>
-<main class="admin-main">
-    <a href="/admin/dashboard" class="admin-back">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2"/>
-        </svg>
-        Voltar ao Dashboard
-    </a>
-    <h1>Histórico de Configurações do Sistema</h1>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <span class="logo-text">PromptShield</span>
+                <span class="admin-badge">Admin</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3 class="nav-title">Dashboard</h3>
+                <a href="/admin/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Visão Geral</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Gestão</h3>
+                <a href="/admin/users" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Utilizadores</span>
+                </a>
+                <a href="/admin/reports" class="nav-item">
+                    <i class="fas fa-flag"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/admin/system-preferences" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="/admin/config-history" class="nav-item active">
+                    <i class="fas fa-history"></i>
+                    <span>Histórico</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3 class="nav-title">Sistema</h3>
+                <a href="/chat" class="nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Histórico</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="notification-container">
+                    <button class="notification-bell" id="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-count">0</span>
+                    </button>
+                    
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h3>Notificações</h3>
+                            <button id="mark-all-read" class="mark-all-read-btn">
+                                <i class="fas fa-check-double"></i>
+                                Marcar todas
+                            </button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <!-- Notificações serão carregadas aqui -->
+                        </div>
+                        <div class="notification-empty" id="notification-empty" style="display:none;">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>Nenhuma notificação</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Administrador</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                    <a href="/auth/logout" class="logout-link" title="Sair">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Config History Content -->
+        <div class="config-history-container">
+            <div class="page-header">
+                <h1>Histórico de Configurações do Sistema</h1>
+                <p>Acompanhe todas as alterações feitas nas configurações do sistema</p>
+            </div>
     
     <!-- Filtros e Pesquisa -->
     <section class="admin-filters-section">
@@ -323,7 +415,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualizar
     document.getElementById('refresh-history').addEventListener('click', loadHistory);
-});
-</script>
+        });
+    </script>
+    </main>
 </body>
 </html> 

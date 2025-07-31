@@ -35,6 +35,23 @@ public class AuthControllerWeb {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
+        // Marcar utilizador como offline antes de invalidar a sessão
+        try {
+            String username = session.getAttribute("username") != null ? 
+                session.getAttribute("username").toString() : null;
+            
+            if (username != null) {
+                userRepository.findByUsername(username).ifPresent(user -> {
+                    user.setIsOnline(Boolean.FALSE);
+                    user.setLastActive(LocalDateTime.now());
+                    userRepository.save(user);
+                });
+            }
+        } catch (Exception e) {
+            // Log error but don't fail logout
+            System.err.println("Erro ao marcar utilizador como offline: " + e.getMessage());
+        }
+        
         session.invalidate();
         return "redirect:/auth/login";
     }
