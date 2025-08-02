@@ -26,7 +26,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/", "/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**", "/css/**", "/api/auth/test-email", "/api/auth/register", "/api/auth/login", "/admin/llm-status", "/admin/llm-user-prefs").permitAll()
+                .requestMatchers("/", "/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**", "/css/**", "/api/auth/test-email", "/api/auth/register", "/api/auth/login", "/admin/llm-status", "/admin/llm-status-simple", "/admin/llm-user-prefs", "/admin/llm-maintenance-status").permitAll()
                 .requestMatchers("/admin/**", "/auth/delete/**").hasRole("ADMIN")
                 .requestMatchers("/check-account-status", "/account-disabled").authenticated()
                 .anyRequest().authenticated()

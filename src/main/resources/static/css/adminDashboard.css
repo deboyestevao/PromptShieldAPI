@@ -636,22 +636,6 @@ body {
     margin-bottom: 8px;
 }
 
-.metric-change {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.metric-change.positive {
-    color: var(--accent-success);
-}
-
-.metric-change.negative {
-    color: var(--accent-danger);
-}
-
 .metric-detail {
     font-size: 0.75rem;
     color: var(--text-tertiary);

@@ -38,3 +38,14 @@
 [2025-07-31 15:42:53] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-07-31T15:44 por a1 | a1
 [2025-07-31 15:44:04] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado para o estado original (ativado) após expiração do desligamento temporário | sistema
 [2025-07-31 15:45:30] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por a1 (OpenAI: false, Ollama: false) | a1
+[2025-08-02 19:27:50] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestêvão (OpenAI: true, Ollama: false) | jestêvão
+[2025-08-02 20:00:42] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'teste@gmail.com' registado no sistema | teste@gmail.com
+[2025-08-02 20:01:00] USER_DEACTIVATED | Utilizador Desativado | Utilizador 't1' foi desativado por jestêvão | jestêvão
+[2025-08-02 20:01:09] REPORT_CREATED | Novo Report Criado | Utilizador 't1' criou um report de problema de conta | t1
+[2025-08-02 20:01:18] REPORT_APPROVED | Report Aprovado | Report do utilizador 't1' foi aprovado por jestêvão | jestêvão
+[2025-08-02 20:34:34] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestêvão (OpenAI: false, Ollama: false) | jestêvão
+[2025-08-02 20:34:38] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestêvão (OpenAI: true, Ollama: false) | jestêvão
+[2025-08-02 20:42:01] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-08-02T20:42 por jestêvão | jestêvão
+[2025-08-02 20:42:11] LLM_TEMPORARY_DISABLE_REMOVED | Desligamento Temporário Removido | Desligamento temporário removido para o modelo OPENAI por jestêvão | jestêvão
+[2025-08-02 20:42:21] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-08-02T20:43 por jestêvão | jestêvão
+[2025-08-02 20:43:33] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado para o estado original (ativado) após expiração do desligamento temporário | sistema

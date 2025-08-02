@@ -93,7 +93,7 @@
                             </div>
                             
                             <div class="welcome-tips">
-                                <p><strong>💡 Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
+                                <p><strong><i class="fas fa-lightbulb"></i> Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
                             </div>
                         </div>
                     </div>
@@ -357,7 +357,7 @@ const fileChip = document.getElementById('file-chip');
 fileInput.addEventListener('change', function() {
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        fileChip.innerHTML = `<span class='file-chip-icon'>📎</span> <span class='file-chip-name'>${file.name}</span> <span class='file-chip-remove' title='Remover'>&times;</span>`;
+        fileChip.innerHTML = `<span class='file-chip-icon'><i class="fas fa-paperclip"></i></span> <span class='file-chip-name'>${file.name}</span> <span class='file-chip-remove' title='Remover'><i class="fas fa-times"></i></span>`;
         fileChip.style.display = 'flex';
     } else {
         fileChip.style.display = 'none';
@@ -417,7 +417,7 @@ fileChip.addEventListener('click', function(e) {
                     </div>
                     
                     <div class="welcome-tips">
-                        <p><strong>💡 Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
+                        <p><strong><i class="fas fa-lightbulb"></i> Dica:</strong> Pode anexar ficheiros para análise ou fazer perguntas diretas.</p>
                     </div>
                 </div>
             `;
@@ -448,11 +448,10 @@ async function loadChats() {
         if (chats.length === 0) {
             const emptyMessage = document.createElement('div');
             emptyMessage.className = 'empty-chats-message';
-            emptyMessage.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 200px; padding: 20px; background: #fff; border-radius: 12px; margin: 10px; border: 1px solid rgba(24, 60, 124, 0.1);';
             emptyMessage.innerHTML = `
-                <div class="empty-chats-content" style="text-align: center; color: #64748b;">
-                    <p style="margin: 0 0 8px 0; font-size: 1rem; font-weight: 500; color: #475569;">Nenhum chat ainda</p>
-                    <small style="font-size: 0.85rem; opacity: 0.8; color: #94a3b8;">Clique em + para começar</small>
+                <div class="empty-chats-content">
+                    <p>Nenhum chat ainda</p>
+                    <small>Clique em + para começar</small>
                 </div>
             `;
             sidebarChats.appendChild(emptyMessage);
@@ -472,7 +471,7 @@ async function loadChats() {
         const del = document.createElement('button');
         del.className = 'delete-chat-btn';
         del.title = 'Apagar chat';
-        del.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+        del.innerHTML = `<i class="fas fa-times"></i>`;
         del.onclick = (e) => { e.stopPropagation(); deleteChat(chat.id); };
         div.appendChild(del);
         sidebarChats.appendChild(div);
@@ -755,7 +754,7 @@ function addLLMAnswers(answerText) {
         if (attachedFile) {
             fileChipHTML = `
                 <div class="message-file-chip">
-                    <span class="file-chip-icon">📎</span>
+                    <span class="file-chip-icon"><i class="fas fa-paperclip"></i></span>
                     <span class="file-chip-name">${attachedFile}</span>
                 </div>
             `;
@@ -811,6 +810,18 @@ function scrollToBottom() {
     chatMessages.scrollTo({
         top: chatMessages.scrollHeight,
         behavior: 'smooth'
+    });
+}
+
+// Formata data e hora para exibição
+function formatDateTime(dateTimeString) {
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('pt-PT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 
