@@ -46,7 +46,6 @@ public class AuthService {
             
             if (user != null) {
                 user.setLastLoginAt(java.time.LocalDateTime.now());
-                user.setIsOnline(Boolean.TRUE);
                 user.setLastActive(java.time.LocalDateTime.now());
                 userRepository.save(user);
                 
@@ -124,7 +123,6 @@ public class AuthService {
     public void updateLastLogin(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             user.setLastLoginAt(java.time.LocalDateTime.now());
-            user.setIsOnline(Boolean.TRUE);
             user.setLastActive(java.time.LocalDateTime.now());
             userRepository.save(user);
         });

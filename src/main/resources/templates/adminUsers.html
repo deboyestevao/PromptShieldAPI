@@ -134,7 +134,19 @@
                     <span class="stat-label">Utilizadores Ativos</span>
                 </div>
             </div>
-
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="deleted-users">0</span>
+                    <span class="stat-label">Na Lixeira</span>
+                    <a href="/admin/users/trash" class="trash-link">
+                        <i class="fas fa-eye"></i>
+                        Ver Lixeira
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Barra de pesquisa e filtros -->
@@ -233,6 +245,7 @@
         // Carregar utilizadores quando a página carrega
         document.addEventListener('DOMContentLoaded', function() {
             loadUsers();
+            loadDeletedCount();
             setupEventListeners();
             setupHeaderFunctionality();
         });
@@ -384,6 +397,18 @@
             document.getElementById('active-users').textContent = active;
         }
 
+        async function loadDeletedCount() {
+            try {
+                const response = await fetch('/admin/api/users/deleted');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('deleted-users').textContent = data.totalDeleted || 0;
+                }
+            } catch (error) {
+                document.getElementById('deleted-users').textContent = '0';
+            }
+        }
+
         function filterUsers() {
             const searchTerm = document.getElementById('search-users').value.toLowerCase();
             const statusFilter = document.getElementById('status-filter').value;
@@ -506,7 +531,7 @@
                             ${canDelete ? `
                                 <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
                                     <i class="fas fa-trash"></i>
-                                    <span>Eliminar</span>
+                                    <span>Mover para Lixeira</span>
                                 </button>
                             ` : ''}
                         </div>
@@ -687,15 +712,15 @@
 
         async function deleteUser(userId) {
             showConfirmModal(
-                'Tem a certeza que deseja eliminar este utilizador? Esta ação não pode ser desfeita.',
+                'Tem a certeza que deseja mover este utilizador para a lixeira? O utilizador será desativado mas os dados serão mantidos.',
                 async () => {
                     try {
                         const response = await fetch(`/admin/api/users/${userId}`, { method: 'DELETE' });
                         if (response.ok) {
-                            showNotification('Utilizador eliminado com sucesso', 'success');
+                            showNotification('Utilizador movido para a lixeira com sucesso', 'success');
                             loadUsers();
                         } else {
-                            showNotification('Erro ao eliminar utilizador', 'error');
+                            showNotification('Erro ao mover utilizador para a lixeira', 'error');
                         }
                     } catch (error) {
                         showNotification('Erro de conexão', 'error');

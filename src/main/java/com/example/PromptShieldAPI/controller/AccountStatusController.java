@@ -38,6 +38,11 @@ public class AccountStatusController {
             user.setLastLoginAt(java.time.LocalDateTime.now());
             userRepository.save(user);
             
+            // Verificar se está deletado
+            if (user.isDeleted()) {
+                return "redirect:/account-deleted";
+            }
+            
             // Verificar se está ativo
             if (!user.isActive()) {
                 return "redirect:/account-disabled";
@@ -50,6 +55,11 @@ public class AccountStatusController {
     @GetMapping("/account-disabled")
     public String accountDisabledPage() {
         return "accountDisabled";
+    }
+
+    @GetMapping("/account-deleted")
+    public String accountDeletedPage() {
+        return "accountDeleted";
     }
 
     @PostMapping("/report-account-issue")

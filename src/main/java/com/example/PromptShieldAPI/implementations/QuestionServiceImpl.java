@@ -51,6 +51,11 @@ public class QuestionServiceImpl implements QuestionService {
             }
             
             questionRepo.save(q);
+            
+            // Atualizar lastActive do usuário
+            user.setLastActive(java.time.LocalDateTime.now());
+            userRepo.save(user);
+            
             // log.info("Pergunta salva com sucesso - ID: {}", q.getId());
         } catch (Exception e) {
             log.error("Erro ao salvar pergunta: {}", e.getMessage(), e);

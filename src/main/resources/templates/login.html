@@ -23,8 +23,11 @@
             <input type="password" id="password" name="password" class="form-control" placeholder="Digite a sua senha" required>
         </div>
         <div th:if="${param.error}" class="error-message">
-            <span class="error-text">
+            <span class="error-text" th:if="${param.error[0] == 'true'}">
                 <i class="fas fa-exclamation-triangle"></i> Email ou senha inválidos. Tente novamente.
+            </span>
+            <span class="error-text" th:if="${param.error[0] == 'deleted'}">
+                <i class="fas fa-trash"></i> A sua conta foi removida por um administrador. Entre em contacto para mais informações.
             </span>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>

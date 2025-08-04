@@ -130,6 +130,31 @@
     font-weight: 500;
 }
 
+.trash-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent-primary);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-normal);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.trash-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+.trash-link i {
+    font-size: 10px;
+}
+
 /* ===== USERS CONTROLS ===== */
 .users-controls {
     background: rgba(30, 41, 59, 0.8);

@@ -1,6 +1,7 @@
 package com.example.PromptShieldAPI.model;
 
 import com.example.PromptShieldAPI.service.CustomUserDetailsService;
+import com.example.PromptShieldAPI.service.CustomAuthenticationFailureHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
+    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -28,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/", "/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**", "/css/**", "/api/auth/test-email", "/api/auth/register", "/api/auth/login", "/admin/llm-status", "/admin/llm-status-simple", "/admin/llm-user-prefs", "/admin/llm-maintenance-status").permitAll()
                 .requestMatchers("/admin/**", "/auth/delete/**").hasRole("ADMIN")
-                .requestMatchers("/check-account-status", "/account-disabled").authenticated()
+                .requestMatchers("/check-account-status", "/account-disabled", "/account-deleted").authenticated()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin(form -> form
@@ -37,7 +39,7 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .defaultSuccessUrl("/check-account-status", true)
-                        .failureUrl("/auth/login?error=true")
+                        .failureHandler(authenticationFailureHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout

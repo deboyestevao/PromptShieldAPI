@@ -19,6 +19,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilizador não encontrado com o email: " + email));
 
+        // Verificar se a conta está deletada
+        if (user.isDeleted()) {
+            throw new UsernameNotFoundException("Conta deletada. Não é possível fazer login.");
+        }
+
         // Não vamos verificar se está ativo aqui, vamos deixar o login acontecer
         // e verificar depois no controller
 

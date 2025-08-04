@@ -42,7 +42,6 @@ public class AuthControllerWeb {
             
             if (username != null) {
                 userRepository.findByUsername(username).ifPresent(user -> {
-                    user.setIsOnline(Boolean.FALSE);
                     user.setLastActive(LocalDateTime.now());
                     userRepository.save(user);
                 });

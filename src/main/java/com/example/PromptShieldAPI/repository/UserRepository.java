@@ -12,12 +12,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);       // necessário para login por email
     
     // Métodos para dashboard
-    long countByIsOnlineTrue();
     long countByActiveTrue();
     long countByActiveFalse();
     List<User> findTop5ByOrderByLastLoginAtDesc();
     
-    // Alternative method for Boolean field
-    @Query("SELECT COUNT(u) FROM User u WHERE u.isOnline = true")
-    long countOnlineUsers();
+    // Métodos para soft delete
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+    List<User> findAllActive();
+    
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NOT NULL ORDER BY u.deletedAt DESC")
+    List<User> findAllDeleted();
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL")
+    long countActiveUsers();
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NOT NULL")
+    long countDeletedUsers();
 }

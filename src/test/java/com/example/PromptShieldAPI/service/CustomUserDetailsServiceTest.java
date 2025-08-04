@@ -48,4 +48,20 @@ class CustomUserDetailsServiceTest {
             service.loadUserByUsername("notfound@example.com");
         });
     }
+
+    @Test
+    void testLoadUserByUsername_WhenUserIsDeleted() {
+        User user = new User();
+        user.setUsername("deleted");
+        user.setEmail("deleted@example.com");
+        user.setPassword("123");
+        user.setRole("USER");
+        user.softDelete("admin"); // Marcar como deletado
+
+        when(userRepository.findByEmail("deleted@example.com")).thenReturn(Optional.of(user));
+
+        assertThrows(UsernameNotFoundException.class, () -> {
+            service.loadUserByUsername("deleted@example.com");
+        });
+    }
 }

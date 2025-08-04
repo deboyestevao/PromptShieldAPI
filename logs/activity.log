@@ -49,3 +49,15 @@
 [2025-08-02 20:42:11] LLM_TEMPORARY_DISABLE_REMOVED | Desligamento Temporário Removido | Desligamento temporário removido para o modelo OPENAI por jestêvão | jestêvão
 [2025-08-02 20:42:21] LLM_TEMPORARILY_DISABLED | LLM Desligado Temporariamente | Modelo OPENAI desligado temporariamente até 2025-08-02T20:43 por jestêvão | jestêvão
 [2025-08-02 20:43:33] LLM_AUTO_REACTIVATED | LLM Reativada Automaticamente | Modelo OpenAI foi automaticamente reativado para o estado original (ativado) após expiração do desligamento temporário | sistema
+[2025-08-04 11:56:56] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: false, Ollama: false) | jreis
+[2025-08-04 12:06:57] USER_DELETED | Utilizador Eliminado | Utilizador 'mestêvão' foi eliminado por jreis | jreis
+[2025-08-04 12:39:11] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'reis@gmail.com' registado no sistema | reis@gmail.com
+[2025-08-04 12:40:02] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'maria@gmail.com' registado no sistema | maria@gmail.com
+[2025-08-04 12:41:08] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: true, Ollama: false) | jreis
+[2025-08-04 12:41:27] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jreis (OpenAI: false, Ollama: false) | jreis
+[2025-08-04 12:42:21] USER_DELETED | Utilizador Eliminado | Utilizador 'mobesa' foi movido para a lixeira por jreis | jreis
+[2025-08-04 13:19:59] USER_RESTORED | Utilizador Restaurado | Utilizador 'mobesa' foi restaurado da lixeira por jreis | jreis
+[2025-08-04 13:23:38] USER_DELETED | Utilizador Eliminado | Utilizador 'mobesa' foi movido para a lixeira por jreis | jreis
+[2025-08-04 13:43:36] USER_RESTORED | Utilizador Restaurado | Utilizador 'mobesa' foi restaurado da lixeira por jreis | jreis
+[2025-08-04 13:43:50] USER_DELETED | Utilizador Eliminado | Utilizador 'mobesa' foi movido para a lixeira por jreis | jreis
+[2025-08-04 13:53:29] USER_RESTORED | Utilizador Restaurado | Utilizador 'mobesa' foi restaurado da lixeira por jreis | jreis

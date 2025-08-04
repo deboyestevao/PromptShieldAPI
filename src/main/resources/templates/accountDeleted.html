@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/accountDisabled.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Conta Deletada - PromptShield</title>
+</head>
+<body>
+<div class="container">
+    <div class="account-disabled-card">
+        <div class="header">
+            <div class="logo">
+                <h1>PromptShield</h1>
+            </div>
+            <div class="status-icon">
+                <i class="fas fa-trash"></i>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>Conta Deletada</h2>
+            <p>A sua conta foi movida para a lixeira pelo administrador do sistema. Para solicitar a restauração da sua conta, utilize as opções abaixo.</p>
+            
+            <div class="actions">
+                <button class="btn btn-primary" onclick="showReportForm()">
+                    <i class="fas fa-undo"></i>
+                    Solicitar Restauração
+                </button>
+                <button class="btn btn-secondary" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Terminar Sessão
+                </button>
+            </div>
+        </div>
+        
+        <!-- Formulário de Report (inicialmente escondido) -->
+        <div id="reportForm" class="report-form" style="display: none;">
+            <h3>Formulário de Solicitação de Restauração</h3>
+            <form method="post" action="/report-account-issue">
+                <div class="form-group">
+                    <label for="reason">Motivo da Solicitação de Restauração:</label>
+                    <textarea id="reason" name="reason" rows="4" placeholder="Explique o motivo pelo qual a sua conta deveria ser restaurada..." required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Enviar Solicitação</button>
+                    <button type="button" class="btn btn-outline" onclick="hideReportForm()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Mensagem de sucesso -->
+        <div th:if="${param.reported}" class="success-message">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <p>A sua solicitação de restauração foi enviada com sucesso. O administrador irá analisar o seu pedido.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function showReportForm() {
+    document.getElementById('reportForm').style.display = 'block';
+    document.getElementById('reason').focus();
+}
+
+function hideReportForm() {
+    document.getElementById('reportForm').style.display = 'none';
+    document.getElementById('reason').value = '';
+}
+
+function logout() {
+    if (confirm('Tem a certeza que deseja terminar a sessão?')) {
+        window.location.href = '/auth/logout';
+    }
+}
+</script>
+</body>
+</html> 

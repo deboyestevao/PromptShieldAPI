@@ -139,4 +139,21 @@ class AuthServiceTest {
 
         assertDoesNotThrow(() -> authService.delete(1L));
     }
+
+    // ❌ Login com conta deletada
+    @Test
+    void shouldFailLoginWithDeletedAccount() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("deleted@example.com");
+        loginRequest.setPassword("pass123");
+
+        // Simular que a autenticação falha devido à conta deletada
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new org.springframework.security.core.userdetails.UsernameNotFoundException("Conta deletada. Não é possível fazer login."));
+
+        ResponseEntity<?> response = authService.login(loginRequest, session);
+
+        assertEquals(401, response.getStatusCodeValue());
+        assertEquals("Invalid credentials.", response.getBody());
+    }
 }

@@ -364,6 +364,12 @@ public class AdminController {
         return "adminUsers";
     }
 
+    @GetMapping("/users/trash")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String usersTrashPage() {
+        return "adminUsersTrash";
+    }
+
     @GetMapping(value = "/config-history", produces = "text/html")
     @PreAuthorize("hasRole('ADMIN')")
     public String configHistoryPage() {
@@ -383,7 +389,7 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getAllUsers() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            List<User> users = userRepository.findAll();
+            List<User> users = userRepository.findAllActive(); // Apenas utilizadores ativos (não deletados)
             
             // Encontrar o utilizador atual
             User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
@@ -451,6 +457,8 @@ public class AdminController {
             userData.put("chatCount", chatCount);
             userData.put("lastActivity", user.getLastLoginAt());
             userData.put("role", user.getRole() != null ? user.getRole() : "USER");
+            userData.put("deletedAt", user.getDeletedAt());
+            userData.put("deletedBy", user.getDeletedBy());
             
             return ResponseEntity.ok(userData);
         } catch (Exception e) {
@@ -567,13 +575,16 @@ public class AdminController {
             }
             
             String username = user.getUsername();
-            userRepository.delete(user);
+            
+            // Soft delete do utilizador
+            user.softDelete(currentUsername);
+            userRepository.save(user);
             
             // Criar notificação de utilizador eliminado
             notificationService.createNotification(
                 Notification.NotificationType.USER,
                 "Utilizador Eliminado",
-                "Utilizador '" + username + "' foi eliminado",
+                "Utilizador '" + username + "' foi movido para a lixeira",
                 "/admin/users"
             );
             
@@ -581,7 +592,7 @@ public class AdminController {
             activityLogService.logActivity(
                 "USER_DELETED",
                 "Utilizador Eliminado",
-                "Utilizador '" + username + "' foi eliminado por " + currentUsername,
+                "Utilizador '" + username + "' foi movido para a lixeira por " + currentUsername,
                 currentUsername
             );
             
@@ -688,28 +699,7 @@ public class AdminController {
     }
 
     // API endpoints para gestão de reports
-    @GetMapping("/api/sessions")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> getActiveSessions() {
-        try {
-            long onlineUsers = userRepository.countOnlineUsers();
-            long totalUsers = userRepository.count();
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("activeSessions", onlineUsers);
-            response.put("totalUsers", totalUsers);
-            response.put("onlineUsers", onlineUsers);
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("activeSessions", 0);
-            errorResponse.put("totalUsers", 0);
-            errorResponse.put("onlineUsers", 0);
-            return ResponseEntity.ok(errorResponse);
-        }
-    }
+
 
     @GetMapping("/api/performance")
     @PreAuthorize("hasRole('ADMIN')")
@@ -719,21 +709,18 @@ public class AdminController {
             // Calcular performance baseada em métricas do sistema
             long totalUsers = userRepository.count();
             long activeUsers = userRepository.countByActiveTrue();
-            long onlineUsers = userRepository.countOnlineUsers();
             
-            // Performance baseada na proporção de utilizadores ativos e online
+            // Performance baseada na proporção de utilizadores ativos
             double performance = 95.0; // Valor padrão
             if (totalUsers > 0) {
                 double activeRatio = (double) activeUsers / totalUsers;
-                double onlineRatio = totalUsers > 0 ? (double) onlineUsers / totalUsers : 0;
-                performance = Math.min(100.0, (activeRatio * 0.7 + onlineRatio * 0.3) * 100);
+                performance = Math.min(100.0, activeRatio * 100);
             }
             
             Map<String, Object> response = new HashMap<>();
             response.put("performance", Math.round(performance));
             response.put("totalUsers", totalUsers);
             response.put("activeUsers", activeUsers);
-            response.put("onlineUsers", onlineUsers);
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -743,43 +730,7 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/api/users/online")
-    @ResponseBody
-    public ResponseEntity<?> setUserOnline() {
-        try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userRepository.findByUsername(username).orElse(null);
-            
-            if (user != null) {
-                user.setIsOnline(Boolean.TRUE);
-                user.setLastActive(LocalDateTime.now());
-                userRepository.save(user);
-            }
-            
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao marcar utilizador como online");
-        }
-    }
 
-    @PostMapping("/api/users/offline")
-    @ResponseBody
-    public ResponseEntity<?> setUserOffline() {
-        try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userRepository.findByUsername(username).orElse(null);
-            
-            if (user != null) {
-                user.setIsOnline(Boolean.FALSE);
-                user.setLastActive(LocalDateTime.now());
-                userRepository.save(user);
-            }
-            
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao marcar utilizador como offline");
-        }
-    }
 
     @GetMapping("/api/inactive-accounts")
     @PreAuthorize("hasRole('ADMIN')")
@@ -987,6 +938,89 @@ public class AdminController {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Erro ao rejeitar report");
             return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
+     * Listar utilizadores deletados (lixeira)
+     */
+    @GetMapping("/api/users/deleted")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getDeletedUsers() {
+        try {
+            List<User> deletedUsers = userRepository.findAllDeleted();
+            
+            List<Map<String, Object>> usersWithStats = deletedUsers.stream()
+                .map(user -> {
+                    long chatCount = chatRepository.countByUser(user);
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("id", user.getId());
+                    userMap.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
+                    userMap.put("lastName", user.getLastName() != null ? user.getLastName() : "");
+                    userMap.put("email", user.getEmail());
+                    userMap.put("username", user.getUsername());
+                    userMap.put("active", user.isActive());
+                    userMap.put("createdAt", user.getCreatedAt());
+                    userMap.put("deletedAt", user.getDeletedAt());
+                    userMap.put("deletedBy", user.getDeletedBy());
+                    userMap.put("chatCount", chatCount);
+                    userMap.put("role", user.getRole() != null ? user.getRole() : "USER");
+                    return userMap;
+                }).collect(Collectors.toList());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", usersWithStats);
+            response.put("totalDeleted", deletedUsers.size());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    /**
+     * Restaurar utilizador da lixeira
+     */
+    @PostMapping("/api/users/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    public ResponseEntity<?> restoreUser(@PathVariable Long id) {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            
+            User user = userRepository.findById(id).orElse(null);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!user.isDeleted()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Utilizador não está deletado"));
+            }
+            
+            String username = user.getUsername();
+            user.restore();
+            userRepository.save(user);
+            
+            // Criar notificação de utilizador restaurado
+            notificationService.createNotification(
+                Notification.NotificationType.USER,
+                "Utilizador Restaurado",
+                "Utilizador '" + username + "' foi restaurado da lixeira",
+                "/admin/users"
+            );
+            
+            // Registrar atividade no log
+            activityLogService.logActivity(
+                "USER_RESTORED",
+                "Utilizador Restaurado",
+                "Utilizador '" + username + "' foi restaurado da lixeira por " + currentUsername,
+                currentUsername
+            );
+            
+            return ResponseEntity.ok(Map.of("message", "Utilizador restaurado com sucesso"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Erro ao restaurar utilizador"));
         }
     }
 }

@@ -63,6 +63,11 @@ public class ChatController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByUsername(username).orElseThrow();
         chat.setUser(user);
+        
+        // Atualizar lastActive do usuário
+        user.setLastActive(java.time.LocalDateTime.now());
+        userRepo.save(user);
+        
         return chatRepo.save(chat);
     }
 
@@ -81,6 +86,10 @@ public class ChatController {
             if (chatUpdate.getName() != null) {
                 chat.setName(chatUpdate.getName());
                 chatRepo.save(chat);
+                
+                // Atualizar lastActive do usuário
+                user.setLastActive(java.time.LocalDateTime.now());
+                userRepo.save(user);
             }
             
             return ResponseEntity.ok(chat);
@@ -89,6 +98,14 @@ public class ChatController {
         }
     }
 
+    /**
+     * Deletar chat (soft delete)
+     * 
+     * Move o chat e suas perguntas para a lixeira (soft delete).
+     * Os dados não são removidos permanentemente da base de dados.
+     * 
+     * FEATURE FUTURA: Interface de lixeira para restaurar chats deletados
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteChat(@PathVariable Long id) {
         try {
@@ -111,12 +128,26 @@ public class ChatController {
             chat.softDelete(username);
             chatRepo.save(chat);
             
+            // Atualizar lastActive do usuário
+            user.setLastActive(java.time.LocalDateTime.now());
+            userRepo.save(user);
+            
             return ResponseEntity.ok().body(Map.of("message", "Chat movido para a lixeira"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao deletar chat: " + e.getMessage()));
         }
     }
 
+    /**
+     * FEATURE FUTURA: Restaurar chat da lixeira
+     * 
+     * Este endpoint permite restaurar chats que foram movidos para a lixeira (soft delete).
+     * Funcionalidade planeada para implementação futura com interface de lixeira.
+     * 
+     * TODO: Implementar interface de lixeira no frontend
+     * TODO: Adicionar página para visualizar chats deletados
+     * TODO: Adicionar botões de restaurar na interface
+     */
     @PostMapping("/{id}/restore")
     public ResponseEntity<?> restoreChat(@PathVariable Long id) {
         try {
@@ -144,6 +175,10 @@ public class ChatController {
             chat.restore();
             chatRepo.save(chat);
             
+            // Atualizar lastActive do usuário
+            user.setLastActive(java.time.LocalDateTime.now());
+            userRepo.save(user);
+            
             return ResponseEntity.ok().body(Map.of("message", "Chat restaurado com sucesso"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Erro ao restaurar chat: " + e.getMessage()));
@@ -162,6 +197,15 @@ public class ChatController {
         return questionService.getQuestionsByChat(id);
     }
 
+    /**
+     * FEATURE FUTURA: Listar chats deletados
+     * 
+     * Retorna todos os chats do utilizador que foram movidos para a lixeira.
+     * Endpoint preparado para futura implementação de interface de lixeira.
+     * 
+     * TODO: Implementar página de lixeira no frontend
+     * TODO: Adicionar botões de restaurar para cada chat deletado
+     */
     @GetMapping("/deleted")
     public ResponseEntity<?> getDeletedChats() {
         try {

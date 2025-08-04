@@ -236,19 +236,6 @@
     <script>
         // Load statistics (real data only, no random updates)
         function carregarEstatisticas() {
-            // Load online users count
-            fetch('/admin/api/sessions')
-                .then(response => response.json())
-                .then(data => {
-                    const onlineUsers = data.onlineUsers || 0;
-                    const totalUsers = data.totalUsers || 0;
-                    document.getElementById('online-users').textContent = onlineUsers + ' / ' + totalUsers;
-                    document.getElementById('online-users-detail').textContent = onlineUsers + ' online agora';
-                })
-                .catch(error => {
-                    document.getElementById('online-users').textContent = '0 / 0';
-                    document.getElementById('online-users-detail').textContent = '0 online agora';
-                });
 
             // Load pending reports
             fetch('/admin/api/reports')
@@ -370,28 +357,10 @@
             return icons[type] || icons['INFO'];
         }
         
-        // Online tracking functions
-        function setUserOnline() {
-            fetch('/admin/api/users/online', {
-                method: 'POST'
-            }).catch(error => {
-                console.error('Erro ao marcar utilizador como online:', error);
-            });
-        }
 
-        function setUserOffline() {
-            fetch('/admin/api/users/offline', {
-                method: 'POST'
-            }).catch(error => {
-                console.error('Erro ao marcar utilizador como offline:', error);
-            });
-        }
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Mark user as online when page loads
-            setUserOnline();
-            
             // Load initial data
             carregarEstatisticas();
             
@@ -437,19 +406,7 @@
             // Refresh data every 5 minutes (not random updates)
             setInterval(carregarEstatisticas, 300000);
             
-            // Track page visibility changes
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    setUserOffline();
-                } else {
-                    setUserOnline();
-                }
-            });
-            
-            // Track page unload
-            window.addEventListener('beforeunload', function() {
-                setUserOffline();
-            });
+
         });
         
         // Notification functions

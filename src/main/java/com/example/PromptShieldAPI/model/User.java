@@ -38,11 +38,14 @@ public class User {
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
-    @Column(name = "is_online")
-    private Boolean isOnline = false;
-
     @Column(name = "last_active")
     private LocalDateTime lastActive;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "deleted_by")
+    private String deletedBy;
 
     private String role;
 
@@ -51,4 +54,19 @@ public class User {
 
     @Version
     private Long version;
+
+    // Métodos para soft delete
+    public void softDelete(String username) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = username;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+        this.deletedBy = null;
+    }
 }

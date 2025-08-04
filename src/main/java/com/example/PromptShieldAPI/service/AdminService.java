@@ -71,6 +71,10 @@ public class AdminService {
         boolean openai = prefs.getOrDefault("openai", false);
         boolean ollama = prefs.getOrDefault("ollama", false);
         updateUserPreferences(ollama, openai, user.getId());
+        
+        // Atualizar lastActive do usuário
+        user.setLastActive(java.time.LocalDateTime.now());
+        userRepository.save(user);
     }
 
     public java.util.Map<String, Boolean> getUserLLMPreferences(String username) {
