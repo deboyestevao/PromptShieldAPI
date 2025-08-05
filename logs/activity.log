@@ -61,3 +61,16 @@
 [2025-08-04 13:43:36] USER_RESTORED | Utilizador Restaurado | Utilizador 'mobesa' foi restaurado da lixeira por jreis | jreis
 [2025-08-04 13:43:50] USER_DELETED | Utilizador Eliminado | Utilizador 'mobesa' foi movido para a lixeira por jreis | jreis
 [2025-08-04 13:53:29] USER_RESTORED | Utilizador Restaurado | Utilizador 'mobesa' foi restaurado da lixeira por jreis | jreis
+[2025-08-04 19:45:01] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'admin@gmail.com' registado no sistema | admin@gmail.com
+[2025-08-04 19:45:43] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestêvão (OpenAI: true, Ollama: false) | jestêvão
+[2025-08-04 20:29:36] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'teste@gmail.com' registado no sistema | teste@gmail.com
+[2025-08-04 20:33:03] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'jestêvão1' foi desativado por jestêvão | jestêvão
+[2025-08-04 20:33:58] REPORT_CREATED | Novo Report Criado | Utilizador 'jestêvão1' criou um report de problema de conta | jestêvão1
+[2025-08-04 20:34:23] REPORT_APPROVED | Report Aprovado | Report do utilizador 'jestêvão1' foi aprovado por jestêvão | jestêvão
+[2025-08-04 22:02:34] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'rjfm.moura@gmail.com' registado no sistema | rjfm.moura@gmail.com
+[2025-08-04 22:03:54] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'rmoura' foi desativado por jestêvão | jestêvão
+[2025-08-04 22:07:07] REPORT_CREATED | Novo Report Criado | Utilizador 'rmoura' criou um report de problema de conta | rmoura
+[2025-08-04 22:07:23] REPORT_REJECTED | Report Rejeitado | Report do utilizador 'rmoura' foi rejeitado por jestêvão | jestêvão
+[2025-08-04 22:07:43] REPORT_CREATED | Novo Report Criado | Utilizador 'rmoura' criou um report de problema de conta | rmoura
+[2025-08-04 22:08:21] REPORT_APPROVED | Report Aprovado | Report do utilizador 'rmoura' foi aprovado por jestêvão | jestêvão
+[2025-08-04 22:08:31] USER_MADE_ADMIN | Novo Admin | Utilizador 'rmoura' foi tornado administrador por jestêvão | jestêvão

@@ -133,6 +133,69 @@ public class DataMaskerTest {
     }
 
     @Test
+    void testMaskBalanceWithEuroSymbol() {
+        String input = "O meu saldo é €50.00";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("€***.**"));
+    }
+
+    @Test
+    void testMaskBalanceWithDollarSymbol() {
+        String input = "O preço é $45.99";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("$***.**"));
+    }
+
+    @Test
+    void testMaskBalanceWithPoundSymbol() {
+        String input = "Custa £30.50";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("£***.**"));
+    }
+
+    @Test
+    void testMaskBalanceWithSymbolAfter() {
+        String input = "O valor é 50€";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("***.**€"));
+    }
+
+    @Test
+    void testMaskBalanceWithDollarAfter() {
+        String input = "O preço é 45$";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("***.**$"));
+    }
+
+    @Test
+    void testMaskBalanceWithLargeAmount() {
+        String input = "O valor é €1,234.56";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("€***.**"));
+    }
+
+    @Test
+    void testMaskBalanceWithIntegerAmount() {
+        String input = "O valor é €50";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("€***.**"));
+    }
+
+    @Test
+    void testMaskBalanceBothFormats() {
+        String input = "O valor é €50 e também 50€";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("€***.**") && masked.contains("***.**€"));
+    }
+
+    @Test
+    void testMaskBalanceWithoutSpaces() {
+        String input = "O valor é €50 e 50€";
+        String masked = DataMasker.maskSensitiveData(input).getMaskedText();
+        assertTrue(masked.contains("€***.**") && masked.contains("***.**€"));
+    }
+
+    @Test
     void testMaskBalanceFalse() {
         String input = "O meu saldo na Steam é de 259.55";
         String masked = DataMasker.maskSensitiveData(input).getMaskedText();

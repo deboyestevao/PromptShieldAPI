@@ -633,36 +633,15 @@ chatForm.addEventListener('submit', async function(e) {
         let question = document.getElementById('question').value.trim();
         if (!question) return;
 
-    // Se não houver chat selecionado, cria um novo com o nome igual à primeira frase
+    // Se não houver chat selecionado, cria um novo chat vazio (a IA irá gerar o nome)
     if (!currentChatId) {
-        let firstSentence = question.split(/[.!?]/)[0];
-        if (firstSentence.length > 30) firstSentence = firstSentence.slice(0, 30) + '...';
         const chat = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: firstSentence })
+            body: JSON.stringify({ name: '' })
         }).then(r => r.json());
         currentChatId = chat.id;
         await loadChats();
-    } else {
-        // Se o chat selecionado não tem nome (chat vazio), atualiza o nome na primeira mensagem
-        const selectedChat = Array.from(document.querySelectorAll('.chat-list-item')).find(div => div.classList.contains('selected'));
-        if (selectedChat && (selectedChat.textContent.trim() === '' || selectedChat.textContent.trim() === 'Chat ' + currentChatId || selectedChat.textContent.trim() === 'Novo chat')) {
-            let firstSentence = question.split(/[.!?]/)[0];
-            if (firstSentence.length > 30) firstSentence = firstSentence.slice(0, 30) + '...';
-            try {
-                const updateResponse = await fetch(`/api/chat/${currentChatId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: firstSentence })
-                });
-                if (updateResponse.ok) {
-                    await loadChats();
-                }
-            } catch (error) {
-                console.error('Erro ao atualizar nome do chat:', error);
-            }
-        }
     }
 
     let fileIds = [];
@@ -709,6 +688,11 @@ chatForm.addEventListener('submit', async function(e) {
                 data.llmAnswers.forEach(ans => {
                     addLLMAnswers(ans);
                 });
+        }
+        
+        // Atualizar a lista de chats apenas se for a primeira mensagem (quando o nome é gerado)
+        if (!currentChatId || document.querySelector('.chat-list-item.selected')?.textContent.trim() === 'Novo chat') {
+            await loadChats();
         }
     } else {
         addMessage('Erro', 'Falha ao obter resposta do chatbot.', 'error');

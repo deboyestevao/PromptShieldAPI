@@ -49,6 +49,9 @@ public class DataMasker {
         result = maskAddress(masked);
         masked = result.getMaskedText();
 
+        result = maskAnyNumber(masked);
+        masked = result.getMaskedText();
+
         return new MaskingResult(masked);
     }
 
@@ -85,9 +88,9 @@ public class DataMasker {
             String masked;
             if (cleaned.length() == 9 && cleaned.startsWith("9")) {
                 // Sempre adiciona espaços no mascaramento para números de 9 dígitos
-                masked = "9** *** **" + cleaned.charAt(8);
+                masked = " 9** *** **" + cleaned.charAt(8);
             } else if (cleaned.length() == 12 && cleaned.startsWith("351")) {
-                masked = "351 9** *** **" + cleaned.charAt(11);
+                masked = " 351 9** *** **" + cleaned.charAt(11);
             } else {
                 masked = raw;
             }
@@ -318,7 +321,7 @@ public class DataMasker {
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            String masked = "***.** EUR";
+            String masked = "***€";
             matcher.appendReplacement(result, masked);
         }
 
@@ -339,6 +342,20 @@ public class DataMasker {
                           parts[1].charAt(0) + "*".repeat(parts[1].length() - 1);
             matcher.appendReplacement(result, masked);
             }
+
+        matcher.appendTail(result);
+        return new MaskingResult(result.toString());
+    }
+
+    private static MaskingResult maskAnyNumber(String input) {
+        Pattern pattern = Pattern.compile("\\b\\d+\\b");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            String masked = "*".repeat(matcher.group().length());
+            matcher.appendReplacement(result, masked);
+        }
 
         matcher.appendTail(result);
         return new MaskingResult(result.toString());

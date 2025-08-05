@@ -3,10 +3,13 @@ package com.example.PromptShieldAPI.service;
 import com.example.PromptShieldAPI.dto.QuestionDTO;
 import com.example.PromptShieldAPI.dto.QuestionYearMonthRequest;
 import com.example.PromptShieldAPI.interfaces.QuestionService;
+import com.example.PromptShieldAPI.model.Chat;
 import com.example.PromptShieldAPI.model.Question;
 import com.example.PromptShieldAPI.model.User;
+import com.example.PromptShieldAPI.repository.ChatRepository;
 import com.example.PromptShieldAPI.repository.QuestionRepository;
 import com.example.PromptShieldAPI.repository.UserRepository;
+import com.example.PromptShieldAPI.service.MaskingResult;
 import com.example.PromptShieldAPI.util.DataMasker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,7 @@ public class AiService {
     private final UserRepository userRepo;
     private final SystemConfigService systemConfigService;
     private final QuestionService questionService;
+    private final ChatRepository chatRepo;
 
 
     private static final String INPUT_FOLDER = "InputFiles";
@@ -49,6 +53,32 @@ public class AiService {
             return "OpenAi está desativado para este utilizador.";
         }
 
+        // Verificar se é a primeira pergunta do chat e gerar nome
+        if (chatId != null) {
+            List<Question> history = questionService.getQuestionsByChat(chatId);
+            if (history.isEmpty()) {
+                log.info("Primeira pergunta detectada para chat ID: {}", chatId);
+                // É a primeira pergunta, gerar nome do chat
+                String chatName = generateChatName(question);
+                // Atualizar o nome do chat
+                try {
+                    Chat chat = chatRepo.findById(chatId).orElse(null);
+                    if (chat != null && (chat.getName() == null || chat.getName().trim().isEmpty())) {
+                        log.info("Atualizando nome do chat de '{}' para '{}'", chat.getName(), chatName);
+                        chat.setName(chatName);
+                        chatRepo.save(chat);
+                        log.info("Nome do chat atualizado com sucesso");
+                    } else {
+                        log.info("Chat não encontrado ou já tem nome: {}", chat != null ? chat.getName() : "null");
+                    }
+                } catch (Exception e) {
+                    log.error("Erro ao atualizar nome do chat: {}", e.getMessage());
+                }
+            } else {
+                log.info("Não é primeira pergunta, histórico tem {} perguntas", history.size());
+            }
+        }
+        
         // Carregar histórico do chat para contexto
         String context = buildChatContext(chatId);
         
@@ -62,8 +92,12 @@ public class AiService {
 
         try {
             String answer = chatModel.call(finalPrompt) + "\n";
-            // Salva apenas a pergunta original, não o conteúdo dos ficheiros
-            questionService.saveQuestion(question, answer, "openai", chatId);
+            // Mascara a resposta da IA antes de guardar na base de dados
+            MaskingResult maskedAnswer = DataMasker.maskSensitiveData(answer);
+            String maskedAnswerText = maskedAnswer.getMaskedText();
+            
+            // Salva a pergunta e resposta mascaradas na base de dados para segurança
+            questionService.saveQuestion(maskedQuestion, maskedAnswerText, "openai", chatId);
 
             // log.info("Resposta OpenAI gerada com sucesso");
             return answer;
@@ -85,6 +119,32 @@ public class AiService {
             return "Ollama está desativado para este utilizador.";
         }
 
+        // Verificar se é a primeira pergunta do chat e gerar nome
+        if (chatId != null) {
+            List<Question> history = questionService.getQuestionsByChat(chatId);
+            if (history.isEmpty()) {
+                log.info("Primeira pergunta detectada para chat ID: {}", chatId);
+                // É a primeira pergunta, gerar nome do chat
+                String chatName = generateChatName(question);
+                // Atualizar o nome do chat
+                try {
+                    Chat chat = chatRepo.findById(chatId).orElse(null);
+                    if (chat != null && (chat.getName() == null || chat.getName().trim().isEmpty())) {
+                        log.info("Atualizando nome do chat de '{}' para '{}'", chat.getName(), chatName);
+                        chat.setName(chatName);
+                        chatRepo.save(chat);
+                        log.info("Nome do chat atualizado com sucesso");
+                    } else {
+                        log.info("Chat não encontrado ou já tem nome: {}", chat != null ? chat.getName() : "null");
+                    }
+                } catch (Exception e) {
+                    log.error("Erro ao atualizar nome do chat: {}", e.getMessage());
+                }
+            } else {
+                log.info("Não é primeira pergunta, histórico tem {} perguntas", history.size());
+            }
+        }
+
         // Carregar histórico do chat para contexto
         String context = buildChatContext(chatId);
         
@@ -98,8 +158,12 @@ public class AiService {
 
         try {
             String answer = ollamaChatModel.call(finalPrompt) + "\n";
-            // Salva apenas a pergunta original, não o conteúdo dos ficheiros
-            questionService.saveQuestion(question, answer, "ollama", chatId);
+            // Mascara a resposta da IA antes de guardar na base de dados
+            MaskingResult maskedAnswer = DataMasker.maskSensitiveData(answer);
+            String maskedAnswerText = maskedAnswer.getMaskedText();
+            
+            // Salva a pergunta e resposta mascaradas na base de dados para segurança
+            questionService.saveQuestion(maskedQuestion, maskedAnswerText, "ollama", chatId);
 
             // log.info("Resposta Ollama gerada com sucesso");
             return answer;
@@ -160,6 +224,30 @@ public class AiService {
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByUsername(username).orElseThrow();
+    }
+
+    private String generateChatName(String question) {
+        try {
+            String prompt = "Cria um título curto e descritivo (máximo 30 caracteres) que explique o tema da pergunta por poucas palavras. NÃO uses dois pontos (:). Exemplos: 'Investimento Ações', 'Código Python', 'Restaurantes Lisboa', 'Backup Dados'. Responde APENAS com o título:\n\n" + question;
+            
+            log.info("Gerando nome para chat com pergunta: {}", question);
+            String chatName = chatModel.call(prompt).trim();
+            log.info("Resposta da IA para nome do chat: '{}'", chatName);
+            
+            // Limitar a 30 caracteres e remover aspas se existirem
+            chatName = chatName.replaceAll("[\"']", "").trim();
+            if (chatName.length() > 30) {
+                chatName = chatName.substring(0, 30);
+            }
+            
+            String finalName = chatName.isEmpty() ? "Nova conversa" : chatName;
+            log.info("Nome final do chat: '{}'", finalName);
+            
+            return finalName;
+        } catch (Exception e) {
+            log.error("Erro ao gerar nome do chat: {}", e.getMessage());
+            return "Nova conversa";
+        }
     }
 
     public ResponseEntity<QuestionYearMonthRequest> findByYearAndMonth(Integer year, Integer month) {
