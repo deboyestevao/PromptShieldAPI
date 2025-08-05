@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lixeira do Chat - PromptShield</title>
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="chat-layout">
+    <!-- Sidebar -->
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-trash"></i> Lixeira</h3>
+        </div>
+        
+        <div class="sidebar-chats" id="sidebar-chats">
+            <!-- Lista de chats deletados será preenchida dinamicamente -->
+        </div>
+        
+                 <div class="sidebar-actions">
+             <a href="/chat" class="btn-back-to-chat" title="Voltar ao Chat">
+                 <i class="fas fa-arrow-left"></i>
+             </a>
+         </div>
+    </div>
+
+    <!-- Área principal -->
+    <div class="container-chat">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="logo">
+                    <h1>PromptShield</h1>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <span>Olá, <span id="username" th:text="${username}">utilizador</span>!</span>
+                <a href="/auth/logout" class="logout-link">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </div>
+        </div>
+
+        <!-- Área principal -->
+        <div class="chat-main">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Mensagem de boas-vindas -->
+                <div id="welcome-message" class="welcome-message">
+                    <div class="welcome-content">
+                        <h2><i class="fas fa-trash"></i> Lixeira do Chat</h2>
+                        <p>Chats que foram movidos para a lixeira. Pode restaurá-los se necessário.</p>
+                        
+                        <div class="welcome-features">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-undo"></i>
+                                </div>
+                                <div>
+                                    <div class="feature-title">Restaurar Chats</div>
+                                    <div class="feature-desc">Recupere conversas deletadas</div>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <div class="feature-title">Histórico</div>
+                                    <div class="feature-desc">Veja quando foram deletados</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação -->
+<div id="confirm-modal" class="confirm-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Ação</h3>
+            <button class="close-btn" onclick="closeConfirmModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="confirm-message"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeConfirmModal()">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn btn-primary" id="confirm-action-btn">
+                <i class="fas fa-check"></i> Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // Busca nome do utilizador autenticado
+    fetch('/ai/welcome').then(r => r.text()).then(txt => {
+        const match = txt.match(/Bem vindo\/a (.+)/);
+        if (match) document.getElementById('username').textContent = match[1];
+    });
+
+    let allChats = [];
+
+    // Carregar chats deletados
+    async function loadDeletedChats() {
+        try {
+            const response = await fetch('/api/chat/deleted');
+            if (response.ok) {
+                const data = await response.json();
+                allChats = data.map(chat => ({
+                    id: chat.id,
+                    title: chat.name,
+                    createdAt: chat.createdAt,
+                    deletedAt: chat.deletedAt,
+                    deletedBy: chat.deletedBy
+                }));
+                displayChats();
+            } else {
+                console.error('Erro ao carregar chats deletados');
+            }
+        } catch (error) {
+            console.error('Erro de conexão:', error);
+        }
+    }
+
+    // Exibir chats deletados
+    function displayChats() {
+        const sidebarChats = document.getElementById('sidebar-chats');
+        const welcomeMessage = document.getElementById('welcome-message');
+        
+        if (allChats.length === 0) {
+            sidebarChats.innerHTML = `
+                <div class="empty-chats-message">
+                    <div class="empty-chats-content">
+                        <p>Lixeira vazia</p>
+                        <small>Não há chats deletados</small>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        sidebarChats.innerHTML = allChats.map(chat => `
+            <div class="chat-list-item" onclick="viewChat(${chat.id})">
+                <div>
+                    <div class="chat-title">${chat.title || 'Chat sem título'}</div>
+                    <div class="chat-preview">Deletado em ${formatDateTime(chat.deletedAt)}</div>
+                </div>
+                <button class="delete-chat-btn" onclick="restoreChat(${chat.id}); event.stopPropagation();" title="Restaurar">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+        `).join('');
+
+        // Esconder mensagem de boas-vindas se há chats
+        if (welcomeMessage) {
+            welcomeMessage.style.display = 'none';
+        }
+    }
+
+    // Ver chat (mostrar detalhes)
+    function viewChat(chatId) {
+        const chat = allChats.find(c => c.id === chatId);
+        if (!chat) return;
+
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = `
+            <div class="welcome-message">
+                <div class="welcome-content">
+                    <h2><i class="fas fa-comments"></i> ${chat.title || 'Chat sem título'}</h2>
+                    <p>Este chat foi movido para a lixeira.</p>
+                    
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div>
+                                <div class="feature-title">Criado em</div>
+                                <div class="feature-desc">${formatDateTime(chat.createdAt)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                            <div>
+                                <div class="feature-title">Deletado em</div>
+                                <div class="feature-desc">${formatDateTime(chat.deletedAt)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="restoreChat(${chat.id})" style="margin-top: 20px;">
+                        <i class="fas fa-undo"></i> Restaurar Chat
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Restaurar chat
+    function restoreChat(chatId) {
+        showConfirmModal(
+            'Tem a certeza que deseja restaurar este chat? O chat voltará a estar disponível.',
+            async () => {
+                try {
+                    const response = await fetch(`/api/chat/${chatId}/restore`, { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showNotification('Chat restaurado com sucesso', 'success');
+                        loadDeletedChats();
+                    } else {
+                        const errorData = await response.json();
+                        showNotification(errorData.error || 'Erro ao restaurar chat', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Erro de conexão', 'error');
+                }
+            }
+        );
+    }
+
+    // Mostrar modal de confirmação
+    function showConfirmModal(message, onConfirm) {
+        document.getElementById('confirm-message').textContent = message;
+        document.getElementById('confirm-action-btn').onclick = () => {
+            closeConfirmModal();
+            onConfirm();
+        };
+        document.getElementById('confirm-modal').style.display = 'block';
+    }
+
+    // Fechar modal de confirmação
+    function closeConfirmModal() {
+        document.getElementById('confirm-modal').style.display = 'none';
+    }
+
+    // Formatar data e hora
+    function formatDateTime(dateTimeString) {
+        if (!dateTimeString) return 'N/A';
+        const date = new Date(dateTimeString);
+        return date.toLocaleString('pt-PT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Mostrar notificação
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDeletedChats();
+        
+        // Fechar modal ao clicar no overlay
+        const modalOverlay = document.querySelector('.modal-overlay');
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', function() {
+                closeConfirmModal();
+            });
+        }
+    });
+</script>
+
+<style>
+/* ===== ESTILOS ESPECÍFICOS DA LIXEIRA ===== */
+
+/* Header da lixeira com gradiente especial */
+.sidebar-header h3 {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 20px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.sidebar-header h3 i {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+/* Botão voltar estilizado */
+.btn-back-to-chat {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-secondary);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    width: 44px;
+    height: 44px;
+    text-decoration: none;
+}
+
+.btn-back-to-chat:hover {
+    background: var(--bg-glass-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-accent);
+    color: var(--text-primary);
+}
+
+.btn-back-to-chat i {
+    transition: transform var(--transition-normal);
+}
+
+.btn-back-to-chat:hover i {
+    transform: translateX(-2px);
+}
+
+/* Chats deletados com design especial */
+.chat-list-item {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(239, 68, 68, 0.05) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-list-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ef4444, #dc2626, #ef4444);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.chat-list-item:hover::before {
+    opacity: 1;
+}
+
+.chat-list-item:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--bg-glass-hover) 100%);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: translateX(8px) translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.chat-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.chat-preview {
+    color: var(--text-tertiary);
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* Botão restaurar com animação */
+.delete-chat-btn {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.2) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--accent-success);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.delete-chat-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(16, 185, 129, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.delete-chat-btn:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.delete-chat-btn:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.3) 100%);
+    color: #10b981;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.delete-chat-btn i {
+    position: relative;
+    z-index: 1;
+    font-size: 14px;
+}
+
+/* Mensagem de lixeira vazia estilizada */
+.empty-chats-message {
+    background: linear-gradient(135deg, var(--bg-glass) 0%, rgba(239, 68, 68, 0.05) 100%);
+    border: 2px dashed rgba(239, 68, 68, 0.3);
+    border-radius: var(--border-radius);
+    padding: 40px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-chats-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(239, 68, 68, 0.02) 50%, transparent 70%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.empty-chats-content p {
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.empty-chats-content small {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    opacity: 0.8;
+    position: relative;
+    z-index: 1;
+}
+
+/* Mensagem de boas-vindas da lixeira */
+.welcome-content h2 {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.welcome-content h2 i {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-right: 12px;
+}
+
+/* Feature cards da lixeira */
+.feature-card {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(239, 68, 68, 0.05) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: 16px 20px;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-card:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--bg-glass-hover) 100%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.feature-icon {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 18px;
+    margin-right: 12px;
+}
+
+.feature-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 16px;
+}
+
+.feature-desc {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Botão restaurar na área principal */
+.btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-primary i {
+    position: relative;
+    z-index: 1;
+    font-size: 14px;
+}
+
+/* Modal de confirmação estilizado */
+.confirm-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--bg-glass) 0%, var(--bg-secondary) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 0;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-primary);
+    position: relative;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ef4444, #dc2626, #ef4444);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.modal-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, transparent 100%);
+    position: relative;
+}
+
+.modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-primary), transparent);
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-header h3 i {
+    color: #ef4444;
+    -webkit-text-fill-color: #ef4444;
+    font-size: 20px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all var(--transition-normal);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.close-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-tertiary);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    border-radius: 8px;
+}
+
+.close-btn:hover::before {
+    opacity: 1;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.close-btn i {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-body {
+    padding: 28px 32px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.6;
+    background: linear-gradient(135deg, transparent 0%, rgba(239, 68, 68, 0.02) 100%);
+    position: relative;
+}
+
+.modal-body p {
+    margin: 0;
+    font-weight: 500;
+    position: relative;
+    padding-left: 32px;
+}
+
+.modal-body p::before {
+    content: '\f071';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    font-size: 16px;
+    color: #ef4444;
+}
+
+.modal-footer {
+    padding: 20px 32px 28px;
+    border-top: 1px solid var(--border-primary);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: linear-gradient(135deg, transparent 0%, rgba(239, 68, 68, 0.05) 100%);
+    position: relative;
+}
+
+.modal-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-primary), transparent);
+}
+
+.modal-footer .btn {
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.modal-footer .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.modal-footer .btn:hover::before {
+    left: 100%;
+}
+
+.modal-footer .btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-secondary);
+}
+
+.modal-footer .btn-secondary:hover {
+    background: var(--bg-glass-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-accent);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.modal-footer .btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.modal-footer .btn-primary:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+    text-decoration: none;
+}
+
+.modal-footer .btn i {
+    position: relative;
+    z-index: 1;
+    font-size: 14px;
+}
+
+/* Notificações estilizadas */
+.notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    border-radius: var(--border-radius);
+    color: white;
+    font-weight: 600;
+    z-index: 1001;
+    animation: slideInRight 0.4s ease;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.notification.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.notification.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        margin: 20px;
+    }
+    
+    .notification {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        text-align: center;
+    }
+    
+    .btn-back-to-chat {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+}
+</style>
+</body>
+</html> 

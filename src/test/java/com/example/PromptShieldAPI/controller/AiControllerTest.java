@@ -61,7 +61,7 @@ class AiControllerTest {
         when(configService.isModelEnabled(ModelType.OPENAI)).thenReturn(true);
         when(configService.isModelEnabled(ModelType.OLLAMA)).thenReturn(false);
         when(fileService.estimateTokens(anyString())).thenReturn(1000);
-        when(aiService.askOpenAi(anyString())).thenReturn("Paris");
+        when(aiServiceaskOpenAi.(anyString())).thenReturn("Paris");
 
         String response = aiController.ask(request);
         assertTrue(response.contains("OpenAI: Paris"));

@@ -74,3 +74,8 @@
 [2025-08-04 22:07:43] REPORT_CREATED | Novo Report Criado | Utilizador 'rmoura' criou um report de problema de conta | rmoura
 [2025-08-04 22:08:21] REPORT_APPROVED | Report Aprovado | Report do utilizador 'rmoura' foi aprovado por jestêvão | jestêvão
 [2025-08-04 22:08:31] USER_MADE_ADMIN | Novo Admin | Utilizador 'rmoura' foi tornado administrador por jestêvão | jestêvão
+[2025-08-05 11:46:33] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'admin@gmail.com' registado no sistema | admin@gmail.com
+[2025-08-05 11:47:46] USER_MADE_ADMIN | Novo Admin | Utilizador 'jestevao' foi tornado administrador por jreis | jreis
+[2025-08-05 12:02:54] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'admin@gmail.com' registado no sistema | admin@gmail.com
+[2025-08-05 12:03:47] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestevao (OpenAI: true, Ollama: false) | jestevao
+[2025-08-05 12:47:38] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'reis@gmail.com' registado no sistema | reis@gmail.com

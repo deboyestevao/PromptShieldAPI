@@ -103,7 +103,7 @@ public class AiService {
             return answer;
         } catch (Exception e) {
             log.error("Erro ao chamar OpenAI: {}", e.getMessage(), e);
-            return "Erro ao processar a pergunta: " + e.getMessage();
+            return "Foram enviadas muitas mensagens para o sistema simultaneamente. Por favor, abrande!";
         }
     }
 
@@ -169,7 +169,7 @@ public class AiService {
             return answer;
         } catch (Exception e) {
             log.error("Erro ao chamar Ollama: {}", e.getMessage(), e);
-            return "Erro ao processar a pergunta: " + e.getMessage();
+            return "Foram enviadas muitas mensagens para o sistema simultaneamente. Por favor, abrande!";
         }
     }
 

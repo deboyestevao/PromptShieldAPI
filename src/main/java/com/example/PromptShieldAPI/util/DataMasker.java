@@ -49,9 +49,6 @@ public class DataMasker {
         result = maskAddress(masked);
         masked = result.getMaskedText();
 
-        result = maskAnyNumber(masked);
-        masked = result.getMaskedText();
-
         return new MaskingResult(masked);
     }
 
@@ -342,20 +339,6 @@ public class DataMasker {
                           parts[1].charAt(0) + "*".repeat(parts[1].length() - 1);
             matcher.appendReplacement(result, masked);
             }
-
-        matcher.appendTail(result);
-        return new MaskingResult(result.toString());
-    }
-
-    private static MaskingResult maskAnyNumber(String input) {
-        Pattern pattern = Pattern.compile("\\b\\d+\\b");
-        Matcher matcher = pattern.matcher(input);
-        StringBuffer result = new StringBuffer();
-
-        while (matcher.find()) {
-            String masked = "*".repeat(matcher.group().length());
-            matcher.appendReplacement(result, masked);
-        }
 
         matcher.appendTail(result);
         return new MaskingResult(result.toString());

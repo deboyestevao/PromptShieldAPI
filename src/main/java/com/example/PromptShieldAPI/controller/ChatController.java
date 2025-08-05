@@ -198,13 +198,9 @@ public class ChatController {
     }
 
     /**
-     * FEATURE FUTURA: Listar chats deletados
+     * Listar chats deletados
      * 
      * Retorna todos os chats do utilizador que foram movidos para a lixeira.
-     * Endpoint preparado para futura implementação de interface de lixeira.
-     * 
-     * TODO: Implementar página de lixeira no frontend
-     * TODO: Adicionar botões de restaurar para cada chat deletado
      */
     @GetMapping("/deleted")
     public ResponseEntity<?> getDeletedChats() {
@@ -212,8 +208,6 @@ public class ChatController {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepo.findByUsername(username).orElseThrow();
             
-            // Verificar se é admin (pode ser implementado com roles)
-            // Por enquanto, permitir que qualquer usuário veja seus próprios chats deletados
             List<Chat> deletedChats = chatRepo.findDeletedByUser(user);
             
             return ResponseEntity.ok(deletedChats);
