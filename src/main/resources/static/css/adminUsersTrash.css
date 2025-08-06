@@ -1,0 +1,308 @@
+/* ===== TRASH PAGE SPECIFIC STYLES ===== */
+/* Complementa o adminDashboard.css e adminUsers.css mantendo consistência visual */
+
+/* Breadcrumb styling to match other pages */
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.breadcrumb span {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+/* Override users-container to use dashboard-container instead */
+.users-container {
+    /* Remove specific styling to use dashboard-container from adminDashboard.css */
+}
+
+/* Ensure the table container works within the activity-panel */
+.activity-panel .users-table-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Style the users table within the activity panel */
+.activity-panel .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+}
+
+.activity-panel .users-table thead {
+    background: rgba(30, 41, 59, 0.3);
+}
+
+.activity-panel .users-table th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-primary);
+    font-size: 14px;
+}
+
+.activity-panel .users-table tbody tr {
+    border-bottom: 1px solid var(--border-primary);
+    transition: all var(--transition-normal);
+}
+
+.activity-panel .users-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.activity-panel .users-table td {
+    padding: 16px 12px;
+    vertical-align: middle;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* User info cell styling */
+.user-info-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.user-username {
+    color: var(--text-tertiary);
+    font-size: 12px;
+}
+
+/* Role badge styling */
+.role-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-primary);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.role-badge.user {
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--text-secondary);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Action buttons styling */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.action-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.action-btn.view-btn:hover {
+    background: var(--accent-primary);
+}
+
+.action-btn.restore-btn:hover {
+    background: var(--accent-success);
+}
+
+.action-btn.delete-btn:hover {
+    background: var(--accent-danger);
+}
+
+/* Empty state styling */
+.users-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-tertiary);
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.users-empty h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.users-empty p {
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* Error state styling */
+.users-error {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--accent-danger);
+}
+
+.error-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+.users-error h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--accent-danger);
+}
+
+.users-error p {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+}
+
+.retry-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    background: var(--accent-danger);
+    color: white;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.retry-btn:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* Loading state styling */
+.users-loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-tertiary);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-secondary);
+    border-top: 3px solid var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .activity-panel .users-table {
+        font-size: 12px;
+    }
+    
+    .activity-panel .users-table th,
+    .activity-panel .users-table td {
+        padding: 12px 8px;
+    }
+    
+    .user-info-cell {
+        gap: 8px;
+    }
+    
+    .user-avatar-small {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .action-buttons {
+        gap: 4px;
+    }
+    
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .activity-panel .users-table th,
+    .activity-panel .users-table td {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+    
+    .user-name {
+        font-size: 12px;
+    }
+    
+    .user-username {
+        font-size: 10px;
+    }
+    
+    .role-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+}
