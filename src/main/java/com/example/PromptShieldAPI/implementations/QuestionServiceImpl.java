@@ -24,6 +24,10 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepo;
     private final ChatRepository chatRepo;
 
+    /**
+     * Salva uma pergunta e resposta na base de dados
+     * Esta função é crítica pois persiste dados mascarados para auditoria e histórico
+     */
     @Transactional
     public void saveQuestion(String question, String answer, String model, Long chatId) {
         try {
@@ -38,6 +42,7 @@ public class QuestionServiceImpl implements QuestionService {
             q.setModel(model);
             q.setUser(user);
             
+            // Associa pergunta ao chat se existir
             if (chatId != null) {
                 Chat chat = chatRepo.findById(chatId).orElse(null);
                 if (chat != null) {
@@ -52,7 +57,7 @@ public class QuestionServiceImpl implements QuestionService {
             
             questionRepo.save(q);
             
-            // Atualizar lastActive do usuário
+            // Atualiza timestamp de atividade do utilizador
             user.setLastActive(java.time.LocalDateTime.now());
             userRepo.save(user);
             

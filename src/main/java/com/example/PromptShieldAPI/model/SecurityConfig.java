@@ -24,15 +24,24 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
+    /**
+     * Configuração principal de segurança da aplicação
+     * Esta configuração é crítica pois define quem pode aceder a quê
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
+                // URLs públicas - qualquer pessoa pode aceder
                 .requestMatchers("/", "/auth/register", "/auth/login", "/swagger-ui/**", "/v3/**", "/files/**", "/css/**", "/api/auth/test-email", "/api/auth/register", "/api/auth/login", "/admin/llm-status", "/admin/llm-status-simple", "/admin/llm-user-prefs", "/admin/llm-maintenance-status").permitAll()
+                // URLs de administração - apenas admins
                 .requestMatchers("/admin/**", "/auth/delete/**").hasRole("ADMIN")
+                // URLs que requerem autenticação mas não admin
                 .requestMatchers("/check-account-status", "/account-disabled", "/account-deleted", "/chat/trash").authenticated()
+                // Todas as outras URLs requerem autenticação
                 .anyRequest().authenticated()
                 .and()
+                // Configuração do formulário de login
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")
@@ -42,12 +51,13 @@ public class SecurityConfig {
                         .failureHandler(authenticationFailureHandler)
                         .permitAll()
                 )
+                // Configuração do logout
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login")
                         .permitAll()
                 )
-                // Adicionar este bloco para AJAX
+                // Tratamento de exceções para requisições AJAX
                 .exceptionHandling(exception -> exception
                     .defaultAuthenticationEntryPointFor(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),

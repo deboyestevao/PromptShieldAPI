@@ -79,3 +79,28 @@
 [2025-08-05 12:02:54] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'admin@gmail.com' registado no sistema | admin@gmail.com
 [2025-08-05 12:03:47] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestevao (OpenAI: true, Ollama: false) | jestevao
 [2025-08-05 12:47:38] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'reis@gmail.com' registado no sistema | reis@gmail.com
+[2025-08-06 22:23:26] USER_DELETED | Utilizador Eliminado | Utilizador 'rmoura' foi movido para a lixeira por jestêvão | jestêvão
+[2025-08-06 22:23:34] USER_RESTORED | Utilizador Restaurado | Utilizador 'rmoura' foi restaurado da lixeira por jestêvão | jestêvão
+[2025-08-09 17:07:38] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'teste1@gmail.com' registado no sistema | teste1@gmail.com
+[2025-08-09 17:11:33] USER_DEACTIVATED | Utilizador Desativado | Utilizador 't1' foi desativado por jestêvão | jestêvão
+[2025-08-09 17:11:35] USER_ACTIVATED | Utilizador Ativado | Utilizador 't1' foi ativado por jestêvão | jestêvão
+[2025-08-09 17:15:51] USER_DEACTIVATED | Utilizador Desativado | Utilizador 't1' foi desativado por jestêvão | jestêvão
+[2025-08-09 17:16:33] REPORT_CREATED | Novo Report Criado | Utilizador 't1' criou um report de problema de conta | t1
+[2025-08-09 17:16:45] REPORT_APPROVED | Report Aprovado | Report do utilizador 't1' foi aprovado por jestêvão | jestêvão
+[2025-08-09 18:56:06] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'ola@gmail.cim' registado no sistema | ola@gmail.cim
+[2025-08-09 19:00:24] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'galves' foi desativado por jestêvão | jestêvão
+[2025-08-09 19:00:40] REPORT_CREATED | Novo Report Criado | Utilizador 'galves' criou um report de problema de conta | galves
+[2025-08-09 19:00:48] REPORT_APPROVED | Report Aprovado | Report do utilizador 'galves' foi aprovado por jestêvão | jestêvão
+[2025-08-09 19:05:51] USER_MADE_ADMIN | Novo Admin | Utilizador 'galves' foi tornado administrador por jestêvão | jestêvão
+[2025-09-10 02:36:42] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'galves' por jestêvão | jestêvão
+[2025-09-10 02:38:15] USER_MADE_ADMIN | Novo Admin | Utilizador 'galves' foi tornado administrador por jestêvão | jestêvão
+[2025-09-10 03:11:52] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'admin@gmail.com' registado no sistema | admin@gmail.com
+[2025-09-10 03:13:28] SYSTEM_CONFIG_CHANGED | Configurações do Sistema | Configurações do sistema alteradas por jestêvão (OpenAI: true, Ollama: false) | jestêvão
+[2025-09-10 03:16:02] USER_REGISTER | Novo Utilizador | Novo utilizador com email 'jreis@gmail.com' registado no sistema | jreis@gmail.com
+[2025-09-10 03:17:21] USER_MADE_ADMIN | Novo Admin | Utilizador 'jreis' foi tornado administrador por jestêvão | jestêvão
+[2025-09-10 03:17:24] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'jreis' por jestêvão | jestêvão
+[2025-09-10 03:21:25] USER_MADE_ADMIN | Novo Admin | Utilizador 'jreis' foi tornado administrador por jestêvão | jestêvão
+[2025-09-10 03:21:56] ADMIN_REMOVED | Admin Removido | Privilégios de admin removidos de 'jreis' por jestêvão | jestêvão
+[2025-09-10 03:21:58] USER_DEACTIVATED | Utilizador Desativado | Utilizador 'jreis' foi desativado por jestêvão | jestêvão
+[2025-09-10 03:22:15] REPORT_CREATED | Novo Report Criado | Utilizador 'jreis' criou um report de problema de conta | jreis
+[2025-09-10 03:22:33] REPORT_APPROVED | Report Aprovado | Report do utilizador 'jreis' foi aprovado por jestêvão | jestêvão

@@ -39,16 +39,20 @@ public class AiController {
         return "Bem vindo/a " + user;
     }
 
+    /**
+     * Endpoint principal para processar perguntas da IA
+     * Esta função é crítica pois coordena todo o fluxo de processamento de IA
+     */
     @PostMapping("/ask")
     public ResponseEntity<?> ask(@RequestBody QuestionWithFilesRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Long chatId = request.getChatId();
 
-        // 🔒 Validação de segurança do chat
+        // Validação de segurança: verifica se o utilizador tem acesso ao chat
         if (chatId != null) {
             User user = userRepository.findByUsername(username).orElse(null);
             if (user == null) {
-                return ResponseEntity.status(401).body(Map.of("error", "Usuário não encontrado"));
+                return ResponseEntity.status(401).body(Map.of("error", "Utilizador não encontrado"));
             }
             
             Chat chat = chatRepository.findById(chatId).orElse(null);
@@ -61,11 +65,11 @@ public class AiController {
             }
         }
 
-        // ⛑️ Verifica disponibilidade real e atualiza o estado no banco
+        // Verifica disponibilidade real dos modelos LLM e atualiza estado no banco
         configService.checkAndUpdateModelStatus(ModelType.OPENAI);
         configService.checkAndUpdateModelStatus(ModelType.OLLAMA);
 
-        // ✅ Usa status atualizado direto do banco (via isModelEnabled)
+        // Verifica quais modelos estão ativos para processamento
         boolean useOpenAi = configService.isModelEnabled(ModelType.OPENAI);
         boolean useOllama = configService.isModelEnabled(ModelType.OLLAMA);
 
@@ -76,15 +80,17 @@ public class AiController {
             ));
         }
 
-        // 📁 Carrega contexto de ficheiros
+        // Carrega e processa ficheiros anexados se existirem
         String fileContext = "";
         if (request.getFileIds() != null && !request.getFileIds().isEmpty()) {
             fileContext = fileService.loadFilesContent(username, request.getFileIds());
         }
 
+        // Combina pergunta com contexto de ficheiros
         String question = request.getQuestion();
         String finalPrompt = fileContext.isBlank() ? question : fileContext + "\n\nPergunta: " + question;
 
+        // Controlo crítico: verifica limite de tokens antes de processar
         int tokenEstimate = fileService.estimateTokens(finalPrompt);
         if (tokenEstimate > 4096) {
             return ResponseEntity.ok().body(Map.of(
@@ -93,11 +99,11 @@ public class AiController {
             ));
         }
 
-        // Aplica DataMasker à pergunta do utilizador (sem conteúdo de ficheiros)
+        // Aplica mascaramento de dados sensíveis à pergunta (sem conteúdo de ficheiros)
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         
-        // 🤖 Faz pergunta ao(s) modelo(s) ativo(s)
+        // Processa pergunta através dos modelos LLM ativos
         List<String> llmAnswers = new ArrayList<>();
 
         try {

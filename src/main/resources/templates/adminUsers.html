@@ -71,26 +71,6 @@
             </div>
 
             <div class="header-right">
-                <div class="notification-container">
-
-                    <div class="notification-dropdown" id="notification-dropdown">
-                        <div class="notification-header">
-                            <h3>Notificações</h3>
-                            <button id="mark-all-read" class="mark-all-read-btn">
-                                <i class="fas fa-check-double"></i>
-                                Marcar todas
-                            </button>
-                        </div>
-                        <div class="notification-list" id="notification-list">
-                            <!-- Notificações serão carregadas aqui -->
-                        </div>
-                        <div class="notification-empty" id="notification-empty" style="display:none;">
-                            <i class="fas fa-bell-slash"></i>
-                            <p>Nenhuma notificação</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="user-profile">
                     <div class="user-avatar">
                         <i class="fas fa-user"></i>
@@ -260,115 +240,11 @@
         }
 
         function setupHeaderFunctionality() {
-            // Notificações
-            const notificationBell = document.getElementById('notification-bell');
-            const notificationDropdown = document.getElementById('notification-dropdown');
-            const markAllReadBtn = document.getElementById('mark-all-read');
-
-            if (notificationBell) {
-                notificationBell.addEventListener('click', function() {
-                    notificationDropdown.classList.toggle('active');
-                    loadNotifications();
-                });
-            }
-
-            if (markAllReadBtn) {
-                markAllReadBtn.addEventListener('click', function() {
-                    markAllNotificationsAsRead();
-                });
-            }
-
-            // Fechar dropdown ao clicar fora
-            document.addEventListener('click', function(event) {
-                if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
-                    notificationDropdown.classList.remove('active');
-                }
-            });
-
-            // Carregar notificações iniciais
-            loadNotifications();
+            // Função vazia - funcionalidades de notificação removidas
         }
 
-        async function loadNotifications() {
-            try {
-                const response = await fetch('/admin/api/notifications');
-                if (response.ok) {
-                    const notifications = await response.json();
-                    renderNotifications(notifications);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar notificações:', error);
-            }
-        }
 
-        function renderNotifications(notifications) {
-            const notificationList = document.getElementById('notification-list');
-            const notificationEmpty = document.getElementById('notification-empty');
-            const notificationCount = document.getElementById('notification-count');
 
-            if (notifications.length === 0) {
-                notificationList.style.display = 'none';
-                notificationEmpty.style.display = 'block';
-                notificationCount.textContent = '0';
-                return;
-            }
-
-            notificationList.style.display = 'block';
-            notificationEmpty.style.display = 'none';
-
-            const unreadCount = notifications.filter(n => !n.read).length;
-            notificationCount.textContent = unreadCount > 0 ? unreadCount.toString() : '';
-
-            notificationList.innerHTML = notifications.slice(0, 5).map(notification => `
-                <div class="notification-item ${!notification.read ? 'unread' : ''}" data-id="${notification.id}">
-                    <div class="notification-icon">
-                        <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">${notification.title}</div>
-                        <div class="notification-message">${notification.message}</div>
-                        <div class="notification-time">${formatNotificationTime(notification.createdAt)}</div>
-                    </div>
-                    ${!notification.read ? '<div class="notification-dot"></div>' : ''}
-                </div>
-            `).join('');
-        }
-
-        function getNotificationIcon(type) {
-            const icons = {
-                'USER': 'user',
-                'SYSTEM': 'cog',
-                'REPORT': 'flag',
-                'SECURITY': 'shield-alt'
-            };
-            return icons[type] || 'bell';
-        }
-
-        function formatNotificationTime(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-
-            if (minutes < 1) return 'Agora';
-            if (minutes < 60) return `${minutes}m atrás`;
-            if (hours < 24) return `${hours}h atrás`;
-            if (days < 7) return `${days}d atrás`;
-            return date.toLocaleDateString('pt-PT');
-        }
-
-        async function markAllNotificationsAsRead() {
-            try {
-                const response = await fetch('/admin/api/notifications/read-all', { method: 'POST' });
-                if (response.ok) {
-                    loadNotifications();
-                }
-            } catch (error) {
-                console.error('Erro ao marcar notificações como lidas:', error);
-            }
-        }
 
         async function loadUsers() {
             try {

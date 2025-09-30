@@ -11,8 +11,6 @@ import com.example.PromptShieldAPI.service.SystemConfigService;
 import com.example.PromptShieldAPI.repository.AccountReportRepository;
 import com.example.PromptShieldAPI.repository.ConfigHistoryRepository;
 import com.example.PromptShieldAPI.model.ConfigHistory;
-import com.example.PromptShieldAPI.model.Notification;
-import com.example.PromptShieldAPI.service.NotificationService;
 import com.example.PromptShieldAPI.service.ActivityLogService;
 import com.example.PromptShieldAPI.service.LLMAutoReactivationService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +30,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/admin")
@@ -45,7 +42,6 @@ public class AdminController {
     private final ChatRepository chatRepository;
     private final AccountReportRepository accountReportRepository;
     private final ConfigHistoryRepository configHistoryRepository;
-    private final NotificationService notificationService;
     private final ActivityLogService activityLogService;
     private final LLMAutoReactivationService llmAutoReactivationService;
 
@@ -285,67 +281,6 @@ public class AdminController {
         }
     }
 
-    // Endpoints para notificações
-    @GetMapping("/api/notifications")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> getNotifications() {
-        try {
-            List<Notification> notifications = notificationService.getRecentNotifications();
-            List<Map<String, Object>> notificationData = notifications.stream().map(notification -> {
-                Map<String, Object> notificationMap = new HashMap<>();
-                notificationMap.put("id", notification.getId());
-                notificationMap.put("type", notification.getType().name());
-                notificationMap.put("icon", notification.getType().getIcon());
-                notificationMap.put("title", notification.getTitle());
-                notificationMap.put("message", notification.getMessage());
-                notificationMap.put("read", notification.isRead());
-                notificationMap.put("actionUrl", notification.getActionUrl());
-                notificationMap.put("createdAt", notification.getCreatedAt());
-                return notificationMap;
-            }).collect(Collectors.toList());
-            
-            return ResponseEntity.ok(notificationData);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
-        }
-    }
-
-    @GetMapping("/api/notifications/count")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> getNotificationCount() {
-        try {
-            long unreadCount = notificationService.getUnreadCount();
-            return ResponseEntity.ok(Map.of("unreadCount", unreadCount));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("unreadCount", 0));
-        }
-    }
-
-    @PostMapping("/api/notifications/{id}/read")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseBody
-    public ResponseEntity<?> markNotificationAsRead(@PathVariable Long id) {
-        try {
-            notificationService.markAsRead(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Erro ao marcar notificação como lida"));
-        }
-    }
-
-    @PostMapping("/api/notifications/read-all")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseBody
-    public ResponseEntity<?> markAllNotificationsAsRead() {
-        try {
-            notificationService.markAllAsRead();
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Erro ao marcar notificações como lidas"));
-        }
-    }
 
     @GetMapping("/system-preferences")
     @PreAuthorize("hasRole('ADMIN')")
@@ -466,6 +401,10 @@ public class AdminController {
         }
     }
 
+    /**
+     * Ativa um utilizador no sistema
+     * Função crítica para gestão de acesso e auditoria
+     */
     @PostMapping("/api/users/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
@@ -481,15 +420,7 @@ public class AdminController {
             user.setActive(true);
             userRepository.save(user);
             
-            // Criar notificação de utilizador ativado
-            notificationService.createNotification(
-                Notification.NotificationType.USER,
-                "Utilizador Ativado",
-                "Utilizador '" + user.getUsername() + "' foi ativado",
-                "/admin/users"
-            );
-            
-            // Registrar atividade no log
+            // Regista atividade no log para auditoria
             activityLogService.logActivity(
                 "USER_ACTIVATED",
                 "Utilizador Ativado",
@@ -529,13 +460,6 @@ public class AdminController {
             user.setActive(false);
             userRepository.save(user);
             
-            // Criar notificação de utilizador desativado
-            notificationService.createNotification(
-                Notification.NotificationType.USER,
-                "Utilizador Desativado",
-                "Utilizador '" + user.getUsername() + "' foi desativado",
-                "/admin/users"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(
@@ -580,13 +504,6 @@ public class AdminController {
             user.softDelete(currentUsername);
             userRepository.save(user);
             
-            // Criar notificação de utilizador eliminado
-            notificationService.createNotification(
-                Notification.NotificationType.USER,
-                "Utilizador Eliminado",
-                "Utilizador '" + username + "' foi movido para a lixeira",
-                "/admin/users"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(
@@ -624,13 +541,6 @@ public class AdminController {
             user.setRole("ADMIN");
             userRepository.save(user);
             
-            // Criar notificação de utilizador tornado admin
-            notificationService.createNotification(
-                Notification.NotificationType.USER,
-                "Novo Admin",
-                "Utilizador '" + user.getUsername() + "' foi tornado administrador",
-                "/admin/users"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(
@@ -672,13 +582,6 @@ public class AdminController {
             user.setRole("USER");
             userRepository.save(user);
             
-            // Criar notificação de admin removido
-            notificationService.createNotification(
-                Notification.NotificationType.USER,
-                "Admin Removido",
-                "Privilégios de admin removidos de '" + user.getUsername() + "'",
-                "/admin/users"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(
@@ -869,13 +772,6 @@ public class AdminController {
             report.setResolvedBy(admin);
             accountReportRepository.save(report);
             
-            // Criar notificação de report aprovado
-            notificationService.createNotification(
-                Notification.NotificationType.REPORT,
-                "Report Aprovado",
-                "Report do utilizador '" + report.getUser().getUsername() + "' foi aprovado",
-                "/admin/reports"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(
@@ -915,13 +811,6 @@ public class AdminController {
             report.setResolvedBy(admin);
             accountReportRepository.save(report);
             
-            // Criar notificação de report rejeitado
-            notificationService.createNotification(
-                Notification.NotificationType.REPORT,
-                "Report Rejeitado",
-                "Report do utilizador '" + report.getUser().getUsername() + "' foi rejeitado",
-                "/admin/reports"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(
@@ -1002,13 +891,6 @@ public class AdminController {
             user.restore();
             userRepository.save(user);
             
-            // Criar notificação de utilizador restaurado
-            notificationService.createNotification(
-                Notification.NotificationType.USER,
-                "Utilizador Restaurado",
-                "Utilizador '" + username + "' foi restaurado da lixeira",
-                "/admin/users"
-            );
             
             // Registrar atividade no log
             activityLogService.logActivity(

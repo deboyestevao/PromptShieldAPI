@@ -636,7 +636,7 @@ chatForm.addEventListener('submit', async function(e) {
         let question = document.getElementById('question').value.trim();
         if (!question) return;
 
-    // Se não houver chat selecionado, cria um novo chat vazio (a IA irá gerar o nome)
+    // Cria novo chat se não houver um selecionado (a IA irá gerar o nome automaticamente)
     if (!currentChatId) {
         const chat = await fetch('/api/chat', {
             method: 'POST',
@@ -647,6 +647,7 @@ chatForm.addEventListener('submit', async function(e) {
         await loadChats();
     }
 
+    // Processa upload de ficheiros se existirem
     let fileIds = [];
     if (fileInput.files.length > 0) {
         const formData = new FormData();
@@ -661,16 +662,17 @@ chatForm.addEventListener('submit', async function(e) {
             return;
         }
     }
-        // Guarda o nome do ficheiro antes de limpar o input
+        // Guarda o nome do ficheiro antes de limpar o input para exibição
         let attachedFileName = null;
         if (fileInput.files.length > 0) {
             attachedFileName = fileInput.files[0].name;
         }
         
+    // Limpa interface após processamento
     fileInput.value = '';
     fileChip.style.display = 'none';
         
-        // Limpa o textarea e reseta a altura
+        // Limpa o textarea e reseta a altura para o estado inicial
         const textarea = document.getElementById('question');
         textarea.value = '';
         textarea.style.height = '40px'; // Reset para altura mínima

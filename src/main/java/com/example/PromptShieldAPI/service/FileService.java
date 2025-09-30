@@ -76,17 +76,24 @@ public class FileService {
         return (int) Math.ceil(text.length() / 4.0);
     }
 
+    /**
+     * Processa e extrai conteúdo de múltiplos ficheiros para contexto da IA
+     * Esta função é crítica pois lida com diferentes formatos de ficheiros e limitações de tokens
+     */
     public String loadFilesContent(String userId, List<String> fileIds) {
         StringBuilder content = new StringBuilder();
         int totalTokens = 0;
 
+        // Verifica se a pasta do utilizador existe
         File userFolder = uploadDir.resolve(userId).toFile();
         if (!userFolder.exists() || !userFolder.isDirectory()) {
             System.out.println("Pasta do utilizador não existe: " + userFolder.getAbsolutePath());
             return "Pasta do utilizador " + userId + " não encontrada.";
         }
 
+        // Processa cada ficheiro individualmente
         for (String id : fileIds) {
+            // Encontra o ficheiro pelo ID (formato: ID_nomeOriginal)
             File[] matchingFiles = userFolder.listFiles(file -> file.getName().startsWith(id));
             if (matchingFiles == null || matchingFiles.length == 0) {
                 return "Ficheiro para id " + id + " não encontrado na pasta do utilizador.";
@@ -99,7 +106,9 @@ public class FileService {
             try {
                 String fileText;
 
+                // Processamento específico por tipo de ficheiro
                 if (lowerName.endsWith(".docx")) {
+                    // Extrai texto de documentos Word
                     try (FileInputStream fis = new FileInputStream(file); XWPFDocument document = new XWPFDocument(fis)) {
                         StringBuilder docText = new StringBuilder();
                         for (XWPFParagraph para : document.getParagraphs()) {
@@ -108,6 +117,7 @@ public class FileService {
                         fileText = docText.toString();
                     }
                 } else if (lowerName.endsWith(".xlsx")) {
+                    // Extrai dados de folhas de cálculo Excel
                     try (FileInputStream fis = new FileInputStream(file); XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
                         StringBuilder excelText = new StringBuilder();
                         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -115,6 +125,7 @@ public class FileService {
                             excelText.append("Sheet: ").append(sheet.getSheetName()).append("\n");
                             for (Row row : sheet) {
                                 for (Cell cell : row) {
+                                    // Processa diferentes tipos de células (texto, números, fórmulas, etc.)
                                     switch (cell.getCellType()) {
                                         case STRING -> excelText.append(cell.getStringCellValue());
                                         case NUMERIC -> excelText.append(cell.getNumericCellValue());
@@ -131,11 +142,13 @@ public class FileService {
                         fileText = excelText.toString();
                     }
                 } else if (lowerName.endsWith(".pdf")) {
+                    // Extrai texto de documentos PDF
                     try (PDDocument pdf = PDDocument.load(file)) {
                         PDFTextStripper stripper = new PDFTextStripper();
                         fileText = stripper.getText(pdf);
                     }
                 } else if (lowerName.endsWith(".pptx")) {
+                    // Extrai texto de apresentações PowerPoint
                     try (FileInputStream fis = new FileInputStream(file); XMLSlideShow ppt = new XMLSlideShow(fis)) {
                         StringBuilder pptText = new StringBuilder();
                         int slideNum = 1;
@@ -151,13 +164,15 @@ public class FileService {
                         fileText = pptText.toString();
                     }
                 } else {
-                    // .txt, .csv, .json, etc.
+                    // Ficheiros de texto simples (.txt, .csv, .json, etc.)
                     fileText = new String(Files.readAllBytes(file.toPath()));
                 }
 
+                // Aplica mascaramento de dados sensíveis antes de adicionar ao contexto
                 String masked = DataMasker.maskSensitiveData(fileText).getMaskedText();
                 int tokens = estimateTokens(masked);
 
+                // Controlo crítico: verifica se adicionar este ficheiro excede o limite de tokens
                 if ((totalTokens + tokens) > MAX_INPUT_TOKENS) {
                     content.append("\n[Limite de tokens atingido. Conteúdo parcial processado.]\n");
                     break;

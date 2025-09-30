@@ -38,6 +38,7 @@ public class SystemConfigService {
 
     /**
      * Verifica se um modelo está realmente habilitado, considerando desligamentos temporários
+     * Esta lógica é crítica pois determina se um modelo pode ser usado
      * Nota: A reativação automática agora é tratada pelo LLMAutoReactivationService em background
      */
     private boolean isModelActuallyEnabled(SystemConfig config) {
@@ -63,6 +64,10 @@ public class SystemConfigService {
         return false;
     }
 
+    /**
+     * Verifica e atualiza o estado de disponibilidade de um modelo LLM
+     * Esta função é crítica pois monitoriza a saúde dos serviços de IA
+     */
     public void checkAndUpdateModelStatus(ModelType model) {
         // Se o modelo está em desligamento temporário, não verificar automaticamente
         SystemConfig config = repository.findByModel(model).orElse(null);
@@ -74,11 +79,13 @@ public class SystemConfigService {
             }
         }
 
+        // Testa conectividade real com o serviço de IA
         boolean reachable = switch (model) {
             case OLLAMA -> azureService.isOllamaReachable();
             case OPENAI -> azureService.isOpenAiReachable();
         };
 
+        // Atualiza estado na base de dados se houve mudança
         repository.findByModel(model).ifPresent(cfg -> {
             boolean previousStatus = cfg.isEnabled();
 
@@ -86,7 +93,7 @@ public class SystemConfigService {
                 cfg.setEnabled(reachable);
                 repository.save(cfg);
 
-                // ✅ Registrar no histórico
+                // Regista mudança no histórico para auditoria
                 ConfigHistory history = new ConfigHistory();
                 history.setSystemConfig(cfg);
                 history.setModel(model);

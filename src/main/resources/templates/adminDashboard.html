@@ -70,26 +70,6 @@
             </div>
             
             <div class="header-right">
-                <div class="notification-container">
-                    
-                    <div class="notification-dropdown" id="notification-dropdown">
-                        <div class="notification-header">
-                            <h3>Notificações</h3>
-                            <button id="mark-all-read" class="mark-all-read-btn">
-                                <i class="fas fa-check-double"></i>
-                                Marcar todas
-                            </button>
-                        </div>
-                        <div class="notification-list" id="notification-list">
-                            <!-- Notificações serão carregadas aqui -->
-                        </div>
-                        <div class="notification-empty" id="notification-empty" style="display:none;">
-                            <i class="fas fa-bell-slash"></i>
-                            <p>Nenhuma notificação</p>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="user-profile">
                     <div class="user-avatar">
                         <i class="fas fa-user"></i>
@@ -270,8 +250,6 @@
                     document.getElementById('llm-detail').textContent = '0 ativas';
                 });
             
-            // Load notifications
-            loadNotifications();
             
             // Load recent activity
             loadRecentActivity();
@@ -364,31 +342,6 @@
             // Load initial data
             carregarEstatisticas();
             
-            // Notification bell
-            const notificationBell = document.getElementById('notification-bell');
-            if (notificationBell) {
-                notificationBell.addEventListener('click', function() {
-                    const dropdown = document.getElementById('notification-dropdown');
-                    dropdown.classList.toggle('active');
-                });
-            }
-            
-            // Mark all as read
-            const markAllReadBtn = document.getElementById('mark-all-read');
-            if (markAllReadBtn) {
-                markAllReadBtn.addEventListener('click', function() {
-                    markAllNotificationsAsRead();
-                });
-            }
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(event) {
-                const bell = document.getElementById('notification-bell');
-                const dropdown = document.getElementById('notification-dropdown');
-                if (bell && dropdown && !bell.contains(event.target) && !dropdown.contains(event.target)) {
-                    dropdown.classList.remove('active');
-                }
-            });
             
             // Refresh activity
             const refreshBtn = document.getElementById('refresh-activity');
@@ -409,91 +362,6 @@
 
         });
         
-        // Notification functions
-        function loadNotifications() {
-            fetch('/admin/api/notifications/count')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('notification-count').textContent = data.unreadCount;
-                })
-                .catch(error => {
-                    document.getElementById('notification-count').textContent = '0';
-                });
-            
-            fetch('/admin/api/notifications')
-                .then(response => response.json())
-                .then(notifications => {
-                    const list = document.getElementById('notification-list');
-                    const empty = document.getElementById('notification-empty');
-                    
-                    if (notifications.length === 0) {
-                        list.style.display = 'none';
-                        empty.style.display = 'block';
-                        return;
-                    }
-                    
-                    list.style.display = 'block';
-                    empty.style.display = 'none';
-                    
-                    list.innerHTML = notifications.map(notification => `
-                        <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
-                            <div class="notification-icon">
-                                <i class="${getNotificationIcon(notification.type)}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-title">${notification.title}</div>
-                                <div class="notification-message">${notification.message}</div>
-                                <div class="notification-time">${formatTime(notification.createdAt)}</div>
-                            </div>
-                            ${!notification.read ? '<div class="notification-dot"></div>' : ''}
-                        </div>
-                    `).join('');
-                    
-                    document.querySelectorAll('.notification-item').forEach(item => {
-                        item.addEventListener('click', function() {
-                            const notificationId = this.dataset.id;
-                            markNotificationAsRead(notificationId);
-                            this.classList.remove('unread');
-                            this.classList.add('read');
-                            this.querySelector('.notification-dot')?.remove();
-                        });
-                    });
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar notificações:', error);
-                });
-        }
-        
-        function markNotificationAsRead(notificationId) {
-            fetch(`/admin/api/notifications/${notificationId}/read`, {
-                method: 'POST'
-            }).then(() => {
-                loadNotifications();
-            }).catch(error => {
-                console.error('Erro ao marcar notificação como lida:', error);
-            });
-        }
-        
-        function markAllNotificationsAsRead() {
-            fetch('/admin/api/notifications/read-all', {
-                method: 'POST'
-            }).then(() => {
-                loadNotifications();
-            }).catch(error => {
-                console.error('Erro ao marcar todas como lidas:', error);
-            });
-        }
-        
-        function getNotificationIcon(type) {
-            const icons = {
-                'REPORT': 'fas fa-flag',
-                'SYSTEM': 'fas fa-cog',
-                'USER': 'fas fa-user',
-                'ALERT': 'fas fa-exclamation-triangle',
-                'STATS': 'fas fa-chart-bar'
-            };
-            return icons[type] || icons['SYSTEM'];
-        }
         
         function formatTime(dateString) {
             const date = new Date(dateString);

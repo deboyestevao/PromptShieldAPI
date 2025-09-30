@@ -10,9 +10,17 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Handler global de exceções para tratamento centralizado de erros
+ * Esta classe é crítica pois define como a aplicação responde a erros
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Trata exceções de status HTTP personalizadas
+     * Converte exceções ResponseStatusException em respostas HTTP apropriadas
+     */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiError> handleResponseStatusException(ResponseStatusException ex) {
         ApiError error = new ApiError(
@@ -23,6 +31,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatusCode()).body(error);
     }
 
+    /**
+     * Trata erros de validação de dados de entrada
+     * Converte erros de validação em respostas estruturadas para o cliente
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException ex) {
         List<String> erros = ex.getBindingResult().getFieldErrors().stream()

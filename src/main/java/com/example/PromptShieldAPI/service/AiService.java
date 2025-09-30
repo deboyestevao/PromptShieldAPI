@@ -86,7 +86,7 @@ public class AiService {
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         
-        String finalPrompt = context + "Usuário: " + maskedQuestion + "\nOpenAI: ";
+        String finalPrompt = context + "Utilizador: " + maskedQuestion + "\nOpenAI: ";
         
         // log.info("Prompt final para OpenAI: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
@@ -152,7 +152,7 @@ public class AiService {
         MaskingResult maskingResult = DataMasker.maskSensitiveData(question);
         String maskedQuestion = maskingResult.getMaskedText();
         
-        String finalPrompt = context + "Usuário: " + maskedQuestion + "\nOllama: ";
+        String finalPrompt = context + "Utilizador: " + maskedQuestion + "\nOllama: ";
         
         // log.info("Prompt final para Ollama: {}", finalPrompt.substring(0, Math.min(100, finalPrompt.length())));
 
@@ -173,6 +173,10 @@ public class AiService {
         }
     }
 
+    /**
+     * Constrói o contexto completo para a IA incluindo prompt do sistema e histórico
+     * Esta função é crítica pois define como a IA se comporta e que informação tem acesso
+     */
     private String buildChatContext(Long chatId) {
         StringBuilder context = new StringBuilder();
         
@@ -180,12 +184,14 @@ public class AiService {
         try {
             String systemPrompt = new String(getClass().getResourceAsStream("/system-prompt.config").readAllBytes());
 
+            // Formata data e hora atual em português para contexto temporal
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM 'de' yyyy, HH:mm", new Locale("pt", "PT"));
             String dataFormatada = LocalDateTime.now().format(formatter);
 
+            // Monta o contexto base com informações do utilizador e sistema
             context.append("\nDIA DA SEMANA, DIA E HORA ATUAL: ").append(dataFormatada)
                     .append(systemPrompt)
-                    .append("\nNOME DO USER: ")
+                    .append("\nNOME DO UTILIZADOR: ")
                     .append(getCurrentUser().getFirstName())
                     .append("\nROLE:")
                     .append(getCurrentUser().getRole())
@@ -200,6 +206,7 @@ public class AiService {
         }
 
         try {
+            // Carrega histórico de perguntas e respostas do chat
             List<Question> history = questionService.getQuestionsByChat(chatId);
             
             if (history.isEmpty()) {
@@ -207,8 +214,9 @@ public class AiService {
                 return context.toString();
             }
 
+            // Reconstrói a conversa para dar contexto à IA
             for (Question q : history) {
-                context.append("Usuário: ").append(q.getQuestion()).append("\n");
+                context.append("Utilizador: ").append(q.getQuestion()).append("\n");
                 context.append(q.getModel()).append(": ").append(q.getAnswer()).append("\n");
             }
             

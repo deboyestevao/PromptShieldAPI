@@ -6,10 +6,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DataMasker {
+    /**
+     * Aplica mascaramento de dados sensíveis a um texto
+     * Esta função é crítica para a segurança pois protege informações pessoais
+     * Aplica múltiplos tipos de mascaramento em sequência para garantir proteção completa
+     */
     public static MaskingResult maskSensitiveData(String input) {
         String masked = input;
         MaskingResult result;
 
+        // Aplica mascaramento sequencial - ordem é importante para evitar conflitos
         result = maskEmails(masked);
         masked = result.getMaskedText();
 
